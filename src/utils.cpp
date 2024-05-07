@@ -194,21 +194,41 @@ double get_lambda_max(
 }
 
 // [[Rcpp::export]]
-Eigen::ArrayXd get_lambda_seq(
-    const NumericVector& x,
-    const Eigen::VectorXd& y,
-    const Eigen::ArrayXd& weights,
-    int k,
+Eigen::VectorXd get_lambda_seq_r(
+    Eigen::VectorXd lambda,
+    double lambda_max,
+    double lambda_min = -1.0,
     double lambda_min_ratio = 1e-5,
     int n_lambda = 50) {
-  if (lambda_min_ratio >= 1) {
-    throw std::invalid_argument("lambda_min_ratio must be less than 1.");
+
+  get_lambda_seq(lambda, lambda_max, lambda_min, lambda_min_ratio, n_lambda);
+  return lambda;
+}
+
+void get_lambda_seq(
+    Eigen::VectorXd lambda,
+    double lambda_max,
+    double lambda_min = -1.0,
+    double lambda_min_ratio = 1e-5,
+    int n_lambda = 50) {
+
+  if ((lambda.array() < 1e-12).all()) {
+    lambda_min = lambda.minCoeff();
+    lambda_max = lambda.maxCoeff();
+    n_lambda = lambda.size();
+  } else {
+    lambda_min = (lambda_min < 0) ? lambda_min_ratio * lambda_max : lambda_min;
+    double lmpad = 1e-20;
+    double ns = static_cast<double>(n_lambda) - 1;
+    double p = 0.0;
+    lambda[0] = lambda_max;
+    if (lambda_min > lmpad) {
+      p = pow(lambda_min / lambda_max, 1 / (ns - 1));
+      for (int i = 1; i < n_lambda; i++) lambda[i] = lambda[i - 1] * p;
+    } else {
+      p = pow(lmpad / lambda_max, 1 / (ns - 2));
+      for (int i = 1; i < n_lambda - 1; i++) lambda[i] = lambda[i - 1] * p;
+      lambda[n_lambda - 1] = lambda_min;
+    }
   }
-  double lambda_max = get_lambda_max(x, y, weights, k);
-  double lambda_min = lambda_max * lambda_min_ratio;
-  return ArrayXd::LinSpaced(
-    n_lambda,
-    std::log(lambda_max),
-    std::log(lambda_min)
-  ).exp();
 }

@@ -21,7 +21,7 @@ get_lambda_max <- function(x, y, weights, k) {
     .Call(`_trendfilter_get_lambda_max`, x, y, weights, k)
 }
 
-get_lambda_seq <- function(x, y, weights, k, lambda_min_ratio = 1e-5, n_lambda = 50L) {
-    .Call(`_trendfilter_get_lambda_seq`, x, y, weights, k, lambda_min_ratio, n_lambda)
+get_lambda_seq_r <- function(lambda, lambda_max, lambda_min = -1.0, lambda_min_ratio = 1e-5, n_lambda = 50L) {
+    .Call(`_trendfilter_get_lambda_seq_r`, lambda, lambda_max, lambda_min, lambda_min_ratio, n_lambda)
 }
 

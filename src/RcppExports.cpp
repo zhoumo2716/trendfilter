@@ -95,19 +95,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// get_lambda_seq
-Eigen::ArrayXd get_lambda_seq(const NumericVector& x, const Eigen::VectorXd& y, const Eigen::ArrayXd& weights, int k, double lambda_min_ratio, int n_lambda);
-RcppExport SEXP _trendfilter_get_lambda_seq(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP lambda_min_ratioSEXP, SEXP n_lambdaSEXP) {
+// get_lambda_seq_r
+Eigen::VectorXd get_lambda_seq_r(Eigen::VectorXd lambda, double lambda_max, double lambda_min, double lambda_min_ratio, int n_lambda);
+RcppExport SEXP _trendfilter_get_lambda_seq_r(SEXP lambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP n_lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const Eigen::ArrayXd& >::type weights(weightsSEXP);
-    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_max(lambda_maxSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_min(lambda_minSEXP);
     Rcpp::traits::input_parameter< double >::type lambda_min_ratio(lambda_min_ratioSEXP);
     Rcpp::traits::input_parameter< int >::type n_lambda(n_lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_lambda_seq(x, y, weights, k, lambda_min_ratio, n_lambda));
+    rcpp_result_gen = Rcpp::wrap(get_lambda_seq_r(lambda, lambda_max, lambda_min, lambda_min_ratio, n_lambda));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -118,7 +117,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_admm_single_lambda_with_tracking", (DL_FUNC) &_trendfilter_admm_single_lambda_with_tracking, 8},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},
-    {"_trendfilter_get_lambda_seq", (DL_FUNC) &_trendfilter_get_lambda_seq, 6},
+    {"_trendfilter_get_lambda_seq_r", (DL_FUNC) &_trendfilter_get_lambda_seq_r, 5},
     {NULL, NULL, 0}
 };
 

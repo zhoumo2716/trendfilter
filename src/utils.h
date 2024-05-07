@@ -27,12 +27,14 @@ Eigen::VectorXd tridiag_backsolve(
         const Eigen::VectorXd& a, const::VectorXd& b,
             const Eigen::VectorXd& cp, const Eigen::VectorXd& d);
 
-/* Miscellaneous */
+/* Lambda sequence */
 double get_lambda_max(const NumericVector& x, const Eigen::VectorXd& y,
-    const Eigen::ArrayXd& sqrt_weights, int k);
-Eigen::ArrayXd get_lambda_seq(const NumericVector& x, const Eigen::VectorXd& y,
-    const Eigen::ArrayXd& sqrt_weights, int k,
-    double lambda_min_ratio, int n_lambda);
+                      const Eigen::ArrayXd& sqrt_weights, int k);
+void get_lambda_seq(Eigen::VectorXd lambda, double lambda_max,
+                    double lambda_min, double lambda_min_ratio, int n_lambda);
+Eigen::VectorXd get_lambda_seq_r(Eigen::VectorXd lambda, double lambda_max,
+                                 double lambda_min, double lambda_min_ratio,
+                                 int n_lambda);
 
 
 #endif
