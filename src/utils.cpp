@@ -206,27 +206,28 @@ Eigen::VectorXd get_lambda_seq_r(
 }
 
 void get_lambda_seq(
-    Eigen::VectorXd lambda,
+    Eigen::VectorXd& lambda,
     double lambda_max,
     double lambda_min = -1.0,
     double lambda_min_ratio = 1e-5,
     int n_lambda = 50) {
 
-  if ((lambda.array() < 1e-12).all()) {
+  if (!(lambda.array() < 1e-12).all()) {
     lambda_min = lambda.minCoeff();
     lambda_max = lambda.maxCoeff();
     n_lambda = lambda.size();
   } else {
-    lambda_min = (lambda_min < 0) ? lambda_min_ratio * lambda_max : lambda_min;
-    double lmpad = 1e-20;
+    double lmpad = lambda_min_ratio * lambda_max;
+    lambda_min = (lambda_min < 0) ? lmpad : lambda_min;
     double ns = static_cast<double>(n_lambda) - 1;
     double p = 0.0;
     lambda[0] = lambda_max;
-    if (lambda_min > lmpad) {
-      p = pow(lambda_min / lambda_max, 1 / (ns - 1));
+    if (lambda_min > 1e-20) {
+      p = pow(lambda_min / lambda_max, 1 / ns);
       for (int i = 1; i < n_lambda; i++) lambda[i] = lambda[i - 1] * p;
     } else {
-      p = pow(lmpad / lambda_max, 1 / (ns - 2));
+      ns -= 1;
+      p = pow(lmpad / lambda_max, 1 / ns);
       for (int i = 1; i < n_lambda - 1; i++) lambda[i] = lambda[i - 1] * p;
       lambda[n_lambda - 1] = lambda_min;
     }
