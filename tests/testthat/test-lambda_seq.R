@@ -9,11 +9,13 @@ test_that("get_lambda_seq works", {
     as.double(10:1)
   )
 
+  # length 10 seq between 10 and .1, ignores lambda_min_ratio
   expect_equal(
     get_lambda_seq_r(double(10), 10, .1, n_lambda = 10L),
     10^seq(log10(10), log10(.1), length.out = 10)
   )
 
+  # uses lambda_min_ratio
   expect_equal(
     get_lambda_seq_r(double(10), 10, -1, 1e-4, 10),
     10^seq(log10(10), log10(1e-3), length.out = 10)
