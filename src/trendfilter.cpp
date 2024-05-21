@@ -44,7 +44,7 @@ void LinearSystem::compute(const SparseMatrix<double>& A, bool tridiag) {
     std::tie(a, b, c) = extract_tridiag(A);
     cp = tridiag_forward(a, b, c);
   } else {
-    // Setting the pivot threshold to be negative forces SparseQR to be 
+    // Setting the pivot threshold to be negative forces SparseQR to be
     // maximally conservative in dropping columns, which is important when
     // the Gram matrix is ill-conditioned (which often is the case for
     // unequally spaced inputs.
@@ -93,17 +93,21 @@ VectorXd init_u(const VectorXd& residual, const SparseMatrix<double>& dk_mat,
 // [[Rcpp::export]]
 Eigen::VectorXd admm_single_lambda(int n, const Eigen::VectorXd& y,
     const Eigen::ArrayXd& weights, int k,
-    const Eigen::VectorXd& theta_init, 
+    const Eigen::VectorXd& theta_init,
     const Eigen::SparseMatrix<double>& penalty_mat,
     const Eigen::SparseMatrix<double>& dk_mat,
     double lam, int max_iter, double rho,
-    bool tridiag=false) {
+    double tol = 1e-5,
+    bool tridiag = false) {
   // Initialize theta, alpha, u
   VectorXd theta = theta_init;
   VectorXd alpha = dk_mat * theta;
   VectorXd u = init_u((theta-y)/rho, dk_mat, weights);
   VectorXd tmp(n-k);
+  VectorXd Dth_tmp(alpha.size());
+  VectorXd alpha_old(alpha);
   VectorXd wy = (y.array()*weights).matrix();
+  double rr, ss;
 
   // Form Gram matrix and set up linear system for theta update
   SparseMatrix<double> A = rho * (dk_mat.transpose() * dk_mat);
@@ -126,6 +130,8 @@ Eigen::VectorXd admm_single_lambda(int n, const Eigen::VectorXd& y,
   double best_objective = tf_objective(y, theta, weights, lam, penalty_mat);
   VectorXd best_theta = theta;
   for (iter = 1; iter < max_iter; iter++) {
+    if (iter % 1000 == 0) Rcpp::checkUserInterrupt(); // check if killed
+
     // theta update
     std::tie(theta, computation_info) = linear_system.solve(
         wy + rho * (dk_mat.transpose() * (alpha + u)),
@@ -133,18 +139,25 @@ Eigen::VectorXd admm_single_lambda(int n, const Eigen::VectorXd& y,
     if (computation_info > 1) {
       std::cerr << "Eigen Sparse QR solve returned nonzero exit status.\n";
     }
-    tmp = dk_mat*theta - u;
+    Dth_tmp = dk_mat * theta;
+    tmp = Dth_tmp - u;
     // alpha update
-    tf_dp(n-k, tmp.data(), lam/rho, alpha.data()); 
+    tf_dp(n-k, tmp.data(), lam/rho, alpha.data());
     // u update
-    u += alpha - dk_mat*theta;
+    u += alpha - Dth_tmp;
     double cur_objective = tf_objective(y, theta, weights, lam, penalty_mat);
     if (cur_objective < best_objective) {
       best_objective = cur_objective;
       best_theta = theta;
     }
+
+    // Check for convergence
+    rr = (Dth_tmp - alpha).norm();
+    ss = rho * (dk_mat.transpose() * (alpha - alpha_old)).norm();
+    alpha_old = alpha;
+    if (rr < tol && ss < tol) break;
   }
-  // TODO: Implement stopping criterion
+
   return best_theta;
 }
 
@@ -157,6 +170,7 @@ Eigen::VectorXd admm_single_lambda(int n, const Eigen::VectorXd& y,
 Eigen::MatrixXd admm_lambda_seq(NumericVector x, Eigen::VectorXd y,
     Eigen::ArrayXd weights, int k,
     const Eigen::ArrayXd& lambda_seq, int max_iter=200, double rho_scale=1.0,
+    double tol = 1e-5,
     bool tridiag=false) {
 
   int n = x.size();
@@ -182,13 +196,13 @@ Eigen::MatrixXd admm_lambda_seq(NumericVector x, Eigen::VectorXd y,
   // Solve TF at largest lambda
   theta_mat.col(0) = admm_single_lambda(n, y, weights, k, theta_init,
       penalty_mat, dk_mat, lambda_seq[0], max_iter, lambda_seq[0]*rho_scale,
-      tridiag);
+      tol, tridiag);
 
   // Solve TF at rest of lambda
   for (int i=1; i < n_lambda; i++) {
     theta_mat.col(i) = admm_single_lambda(n, y, weights, k, theta_mat.col(i-1),
         penalty_mat, dk_mat, lambda_seq[i], max_iter, lambda_seq[i]*rho_scale,
-        tridiag);
+        tol, tridiag);
   }
   return theta_mat;
 }
@@ -242,7 +256,7 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
     }
     tmp = dk_mat*theta - u;
     // alpha update
-    tf_dp(n-k, tmp.data(), lam/rho, alpha.data()); 
+    tf_dp(n-k, tmp.data(), lam/rho, alpha.data());
     // u update
     u += alpha - dk_mat*theta;
     objective_vec[iter] = tf_objective(y, theta, weights, lam, penalty_mat);
