@@ -7,8 +7,11 @@ Authors@R:
 Description: Implementation of univariate trend filtering.
 License: MIT + file LICENSE
 Imports: 
+    checkmate,
+    cli,
     Matrix,
-    Rcpp (>= 1.0.10)
+    Rcpp (>= 1.0.10),
+    rlang
 LinkingTo: 
     dspline,
     Rcpp,

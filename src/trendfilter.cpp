@@ -91,7 +91,8 @@ VectorXd init_u(const VectorXd& residual, const SparseMatrix<double>& dk_mat,
 }
 
 // [[Rcpp::export]]
-Eigen::VectorXd admm_single_lambda(int n, const Eigen::VectorXd& y,
+Eigen::VectorXd admm_single_lambda(
+    int n, const Eigen::VectorXd& y,
     const Eigen::ArrayXd& weights, int k,
     const Eigen::VectorXd& theta_init,
     const Eigen::SparseMatrix<double>& penalty_mat,
@@ -167,27 +168,42 @@ Eigen::VectorXd admm_single_lambda(int n, const Eigen::VectorXd& y,
  * modify it.
  */
 // [[Rcpp::export]]
-Eigen::MatrixXd admm_lambda_seq(NumericVector x, Eigen::VectorXd y,
-    Eigen::ArrayXd weights, int k,
-    const Eigen::ArrayXd& lambda_seq, int max_iter=200, double rho_scale=1.0,
+Rcpp::List admm_lambda_seq(
+    NumericVector x, Eigen::VectorXd y, Eigen::ArrayXd weights, int k,
+    Eigen::VectorXd lambda,
+    int nlambda = 50, double lambda_max = -1.0, double lambda_min = -1.0,
+    double lambda_min_ratio = 1e-5,
+    int max_iter = 200, double rho_scale = 1.0,
     double tol = 1e-5,
-    bool tridiag=false) {
+    bool tridiag = false) {
 
   int n = x.size();
-  int n_lambda = lambda_seq.size();
-  Eigen::MatrixXd theta_mat(n, n_lambda);
+
+  if (lambda[0] < tol / 100 && lambda_max <= 0) {
+    lambda_max = get_lambda_max(x, y, weights, k);
+  }
+  get_lambda_seq(lambda, lambda_max, lambda_min, lambda_min_ratio, nlambda);
+
+
+  Eigen::MatrixXd theta_mat(n, nlambda);
+  Rcpp::NumericVector iters(nlambda);
 
   // Use DP solution for k=0.
-  if (k==0) {
-    for (int i=0; i < n_lambda; i++) {
-      tf_dp_weight(n, y.data(), weights.data(), lambda_seq[i],
-          theta_mat.col(i).data());
+  if (k == 0) {
+    for (int i = 0; i < nlambda; i++) {
+      tf_dp_weight(n, y.data(), weights.data(), lambda[i],
+                   theta_mat.col(i).data());
     }
-    return theta_mat;
+    Rcpp::List out = Rcpp::List::create(
+      Rcpp::Named("theta") = theta_mat,
+      Rcpp::Named("lambda") = lambda,
+      Rcpp::Named("iters") = iters
+    );
+    return out;
   }
 
   // Initialize difference matrices and other helper objects
-  SparseMatrix<double> penalty_mat = get_penalty_mat(k+1, x);
+  SparseMatrix<double> penalty_mat = get_penalty_mat(k + 1, x);
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
 
   // Project onto Legendre polynomials to initialize for largest lambda.
@@ -195,16 +211,22 @@ Eigen::MatrixXd admm_lambda_seq(NumericVector x, Eigen::VectorXd y,
 
   // Solve TF at largest lambda
   theta_mat.col(0) = admm_single_lambda(n, y, weights, k, theta_init,
-      penalty_mat, dk_mat, lambda_seq[0], max_iter, lambda_seq[0]*rho_scale,
+      penalty_mat, dk_mat, lambda[0], max_iter, lambda[0]*rho_scale,
       tol, tridiag);
 
   // Solve TF at rest of lambda
-  for (int i=1; i < n_lambda; i++) {
+  for (int i = 1; i < nlambda; i++) {
+    Rcpp::checkUserInterrupt();
     theta_mat.col(i) = admm_single_lambda(n, y, weights, k, theta_mat.col(i-1),
-        penalty_mat, dk_mat, lambda_seq[i], max_iter, lambda_seq[i]*rho_scale,
+        penalty_mat, dk_mat, lambda[i], max_iter, lambda[i]*rho_scale,
         tol, tridiag);
   }
-  return theta_mat;
+  Rcpp::List out = Rcpp::List::create(
+    Rcpp::Named("theta") = theta_mat,
+    Rcpp::Named("lambda") = lambda,
+    Rcpp::Named("iters") = iters
+  );
+  return out;
 }
 
 // [[Rcpp::export]]
