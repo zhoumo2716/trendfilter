@@ -59,22 +59,21 @@
 #' x <- 1:100 / 101 * 2 * pi
 #' y <- sin(x) + .2 * rnorm(100)
 #' out <- trendfilter(y, x)
-#' plot(x, y)
-#' matlines(x, out$theta, lty = 1)
-trendfilter <- function(
-  y,
-  x = seq_along(y),
-  weights = rep(1, n),
-  k = 2L,
-  family = c("gaussian", "logistic", "poisson"),
-  method = c("admm", "pdip", "hybrid"),
-  lambda = NULL,
-  nlambda = 50L,
-  lambda_max = NULL,
-  lambda_min = NULL,
-  lambda_min_ratio = 1e-5,
-  control = trendfilter_control_list()
-) {
+#'
+#' plot(out)
+trendfilter <- function(y,
+                        x = seq_along(y),
+                        weights = rep(1, n),
+                        k = 2L,
+                        family = c("gaussian", "logistic", "poisson"),
+                        method = c("admm", "pdip", "hybrid"),
+                        lambda = NULL,
+                        nlambda = 50L,
+                        lambda_max = NULL,
+                        lambda_min = NULL,
+                        lambda_min_ratio = 1e-5,
+                        control = trendfilter_control_list()) {
+
   family <- arg_match(family)
   if (family != "gaussian") {
     cli_abort("Data family {.val {family}} is not yet implemented.")
@@ -114,6 +113,7 @@ trendfilter <- function(
     y, x, weights, k,
     theta = drop(out$theta),
     lambda = out$lambda,
+    call = match.call()
   ), class = "trendfilter")
 }
 

@@ -1,11 +1,13 @@
 #' @importFrom stats predict
 #' @export
-predict.trendfilter <- function(object, newx = NULL, lambda = NULL, deriv = 0, ...) {
+predict.trendfilter <- function(object, newx = NULL, lambda = NULL, deriv = 0L, ...) {
   rlang::check_dots_empty()
   newx <- newx %||% object$x
   lambda <- lambda %||% object$lambda
   assert_numeric(newx, lower = min(object$x), upper = max(object$x))
   assert_numeric(lambda, lower = min(object$lambda), upper = max(object$lambda))
+
+  if (is.null(newx) && is.null(lambda) && deriv == 0L) return(object$theta)
 
   # 1. we interpolate at newx for ALL lambda
   interp <- apply(object$theta, 2, function(th) {
@@ -31,9 +33,9 @@ summary.trendfilter <- function(object, ...) {
   }
   tab <- with(object, data.frame(
     lambda = lambda[xlam],
-    index = xlam,
-    approx_dof = dof[xlam],
-    niterations = niter[xlam]
+    index = xlam
+    #approx_dof = dof[xlam],
+    #niterations = niter[xlam]
   ))
   rownames(tab) <- names(xlam)
   out <- structure(
@@ -50,7 +52,7 @@ print.summary.trendfilter <- function(x,
                                       ...) {
   rlang::check_dots_empty()
   cat("\nCall: ", deparse(x$call), fill = TRUE)
-  cat("\nDegree of the estimated piecewise polynomial curve:", x$k + 1, "\n")
+  cat("\nDegree of the estimated piecewise polynomial curve (k):", x$k, "\n")
   cat("\nSummary of the", x$nlam, "estimated models:\n")
   print(x$tab, digits = digits)
   cat("\n")
