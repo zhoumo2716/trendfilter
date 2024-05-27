@@ -59,8 +59,8 @@
 #' x <- 1:100 / 101 * 2 * pi
 #' y <- sin(x) + .2 * rnorm(100)
 #' out <- trendfilter(y, x)
-#' plot(y)
-#' matlines(out$theta, lty = 1)
+#' plot(x, y)
+#' matlines(x, out$theta, lty = 1)
 trendfilter <- function(
   y,
   x = seq_along(y),
@@ -68,8 +68,8 @@ trendfilter <- function(
   k = 2L,
   family = c("gaussian", "logistic", "poisson"),
   method = c("admm", "pdip", "hybrid"),
+  lambda = NULL,
   nlambda = 50L,
-  lambda = double(nlambda),
   lambda_max = NULL,
   lambda_min = NULL,
   lambda_min_ratio = 1e-5,
@@ -88,18 +88,19 @@ trendfilter <- function(
   assert_numeric(x, finite = TRUE, len = n)
   assert_numeric(weights, lower = 0, finite = TRUE, len = n)
   assert_integerish(k, lower = 0L, upper = n - 1L, len = 1L)
-  assert_integerish(nlambda, lower = 0L, len = 1L)
+  assert_integerish(nlambda, lower = 1L, len = 1L)
   assert_numeric(lambda_max, len = 1L, lower = lambda_min %||% 0, finite = TRUE,
                  null.ok = TRUE)
   assert_numeric(lambda_min, len = 1L, lower = 0, upper = lambda_max %||% Inf,
                  finite = TRUE, null.ok = TRUE)
   assert_numeric(lambda_min_ratio, lower = 0, upper = 1, len = 1L)
-  assert_numeric(lambda, len = nlambda, finite = TRUE, lower = 0)
+  assert_numeric(lambda, finite = TRUE, lower = 0, null.ok = TRUE)
   assert_class(control, "trendfilter_control")
 
-  if (is.null(lambda_min)) lambda_min <- -1.0
-  if (is.null(lambda_max)) lambda_max <- -1.0
-  lambda <- sort(lambda, decreasing = TRUE)
+  lambda_min <- lambda_min %||% -1.0
+  lambda_max <- lambda_max %||% -1.0
+  lambda <- sort(lambda, decreasing = TRUE) %||% double(nlambda)
+  nlambda <- length(lambda)
 
   out <- admm_lambda_seq(
     x, y, weights, k,
@@ -110,7 +111,7 @@ trendfilter <- function(
   )
 
   structure(enlist(
-    y, x, weights,
+    y, x, weights, k,
     theta = drop(out$theta),
     lambda = out$lambda,
   ), class = "trendfilter")

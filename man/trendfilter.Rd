@@ -11,8 +11,8 @@ trendfilter(
   k = 2L,
   family = c("gaussian", "logistic", "poisson"),
   method = c("admm", "pdip", "hybrid"),
+  lambda = NULL,
   nlambda = 50L,
-  lambda = double(nlambda),
   lambda_max = NULL,
   lambda_min = NULL,
   lambda_min_ratio = 1e-05,
@@ -45,8 +45,6 @@ curve.}
 
 \item{method}{Character. Specifies the estimation algorithm to use.}
 
-\item{nlambda}{Integer. Number of lambda values to use in the sequence.}
-
 \item{lambda}{Vector. A user supplied sequence of tuning parameters which
 determines the balance between data fidelity and
 smoothness of the estimated curve; larger `lambda` results in a smoother
@@ -58,6 +56,8 @@ this behaviour. It is likely better to supply a
 decreasing sequence of `lambda` values than a single (small) value. If
 supplied, the user-defined `lambda` sequence is automatically sorted in
 decreasing order.}
+
+\item{nlambda}{Integer. Number of lambda values to use in the sequence.}
 
 \item{lambda_max}{Optional value for the largest `lambda` to use.}
 
@@ -93,6 +93,6 @@ Estimate the trendfilter
 x <- 1:100 / 101 * 2 * pi
 y <- sin(x) + .2 * rnorm(100)
 out <- trendfilter(y, x)
-plot(y)
-matlines(out$theta, lty = 1)
+plot(x, y)
+matlines(x, out$theta, lty = 1)
 }

@@ -9,6 +9,7 @@ License: MIT + file LICENSE
 Imports: 
     checkmate,
     cli,
+    ggplot2,
     Matrix,
     Rcpp (>= 1.0.10),
     rlang
