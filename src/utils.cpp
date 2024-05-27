@@ -233,3 +233,29 @@ void get_lambda_seq(
     }
   }
 }
+
+
+// ---- Workarounds to access NumericVector utilities in dspline
+// ---- Do we alter the function signatures in dspline?
+
+// [[Rcpp::export]]
+Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd) {
+  Rcpp::NumericVector nv(Rcpp::wrap(v));
+  Rcpp::NumericVector out = dspline::rcpp_d_mat_mult(nv, k, xd, false, false);
+  return Rcpp::as<Eigen::Map<VectorXd> >(out);
+}
+
+
+Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd) {
+  Rcpp::NumericVector nv(Rcpp::wrap(v));
+  Rcpp::NumericVector out = dspline::rcpp_d_mat_mult(nv, k, xd, false, true);
+  return Rcpp::as<Eigen::Map<VectorXd> >(out);
+}
+
+Eigen::VectorXd penv(Eigen::VectorXd v, int k, const NumericVector& xd,
+                     bool tf_weighting) {
+  Rcpp::NumericVector nv(Rcpp::wrap(v));
+  Rcpp::NumericVector out = dspline::rcpp_d_mat_mult(nv, k, xd, tf_weighting, false);
+  return Rcpp::as<Eigen::Map<VectorXd> >(out);
+}
+

@@ -27,7 +27,7 @@ Eigen::VectorXd tridiag_backsolve(
         const Eigen::VectorXd& a, const::VectorXd& b,
             const Eigen::VectorXd& cp, const Eigen::VectorXd& d);
 
-/* Lambda sequence */
+// Lambda sequence
 double get_lambda_max(const NumericVector& x, const Eigen::VectorXd& y,
                       const Eigen::ArrayXd& sqrt_weights, int k);
 void get_lambda_seq(Eigen::VectorXd& lambda, double lambda_max,
@@ -36,6 +36,11 @@ Eigen::VectorXd get_lambda_seq_r(Eigen::VectorXd lambda, double lambda_max,
                                  double lambda_min, double lambda_min_ratio,
                                  int n_lambda);
 
+// Workarounds for interfacing with dspline
+Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd);
+Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd);
+Eigen::VectorXd penv(Eigen::VectorXd v, int k, const NumericVector& xd,
+                     bool tf_weighting = true);
 
 #endif
 

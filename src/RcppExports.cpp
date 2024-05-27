@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // admm_single_lambda
-Eigen::VectorXd admm_single_lambda(int n, const Eigen::VectorXd& y, const Eigen::ArrayXd& weights, int k, const Eigen::VectorXd& theta_init, const Eigen::SparseMatrix<double>& penalty_mat, const Eigen::SparseMatrix<double>& dk_mat, double lam, int max_iter, double rho, double tol, bool tridiag);
-RcppExport SEXP _trendfilter_admm_single_lambda(SEXP nSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP theta_initSEXP, SEXP penalty_matSEXP, SEXP dk_matSEXP, SEXP lamSEXP, SEXP max_iterSEXP, SEXP rhoSEXP, SEXP tolSEXP, SEXP tridiagSEXP) {
+Eigen::VectorXd admm_single_lambda(int n, const Eigen::VectorXd& y, const Eigen::ArrayXd& weights, int k, const Eigen::VectorXd& theta_init, const NumericVector& xd, const Eigen::SparseMatrix<double>& dk_mat_sq, double lam, int max_iter, double rho, double tol, bool tridiag);
+RcppExport SEXP _trendfilter_admm_single_lambda(SEXP nSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP theta_initSEXP, SEXP xdSEXP, SEXP dk_mat_sqSEXP, SEXP lamSEXP, SEXP max_iterSEXP, SEXP rhoSEXP, SEXP tolSEXP, SEXP tridiagSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -22,14 +22,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::ArrayXd& >::type weights(weightsSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type theta_init(theta_initSEXP);
-    Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type penalty_mat(penalty_matSEXP);
-    Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type dk_mat(dk_matSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type xd(xdSEXP);
+    Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type dk_mat_sq(dk_mat_sqSEXP);
     Rcpp::traits::input_parameter< double >::type lam(lamSEXP);
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< bool >::type tridiag(tridiagSEXP);
-    rcpp_result_gen = Rcpp::wrap(admm_single_lambda(n, y, weights, k, theta_init, penalty_mat, dk_mat, lam, max_iter, rho, tol, tridiag));
+    rcpp_result_gen = Rcpp::wrap(admm_single_lambda(n, y, weights, k, theta_init, xd, dk_mat_sq, lam, max_iter, rho, tol, tridiag));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -116,6 +116,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Dkv
+Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd);
+RcppExport SEXP _trendfilter_Dkv(SEXP vSEXP, SEXP kSEXP, SEXP xdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type v(vSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type xd(xdSEXP);
+    rcpp_result_gen = Rcpp::wrap(Dkv(v, k, xd));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_admm_single_lambda", (DL_FUNC) &_trendfilter_admm_single_lambda, 12},
@@ -124,6 +137,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},
     {"_trendfilter_get_lambda_seq_r", (DL_FUNC) &_trendfilter_get_lambda_seq_r, 5},
+    {"_trendfilter_Dkv", (DL_FUNC) &_trendfilter_Dkv, 3},
     {NULL, NULL, 0}
 };
 

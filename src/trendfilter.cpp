@@ -62,11 +62,23 @@ std::tuple<VectorXd,int> LinearSystem::solve(const VectorXd& v, bool tridiag) {
   }
 }
 
+double tf_gauss_loss(const VectorXd& y,
+                     const VectorXd& theta,
+                     const ArrayXd& weights) {
+  return 0.5 * ((y - theta).array() * weights.sqrt()).matrix().squaredNorm();
+}
+
+double tf_penalty(const VectorXd& theta, const NumericVector& xd, double lam, int k) {
+  Eigen::VectorXd Dv = penv(theta, k + 1, xd);
+  return lam * Dv.lpNorm<1>();
+}
+
+
+// Gaussian only
 double tf_objective(const VectorXd& y, const VectorXd& theta,
-    const ArrayXd& weights,
-    double lam, const SparseMatrix<double>& penalty_mat) {
-  return 0.5*((y-theta).array()*weights.sqrt()).matrix().squaredNorm() +
-    lam*(penalty_mat * theta).lpNorm<1>();
+                    const NumericVector& xd,
+                    const ArrayXd& weights, double lam, int k) {
+  return tf_gauss_loss(y, theta, weights) + tf_penalty(theta, xd, lam, k);
 }
 
 // Matches initialization from package glmgen
@@ -82,10 +94,11 @@ std::tuple<VectorXd,int> init_theta_nullspace(const VectorXd& y, const
   return std::make_tuple(y - (penalty_mat.transpose()) * beta, int(qr.info()));
 }
 
-VectorXd init_u(const VectorXd& residual, const SparseMatrix<double>& dk_mat,
-    const ArrayXd& weights){
+VectorXd init_u(const VectorXd& residual, const NumericVector& xd, int k,
+    const ArrayXd& weights) {
   // (Dk)^T u = y - \theta, from stationarity
   SparseQR<SparseMatrix<double>, Ord> qr;
+  SparseMatrix<double> dk_mat = get_dk_mat(k, xd, false);
   qr.compute(dk_mat.transpose());
   return qr.solve((residual.array()*weights).matrix());
 }
@@ -95,15 +108,15 @@ Eigen::VectorXd admm_single_lambda(
     int n, const Eigen::VectorXd& y,
     const Eigen::ArrayXd& weights, int k,
     const Eigen::VectorXd& theta_init,
-    const Eigen::SparseMatrix<double>& penalty_mat,
-    const Eigen::SparseMatrix<double>& dk_mat,
+    const NumericVector& xd,
+    const Eigen::SparseMatrix<double>& dk_mat_sq,
     double lam, int max_iter, double rho,
     double tol = 1e-5,
     bool tridiag = false) {
   // Initialize theta, alpha, u
   VectorXd theta = theta_init;
-  VectorXd alpha = dk_mat * theta;
-  VectorXd u = init_u((theta-y)/rho, dk_mat, weights);
+  VectorXd alpha = Dkv(theta, k, xd);
+  VectorXd u = init_u((theta-y)/rho, xd, k, weights);
   VectorXd tmp(n-k);
   VectorXd Dth_tmp(alpha.size());
   VectorXd alpha_old(alpha);
@@ -111,13 +124,10 @@ Eigen::VectorXd admm_single_lambda(
   double rr, ss;
 
   // Form Gram matrix and set up linear system for theta update
-  SparseMatrix<double> A = rho * (dk_mat.transpose() * dk_mat);
+  SparseMatrix<double> A = rho * dk_mat_sq;
   A.diagonal().array() += weights;
   A.makeCompressed();
 
-  if (tridiag & (k != 1)) {
-    throw std::invalid_argument("`tridiag` can only be used with k=1.");
-  }
   LinearSystem linear_system;
   // Technically, can form one SparseQR object, analyze the pattern once,
   // and then re-use it.
@@ -128,25 +138,25 @@ Eigen::VectorXd admm_single_lambda(
   // Perform ADMM updates
   int computation_info;
   int iter = 0;
-  double best_objective = tf_objective(y, theta, weights, lam, penalty_mat);
+  double best_objective = tf_objective(y, theta, xd, weights, lam, k);
   VectorXd best_theta = theta;
   for (iter = 1; iter < max_iter; iter++) {
     if (iter % 1000 == 0) Rcpp::checkUserInterrupt(); // check if killed
 
     // theta update
+
     std::tie(theta, computation_info) = linear_system.solve(
-        wy + rho * (dk_mat.transpose() * (alpha + u)),
-        tridiag);
+        wy + rho * Dktv(alpha + u, k, xd), tridiag);
     if (computation_info > 1) {
       std::cerr << "Eigen Sparse QR solve returned nonzero exit status.\n";
     }
-    Dth_tmp = dk_mat * theta;
+    Dth_tmp = Dkv(theta, k, xd);
     tmp = Dth_tmp - u;
     // alpha update
     tf_dp(n-k, tmp.data(), lam/rho, alpha.data());
     // u update
     u += alpha - Dth_tmp;
-    double cur_objective = tf_objective(y, theta, weights, lam, penalty_mat);
+    double cur_objective = tf_objective(y, theta, xd, weights, lam, k);
     if (cur_objective < best_objective) {
       best_objective = cur_objective;
       best_theta = theta;
@@ -154,7 +164,7 @@ Eigen::VectorXd admm_single_lambda(
 
     // Check for convergence
     rr = (Dth_tmp - alpha).norm();
-    ss = rho * (dk_mat.transpose() * (alpha - alpha_old)).norm();
+    ss = rho * Dktv(alpha - alpha_old, k, xd).norm();
     alpha_old = alpha;
     if (rr < tol && ss < tol) break;
   }
@@ -203,22 +213,22 @@ Rcpp::List admm_lambda_seq(
   }
 
   // Initialize difference matrices and other helper objects
-  SparseMatrix<double> penalty_mat = get_penalty_mat(k + 1, x);
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
+  SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
 
   // Project onto Legendre polynomials to initialize for largest lambda.
   VectorXd theta_init = project_polynomials(x, y, weights, k);
 
   // Solve TF at largest lambda
-  theta_mat.col(0) = admm_single_lambda(n, y, weights, k, theta_init,
-      penalty_mat, dk_mat, lambda[0], max_iter, lambda[0]*rho_scale,
+  theta_mat.col(0) = admm_single_lambda(n, y, weights, k, theta_init, x,
+      dk_mat_sq, lambda[0], max_iter, lambda[0]*rho_scale,
       tol, tridiag);
 
   // Solve TF at rest of lambda
   for (int i = 1; i < nlambda; i++) {
     Rcpp::checkUserInterrupt();
     theta_mat.col(i) = admm_single_lambda(n, y, weights, k, theta_mat.col(i-1),
-        penalty_mat, dk_mat, lambda[i], max_iter, lambda[i]*rho_scale,
+        x, dk_mat_sq, lambda[i], max_iter, lambda[i]*rho_scale,
         tol, tridiag);
   }
   Rcpp::List out = Rcpp::List::create(
@@ -245,7 +255,7 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   // Initialize theta, alpha, u
   VectorXd theta = project_polynomials(x, y, weights, k);
   VectorXd alpha = dk_mat * theta;
-  VectorXd u = init_u((theta-y)/rho, dk_mat, weights);
+  VectorXd u = init_u((theta-y)/rho, x, k, weights);
   VectorXd tmp(n-k);
 
   // Form Gram matrix and set up linear system for theta update
@@ -265,7 +275,7 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   VectorXd objective_vec(max_iter);
   int iter = 0;
   theta_mat.col(iter) = theta;
-  objective_vec[iter] = tf_objective(y, theta, weights, lam, penalty_mat);
+  objective_vec[iter] = tf_objective(y, theta, x, weights, lam, k);
   VectorXd best_theta = theta;
   double best_objective = objective_vec[iter];
   for (iter = 1; iter < max_iter; iter++) {
@@ -281,7 +291,7 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
     tf_dp(n-k, tmp.data(), lam/rho, alpha.data());
     // u update
     u += alpha - dk_mat*theta;
-    objective_vec[iter] = tf_objective(y, theta, weights, lam, penalty_mat);
+    objective_vec[iter] = tf_objective(y, theta, x, weights, lam, k);
     theta_mat.col(iter) = theta;
     if (objective_vec[iter] < best_objective) {
       best_objective = objective_vec[iter];

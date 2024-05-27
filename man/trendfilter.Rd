@@ -93,6 +93,6 @@ Estimate the trendfilter
 x <- 1:100 / 101 * 2 * pi
 y <- sin(x) + .2 * rnorm(100)
 out <- trendfilter(y, x)
-plot(x, y)
-matlines(x, out$theta, lty = 1)
+
+plot(out)
 }
