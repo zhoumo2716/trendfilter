@@ -126,8 +126,10 @@ plot.trendfilter <- function(x, lambda = NULL, ...) {
     ggplot2::geom_line() +
     ggplot2::ylab(expression(hat(theta))) +
     ggplot2::theme_bw() +
-    ggplot2::scale_colour_viridis_c(trans = "log10", name = expression(lambda)) +
+    ggplot2::scale_colour_viridis_c(trans = "log10", name = expression(lambda))
   if (nlambda == 1) plt <- plt + ggplot2::theme(legend.position = "none")
-  plt + ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 0, vjust = 0.5))
+  plt <- plt +
+    ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 0, vjust = 0.5))
+  return(plt)
 }
 

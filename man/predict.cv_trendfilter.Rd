@@ -2,36 +2,37 @@
 % Please edit documentation in R/methods-cv.R
 \name{predict.cv_trendfilter}
 \alias{predict.cv_trendfilter}
-\title{Predict}
+\title{Predict with trendfilter at new (interior) design points
+#'}
 \usage{
-\method{predict}{cv_trendfilter}(object, newx = NULL, which_lambda = c("lambda.min", "lambda.1se"), ...)
+\method{predict}{cv_trendfilter}(object, newx = NULL, which_lambda = c("lambda_min", "lambda_1se"), ...)
 }
 \arguments{
-\item{object}{result of cross validation of type `cv_poisson_rt`}
+\item{object}{result of \code{cv_trendfilter()} of class \code{cv_trendfilter}}
 
 \item{newx}{numeric vector of new design points at which to evaluate the. The
-default, `NULL` returns the estimates at the original `x` values.}
+default, \code{NULL} returns the estimates at the original \code{x} values.}
 
-\item{which_lambda}{Select which lambdas from the object to use. If not
-  provided, all Rt's are returned. Note that new lambdas not originally
-  used in the estimation procedure may be provided, but the results will be
-  calculated by linearly interpolating the estimated Rt's.
+\item{which_lambda}{select which solutions to show. If provided a
+vector of \code{lambda} values, the corresponding \eqn{\theta} estimates will be
+plotted. If a string, it must be either one of \code{lambda_min}, or \code{lambda_1se}.
+\itemize{
+\item \code{lambda_min}: plot the estimates corresponding to the lambda
+that minimizes the cross validation score.
+\item \code{lambda_1se}: plot estimates corresponding to the largest lambda whose
+corresponding CV score is within 1 standard error of the
+minimal cross validation score.
+\item If NULL, all estimated \eqn{\theta}'s are plotted (at \code{newx}).
+}}
 
-  The strings `lambda.min` or `lambda.1se` are allowed to choose either
-  the lambda that minimizes the cross validation score or the largest lambda
-  whose corresponding cross validation score is within 1 standard error of
-  the minimal cross validation score.}
-
-\item{...}{additional arguments passed to `predict.trendfilter()`}
+\item{...}{additional arguments passed to \code{predict.trendfilter()}}
 }
 \value{
 A vector or matrix of predictions.
 }
 \description{
-Given an object of class `poisson_rt` produced with [estimate_rt()],
-calculate predicted observed cases for the estimated Rt values.
-Note: This function is not intended for "new x" or to produce forecasts, but
-rather to examine how Rt relates to observables.
+Predict with trendfilter at new (interior) design points
+#'
 }
 \examples{
 x <- 1:100 / 101 * 2 * pi
@@ -39,7 +40,7 @@ y <- sin(x) + .2 * rnorm(100)
 cv <- cv_trendfilter(y, x, nlambda = 20L)
 p <- predict(cv)
 p <- predict(cv, which_lambda = cv$lambda[1])
-p <- predict(cv, which_lambda = "lambda.1se")
+p <- predict(cv, which_lambda = "lambda_1se")
 p <- predict(cv, which_lambda = NULL)
 plot(y)
 matlines(p, lty = 2)

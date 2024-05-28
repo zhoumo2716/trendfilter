@@ -7,21 +7,21 @@
 \method{predict}{trendfilter}(object, newx = NULL, lambda = NULL, deriv = 0L, ...)
 }
 \arguments{
-\item{object}{the result of `trendfilter()`}
+\item{object}{the result of \code{trendfilter()}}
 
 \item{newx}{numeric vector of new design points at which to evaluate the. The
-default, `NULL` returns the estimates at the original `x` values.}
+default, \code{NULL} returns the estimates at the original \code{x} values.}
 
 \item{lambda}{Vector. A user supplied sequence of tuning parameters which
 determines the balance between data fidelity and
-smoothness of the estimated curve; larger `lambda` results in a smoother
-estimate. The default, `NULL`
-results in an automatic computation based on `nlambda`, the largest value
-of `lambda` that would result in a maximally smooth estimate, and `lambda_min_ratio`.
-Supplying a value of `lambda` overrides
+smoothness of the estimated curve; larger \code{lambda} results in a smoother
+estimate. The default, \code{NULL}
+results in an automatic computation based on \code{nlambda}, the largest value
+of \code{lambda} that would result in a maximally smooth estimate, and \code{lambda_min_ratio}.
+Supplying a value of \code{lambda} overrides
 this behaviour. It is likely better to supply a
-decreasing sequence of `lambda` values than a single (small) value. If
-supplied, the user-defined `lambda` sequence is automatically sorted in
+decreasing sequence of \code{lambda} values than a single (small) value. If
+supplied, the user-defined \code{lambda} sequence is automatically sorted in
 decreasing order.}
 
 \item{deriv}{integer; the order of the derivative to be evaluated. Default is 0.}
@@ -29,8 +29,8 @@ decreasing order.}
 \item{...}{not used}
 }
 \value{
-a vector or matrix with rows corresponding to `newx` and columns
-  corresponding to `lambda`
+a vector or matrix with rows corresponding to \code{newx} and columns
+corresponding to \code{lambda}
 }
 \description{
 Predict with trendfilter at new (interior) design points

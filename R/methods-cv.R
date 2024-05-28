@@ -64,22 +64,19 @@ print.summary.cv_trendfilter <- function(
 #'
 #' @param x the result of `cv_trendfilter()` of class `cv_trendfilter`
 #' @param which_lambda select which solutions to show.
+#'   If not provided, the cross validation score will be plotted. If provided a
+#'   vector of `lambda` values, the corresponding \eqn{\theta} estimates will be
+#'   plotted. If provided a string, it must be either one of `cv_scores`,
+#'   `lambda_min`, or `lambda_1se`.
 #'
-#' If not provided, the cross validation score will be plotted. If provided a
-#' vector of `lambda` values, the corresponding \deqn{\theta} estimates will be
-#' plotted.
-#'
-#' If provided a string, it
-#' must be either one of `lambda.min`, `lambda.1se`, or `cv_scores`.
-#'
-#'  * `cv_scores`: plot the cross validation score curve. Vertical lines
-#'    indicate `lambda.min` and `lambda.1se` (from left to right).
-#'  * `lambda.min`: plot the estimates corresponding to the lambda
-#'    that minimizes the cross validation score.
-#'  * `lambda.1se`: plot estimates corresponding to the largest lambda whose
-#'    corresponding CV score is within 1 standard error of the
-#'    minimal cross validation score.
-#'  * If NULL, all estimated \deqn{theta}'s are plotted.
+#'    * `cv_scores`: plot the cross validation score curve. Vertical lines
+#'      indicate `lambda_min` and `lambda_1se` (from left to right).
+#'    * `lambda_min`: plot the estimates corresponding to the lambda
+#'      that minimizes the cross validation score.
+#'    * `lambda_1se`: plot estimates corresponding to the largest lambda whose
+#'      corresponding CV score is within 1 standard error of the
+#'      minimal cross validation score.
+#'    * If `NULL`, all estimated \eqn{\theta}'s are plotted.
 #'
 #' @param ... Not used.
 #'
@@ -92,11 +89,11 @@ print.summary.cv_trendfilter <- function(
 #' cv <- cv_trendfilter(y, x, nlambda = 20L)
 #' plot(cv)
 #' plot(cv, which_lambda = cv$lambda[1])
-#' plot(cv, which_lambda = "lambda.min")
-#' plot(cv, which_lambda = "lambda.1se")
+#' plot(cv, which_lambda = "lambda_min")
+#' plot(cv, which_lambda = "lambda_1se")
 #' plot(cv, NULL)
-plot.cv_poisson_rt <- function(
-    x, which_lambda = c("cv_scores", "lambda.min", "lambda.1se"), ...
+plot.cv_trendfilter <- function(
+    x, which_lambda = c("cv_scores", "lambda_min", "lambda_1se"), ...
 ) {
   rlang::check_dots_empty()
   plt_scores <- FALSE
@@ -109,7 +106,7 @@ plot.cv_poisson_rt <- function(
     }
   } else {
     assert_numeric(which_lambda, lower = min(x$full_fit$lambda),
-                   upper = max(x$full_fit$lambda, null.ok = TRUE))
+                   upper = max(x$full_fit$lambda), null.ok = TRUE)
   }
 
   if (plt_scores) {
@@ -131,13 +128,13 @@ plot.cv_poisson_rt <- function(
       ggplot2::geom_point(ggplot2::aes(x = .data$lambda, y = .data$cv_scores),
                           color = "darkblue"
       ) +
-      ggplot2::geom_vline(xintercept = x$lambda.min, linetype = "dotted") +
-      ggplot2::geom_vline(xintercept = x$lambda.1se, linetype = "dotted") +
+      ggplot2::geom_vline(xintercept = x$lambda_min, linetype = "dotted") +
+      ggplot2::geom_vline(xintercept = x$lambda_1se, linetype = "dotted") +
       ggplot2::theme_bw() +
       ggplot2::labs(x = expression(log(lambda)), y = "CV scores") +
       ggplot2::scale_x_log10()
   } else {
-    plt <- plot(x$full_fit, which_lambda)
+    plt <- plot(x$full_fit, lambda = which_lambda)
   }
 
   return(plt)
@@ -146,24 +143,20 @@ plot.cv_poisson_rt <- function(
 
 
 
-#' Predict
+#' Predict with trendfilter at new (interior) design points
+#'#'
 #'
-#' Given an object of class `poisson_rt` produced with [estimate_rt()],
-#' calculate predicted observed cases for the estimated Rt values.
-#' Note: This function is not intended for "new x" or to produce forecasts, but
-#' rather to examine how Rt relates to observables.
+#' @param object result of `cv_trendfilter()` of class `cv_trendfilter`
+#' @param which_lambda select which solutions to show. If provided a
+#'   vector of `lambda` values, the corresponding \eqn{\theta} estimates will be
+#'   plotted. If a string, it must be either one of `lambda_min`, or `lambda_1se`.
 #'
-#'
-#' @param object result of cross validation of type `cv_poisson_rt`
-#' @param which_lambda Select which lambdas from the object to use. If not
-#'   provided, all Rt's are returned. Note that new lambdas not originally
-#'   used in the estimation procedure may be provided, but the results will be
-#'   calculated by linearly interpolating the estimated Rt's.
-#'
-#'   The strings `lambda.min` or `lambda.1se` are allowed to choose either
-#'   the lambda that minimizes the cross validation score or the largest lambda
-#'   whose corresponding cross validation score is within 1 standard error of
-#'   the minimal cross validation score.
+#'    * `lambda_min`: plot the estimates corresponding to the lambda
+#'      that minimizes the cross validation score.
+#'    * `lambda_1se`: plot estimates corresponding to the largest lambda whose
+#'      corresponding CV score is within 1 standard error of the
+#'      minimal cross validation score.
+#'    * If NULL, all estimated \eqn{\theta}'s are plotted (at `newx`).
 #' @inheritParams predict.trendfilter
 #' @param ... additional arguments passed to `predict.trendfilter()`
 #'
@@ -175,21 +168,20 @@ plot.cv_poisson_rt <- function(
 #' cv <- cv_trendfilter(y, x, nlambda = 20L)
 #' p <- predict(cv)
 #' p <- predict(cv, which_lambda = cv$lambda[1])
-#' p <- predict(cv, which_lambda = "lambda.1se")
+#' p <- predict(cv, which_lambda = "lambda_1se")
 #' p <- predict(cv, which_lambda = NULL)
 #' plot(y)
 #' matlines(p, lty = 2)
 predict.cv_trendfilter <- function(object,
                                    newx = NULL,
-                                   which_lambda = c("lambda.min", "lambda.1se"),
+                                   which_lambda = c("lambda_min", "lambda_1se"),
                                    ...) {
-  rlang::check_dots_empty()
   if (is.character(which_lambda)) {
     which_lambda <- arg_match(which_lambda)
     which_lambda <- object[[which_lambda]]
   } else {
     assert_numeric(which_lambda, lower = min(x$full_fit$lambda),
-                   upper = max(x$full_fit$lambda, null.ok = TRUE))
+                   upper = max(x$full_fit$lambda), null.ok = TRUE)
   }
   predict(object$full_fit, newx, which_lambda, ...)
 }

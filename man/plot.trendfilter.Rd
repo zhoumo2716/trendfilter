@@ -2,12 +2,12 @@
 % Please edit documentation in R/methods-trendfilter.R
 \name{plot.trendfilter}
 \alias{plot.trendfilter}
-\title{Plot estimated values from a `trendfilter` object}
+\title{Plot estimated values from a \code{trendfilter} object}
 \usage{
 \method{plot}{trendfilter}(x, lambda = NULL, ...)
 }
 \arguments{
-\item{x}{output of the function [trendfilter()] of class `trendfilter`}
+\item{x}{output of the function \code{\link[=trendfilter]{trendfilter()}} of class \code{trendfilter}}
 
 \item{lambda}{select which estimates to plot. If not provided,
 all estimates are plotted.}
@@ -16,7 +16,7 @@ all estimates are plotted.}
 }
 \description{
 Produces a figure showing some or all estimated values for different
-values of the penalty. The result is a [ggplot2::ggplot()]. Additional user
+values of the penalty. The result is a \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}. Additional user
 modifications can be added as desired.
 }
 \examples{

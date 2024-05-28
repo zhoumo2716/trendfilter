@@ -20,71 +20,75 @@ trendfilter(
 )
 }
 \arguments{
-\item{y}{vector of observations of length `n`}
+\item{y}{vector of observations of length \code{n}}
 
-\item{x}{vector of positions at which the `y` have been observed, defaults
-to `1:n`}
+\item{x}{vector of positions at which the \code{y} have been observed, defaults
+to \code{1:n}}
 
-\item{weights}{vector of weights for the observations, defaults to `rep(1, n)`}
+\item{weights}{vector of weights for the observations, defaults to \code{rep(1, n)}}
 
 \item{k}{Integer. Degree of the piecewise polynomial curve to be
-estimated. For example, `korder = 0` corresponds to a piecewise constant
+estimated. For example, \code{korder = 0} corresponds to a piecewise constant
 curve.}
 
 \item{family}{Character or function. Specifies the loss function
-  to use. Valid options are:
-  * `"gaussian"` - least squares loss (the default),
-  * `"binomial"` - logistic loss (classification),
-  * `"poisson"`  - Poisson loss for count data
+to use. Valid options are:
+\itemize{
+\item \code{"gaussian"} - least squares loss (the default),
+\item \code{"binomial"} - logistic loss (classification),
+\item \code{"poisson"}  - Poisson loss for count data
+}
 
-  For any other type, a valid [stats::family()] object may be passed. Note
-  that these will generally be much slower to estimate than the built-in
-  options passed as strings. So for example, `family = "gaussian"` and
-  `family = gaussian()` will produce the same results, but the first
-  will be much faster.character.}
+For any other type, a valid \code{\link[stats:family]{stats::family()}} object may be passed. Note
+that these will generally be much slower to estimate than the built-in
+options passed as strings. So for example, \code{family = "gaussian"} and
+\code{family = gaussian()} will produce the same results, but the first
+will be much faster.character.}
 
 \item{method}{Character. Specifies the estimation algorithm to use.}
 
 \item{lambda}{Vector. A user supplied sequence of tuning parameters which
 determines the balance between data fidelity and
-smoothness of the estimated curve; larger `lambda` results in a smoother
-estimate. The default, `NULL`
-results in an automatic computation based on `nlambda`, the largest value
-of `lambda` that would result in a maximally smooth estimate, and `lambda_min_ratio`.
-Supplying a value of `lambda` overrides
+smoothness of the estimated curve; larger \code{lambda} results in a smoother
+estimate. The default, \code{NULL}
+results in an automatic computation based on \code{nlambda}, the largest value
+of \code{lambda} that would result in a maximally smooth estimate, and \code{lambda_min_ratio}.
+Supplying a value of \code{lambda} overrides
 this behaviour. It is likely better to supply a
-decreasing sequence of `lambda` values than a single (small) value. If
-supplied, the user-defined `lambda` sequence is automatically sorted in
+decreasing sequence of \code{lambda} values than a single (small) value. If
+supplied, the user-defined \code{lambda} sequence is automatically sorted in
 decreasing order.}
 
 \item{nlambda}{Integer. Number of lambda values to use in the sequence.}
 
-\item{lambda_max}{Optional value for the largest `lambda` to use.}
+\item{lambda_max}{Optional value for the largest \code{lambda} to use.}
 
-\item{lambda_min}{Optional value for the smallest `lambda` to use. This should
+\item{lambda_min}{Optional value for the smallest \code{lambda} to use. This should
 be greater than zero.}
 
-\item{lambda_min_ratio}{If neither `lambda` nor `lambda_min` is specified, the
-program will generate a `lambdamin` by `lambda_max * lambda_min_ratio`.
-A very small value will lead to the solution `theta = y`.
-This argument has no effect if there is a user-defined `lambda` sequence.}
+\item{lambda_min_ratio}{If neither \code{lambda} nor \code{lambda_min} is specified, the
+program will generate a \code{lambdamin} by \code{lambda_max * lambda_min_ratio}.
+A very small value will lead to the solution \code{theta = y}.
+This argument has no effect if there is a user-defined \code{lambda} sequence.}
 
 \item{control}{A list of control parameters for the estimation algorithm.
-See the constructor `trendfilter_control_list()`.}
+See the constructor \code{trendfilter_control_list()}.}
 }
 \value{
-An object with S3 class `trendfilter`. Among the list components:
-* `y` the input data.
-* `x` the vector of positions at which the data have been observed.
-* `weights` the vector of observation weights
-* `theta` the estimated curve evaluated at `x`. This is a matrix with
-    each column corresponding to one value of `lambda`.
-* `lambda` the values of `lambda` actually used in the algorithm.
-* `korder` degree of the estimated piecewise polynomial curve.
-* `dof` degrees of freedom of the estimated trend filtering problem.
-* `niter` the required number of iterations for each value of `lambda`.
-* `convergence` if number of iterations for each value of `lambda` is less
-    than the maximum number of iterations for the estimation algorithm.
+An object with S3 class \code{trendfilter}. Among the list components:
+\itemize{
+\item \code{y} the input data.
+\item \code{x} the vector of positions at which the data have been observed.
+\item \code{weights} the vector of observation weights
+\item \code{theta} the estimated curve evaluated at \code{x}. This is a matrix with
+each column corresponding to one value of \code{lambda}.
+\item \code{lambda} the values of \code{lambda} actually used in the algorithm.
+\item \code{korder} degree of the estimated piecewise polynomial curve.
+\item \code{dof} degrees of freedom of the estimated trend filtering problem.
+\item \code{niter} the required number of iterations for each value of \code{lambda}.
+\item \code{convergence} if number of iterations for each value of \code{lambda} is less
+than the maximum number of iterations for the estimation algorithm.
+}
 }
 \description{
 Estimate the trendfilter

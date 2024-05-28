@@ -163,8 +163,8 @@ Eigen::VectorXd admm_single_lambda(
     }
 
     // Check for convergence
-    rr = (Dth_tmp - alpha).norm();
-    ss = rho * Dktv(alpha - alpha_old, k, xd).norm();
+    rr = (Dth_tmp - alpha).norm() / alpha.size();
+    ss = rho * Dktv(alpha - alpha_old, k, xd).norm() / dk_mat_sq.rows();
     alpha_old = alpha;
     if (rr < tol && ss < tol) break;
   }

@@ -15,44 +15,46 @@ cv_trendfilter(
 )
 }
 \arguments{
-\item{y}{vector of observations of length `n`}
+\item{y}{vector of observations of length \code{n}}
 
-\item{x}{vector of positions at which the `y` have been observed, defaults
-to `1:n`}
+\item{x}{vector of positions at which the \code{y} have been observed, defaults
+to \code{1:n}}
 
-\item{weights}{vector of weights for the observations, defaults to `rep(1, n)`}
+\item{weights}{vector of weights for the observations, defaults to \code{rep(1, n)}}
 
 \item{k}{Integer. Degree of the piecewise polynomial curve to be
-estimated. For example, `korder = 0` corresponds to a piecewise constant
+estimated. For example, \code{korder = 0} corresponds to a piecewise constant
 curve.}
 
 \item{error_measure}{Metric used to calculate cross validation scores. May
-be `mse`, `mae`, or `deviance`.}
+be \code{mse}, \code{mae}, or \code{deviance}.}
 
 \item{nfolds}{Integer. The number of folds to use. For leave-vth-out cross
-validation, every vth `y` value and its corresponding position (and weight)
+validation, every vth \code{y} value and its corresponding position (and weight)
 are placed into the same fold. The first and last observations are not
 assigned to any folds. This value must be at least 2. As an example, with
-15 data points and `nfolds = 4`, the points are assigned to folds in the
+15 data points and \code{nfolds = 4}, the points are assigned to folds in the
 following way:
 \deqn{
-0 \; 1 \; 2 \; 3 \; 4 \; 1 \; 2 \; 3 \;  4 \; 1 \; 2 \; 3 \; 4 \; 1 \; 0
-}{0 1 2 3 4 1 2 3 4 1 2 3 4 1 0} where 0 indicates no assignment.
-Therefore, the folds are not random and running `cv_trendfilter()` twice
+  0 \; 1 \; 2 \; 3 \; 4 \; 1 \; 2 \; 3 \;  4 \; 1 \; 2 \; 3 \; 4 \; 1 \; 0
+  }{0 1 2 3 4 1 2 3 4 1 2 3 4 1 0} where 0 indicates no assignment.
+Therefore, the folds are not random and running \code{cv_trendfilter()} twice
 will give the same result.}
 
-\item{...}{additional parameters passet along to `trendfilter()`.}
+\item{...}{additional parameters passet along to \code{trendfilter()}.}
 }
 \value{
-An object with S3 class `"cv_trendfilter"`. Among the list components:
-* `full_fit` An object with S3 class `"trendfilter"`, estimated with all
-  `y` and `lambda`
-* `cv_scores` leave-vth-out cross validation scores
-* `cv_se` leave-vth-out cross validation standard error
-* `lambda_min` lambda which achieved the optimal cross validation score
-* `lambda_1se` lambda that gives the optimal cross validation score
+An object with S3 class \code{"cv_trendfilter"}. Among the list components:
+\itemize{
+\item \code{full_fit} An object with S3 class \code{"trendfilter"}, estimated with all
+\code{y} and \code{lambda}
+\item \code{cv_scores} leave-vth-out cross validation scores
+\item \code{cv_se} leave-vth-out cross validation standard error
+\item \code{lambda_min} lambda which achieved the optimal cross validation score
+\item \code{lambda_1se} lambda that gives the optimal cross validation score
 within one standard error.
-* `lambda` the value of `lambda` used in the algorithm.
+\item \code{lambda} the value of \code{lambda} used in the algorithm.
+}
 }
 \description{
 Leave-vth-out cross validation for trendfilter
