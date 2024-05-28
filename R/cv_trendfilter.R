@@ -28,6 +28,9 @@
 #' @export
 #'
 #' @examples
+#' x <- 1:100 / 101 * 2 * pi
+#' y <- sin(x) + .2 * rnorm(100)
+#' cv <- cv_trendfilter(y, x, nlambda = 20L)
 cv_trendfilter <- function(
     y,
     x = seq_along(y),

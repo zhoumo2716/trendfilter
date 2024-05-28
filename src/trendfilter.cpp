@@ -168,7 +168,8 @@ Eigen::VectorXd admm_single_lambda(
     alpha_old = alpha;
     if (rr < tol && ss < tol) break;
   }
-
+  // For checking the criteria. Generally, the dual (ss) is much slower.
+  // Rcpp::Rcout << iter << ": rr = " << rr << " ss = " << ss << std::endl;
   return best_theta;
 }
 

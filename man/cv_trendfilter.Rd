@@ -57,3 +57,8 @@ within one standard error.
 \description{
 Leave-vth-out cross validation for trendfilter
 }
+\examples{
+x <- 1:100 / 101 * 2 * pi
+y <- sin(x) + .2 * rnorm(100)
+cv <- cv_trendfilter(y, x, nlambda = 20L)
+}

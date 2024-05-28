@@ -118,7 +118,7 @@ trendfilter <- function(y,
 }
 
 admm_control_list <- function(
-    max_iter = 1e4, rho_scale = 1.0, tolerance = 1e-5, ...
+    max_iter = 1e4, rho_scale = 1.0, tolerance = 1e-4, ...
 ) {
   rlang::check_dots_empty()
   assert_integerish(max_iter, lower = 0, len = 1L)

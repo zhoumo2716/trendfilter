@@ -1,5 +1,23 @@
+#' Predict with trendfilter at new (interior) design points
+#'
+#' @param object the result of `trendfilter()`
+#' @param newx numeric vector of new design points at which to evaluate the. The
+#'   default, `NULL` returns the estimates at the original `x` values.
+#' @inheritParams trendfilter
+#' @param deriv integer; the order of the derivative to be evaluated. Default is 0.
+#' @param ... not used
+#'
+#' @return a vector or matrix with rows corresponding to `newx` and columns
+#'   corresponding to `lambda`
+#'
 #' @importFrom stats predict
 #' @export
+#' @examples
+#' x <- 1:100 / 101 * 2 * pi
+#' y <- sin(x) + .2 * rnorm(100)
+#' out <- trendfilter(y, x, nlambda = 20L)
+#' predict(out, newx = 1:6, lambda = out$lambda[10])
+#' predict(out, newx = 1:6)
 predict.trendfilter <- function(object, newx = NULL, lambda = NULL, deriv = 0L, ...) {
   rlang::check_dots_empty()
   newx <- newx %||% object$x
