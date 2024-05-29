@@ -197,9 +197,9 @@ double get_lambda_max(
 Eigen::VectorXd get_lambda_seq_r(
     Eigen::VectorXd lambda,
     double lambda_max,
-    double lambda_min = -1.0,
-    double lambda_min_ratio = 1e-5,
-    int n_lambda = 50) {
+    double lambda_min,
+    double lambda_min_ratio,
+    int n_lambda) {
 
   get_lambda_seq(lambda, lambda_max, lambda_min, lambda_min_ratio, n_lambda);
   return lambda;
