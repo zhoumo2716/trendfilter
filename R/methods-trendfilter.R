@@ -119,11 +119,11 @@ plot.trendfilter <- function(x, lambda = NULL, ...) {
     x = rep(x$x, nlambda)
   )
 
-  plt <- ggplot2::ggplot(
-    df,
-    ggplot2::aes(.data$x, .data$theta, colour = .data$lambda, group = .data$lambda)
-  ) +
-    ggplot2::geom_line() +
+  plt <- ggplot2::ggplot() +
+    ggplot2::geom_line(
+      data = df,
+      ggplot2::aes(.data$x, .data$theta, colour = .data$lambda, group = .data$lambda)
+    ) +
     ggplot2::ylab(expression(hat(theta))) +
     ggplot2::theme_bw() +
     ggplot2::scale_colour_viridis_c(trans = "log10", name = expression(lambda))

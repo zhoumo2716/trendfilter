@@ -1,10 +1,21 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 # trendfilter
 
 <!-- badges: start -->
-
 [![R-CMD-check](https://github.com/glmgen/trendfilter/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/glmgen/trendfilter/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
@@ -12,7 +23,7 @@ The goal of trendfilter is to **solve** nonparametric regression.
 
 ## Installation
 
-You can install the development version of trendfilter from
+You can install the development version of trendfilter from 
 [GitHub](https://github.com/) with:
 
 ``` r
@@ -24,7 +35,7 @@ devtools::install_github("glmgen/trendfilter")
 
 This is a basic example which shows you how to solve a common problem:
 
-``` r
+```{r example}
 library(trendfilter)
 library(ggplot2)
 x <- 1:100 / 101 * 2 * pi
@@ -34,13 +45,13 @@ plot(out) +
   geom_point(data = data.frame(x = x, y = y), aes(x, y), color = "black")
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
-
-What is special about using `README.Rmd` instead of just `README.md`?
+What is special about using `README.Rmd` instead of just `README.md`? 
 You can include R chunks like so:
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
+
+You'll still need to render `README.Rmd` regularly, to keep `README.md` 
 up-to-date. `devtools::build_readme()` is handy for this.
 
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
+
+In that case, don't forget to commit and push the resulting figure files, 
+so they display on GitHub and CRAN.
