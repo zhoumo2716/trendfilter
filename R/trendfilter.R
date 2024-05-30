@@ -112,7 +112,9 @@ trendfilter <- function(y,
   structure(enlist(
     y, x, weights, k,
     theta = drop(out$theta),
+    alpha = drop(out$alpha),
     lambda = out$lambda,
+    iters = out$iters,
     call = match.call()
   ), class = "trendfilter")
 }

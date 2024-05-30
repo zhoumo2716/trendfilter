@@ -104,16 +104,20 @@ VectorXd init_u(const VectorXd& residual, const NumericVector& xd, int k,
 }
 
 void admm_single_lambda(
-    int n, const Eigen::VectorXd& y,
+    int n,
+    const Eigen::VectorXd& y,
     const NumericVector& xd,
-    const Eigen::ArrayXd& weights, int k,
-    Eigen::VectorXd& theta,
-    Eigen::VectorXd& alpha,
-    Eigen::VectorXd& u,
-    int iter,
-    double obj_val,
+    const Eigen::ArrayXd& weights,
+    int k,
+    Eigen::VectorXd theta,
+    Eigen::VectorXd alpha,
+    Eigen::VectorXd u,
+    int& iter,
+    double& obj_val,
     const Eigen::SparseMatrix<double>& dk_mat_sq,
-    double lam, int max_iter, double rho,
+    double lam,
+    int max_iter,
+    double rho,
     double tol = 1e-5,
     bool tridiag = false) {
   // Initialize internals
@@ -179,11 +183,17 @@ void admm_single_lambda(
  */
 // [[Rcpp::export]]
 Rcpp::List admm_lambda_seq(
-    NumericVector x, Eigen::VectorXd y, Eigen::ArrayXd weights, int k,
+    NumericVector x,
+    Eigen::VectorXd y,
+    Eigen::ArrayXd weights,
+    int k,
     Eigen::VectorXd lambda,
-    int nlambda = 50, double lambda_max = -1.0, double lambda_min = -1.0,
+    int nlambda = 50,
+    double lambda_max = -1.0,
+    double lambda_min = -1.0,
     double lambda_min_ratio = 1e-5,
-    int max_iter = 200, double rho_scale = 1.0,
+    int max_iter = 200,
+    double rho_scale = 1.0,
     double tol = 1e-5,
     bool tridiag = false) {
 
@@ -197,7 +207,7 @@ Rcpp::List admm_lambda_seq(
 
   Eigen::MatrixXd theta(n, nlambda);
   Rcpp::NumericVector objective_val(nlambda);
-  Rcpp::NumericVector iters(nlambda);
+  Rcpp::IntegerVector iters(nlambda);
 
   // Use DP solution for k=0.
   if (k == 0) {
@@ -231,9 +241,9 @@ Rcpp::List admm_lambda_seq(
   for (int i = 0; i < nlambda; i++) {
     Rcpp::checkUserInterrupt();
     admm_single_lambda(n, y, x, weights, k,
-      theta.col(i).data(), alpha.col(i).data(), u.data(), // return vals
+      theta.col(i), alpha.col(i), u, // return vals
       iters[i], objective_val[i],
-      dk_mat_sq.data(), lambda[i], max_iter, lambda[i]*rho_scale,
+      dk_mat_sq, lambda[i], max_iter, lambda[i]*rho_scale,
       tol, tridiag);
   }
   Rcpp::List out = Rcpp::List::create(
