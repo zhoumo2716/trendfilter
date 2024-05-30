@@ -116,23 +116,3 @@ trendfilter <- function(y,
     call = match.call()
   ), class = "trendfilter")
 }
-
-admm_control_list <- function(
-    max_iter = 1e4, rho_scale = 1.0, tolerance = 1e-4, ...
-) {
-  rlang::check_dots_empty()
-  assert_integerish(max_iter, lower = 0, len = 1L)
-  assert_numeric(tolerance, lower = 0, finite = TRUE, len = 1L)
-  assert_numeric(rho_scale, lower = 0, finite = TRUE, len = 1L)
-  structure(enlist(max_iter, rho_scale, tolerance), class = "admm_control")
-}
-
-trendfilter_control_list <- function(
-    obj_tol = 1e-6, x_cond = 1e11, admm_control = admm_control_list(), ...
-) {
-  rlang::check_dots_empty()
-  assert_numeric(obj_tol, lower = 0, finite = TRUE, len = 1L)
-  assert_numeric(x_cond, lower = 0, finite = TRUE, len = 1L)
-  assert_class(admm_control, "admm_control")
-  structure(enlist(obj_tol, x_cond, admm_control), class = "trendfilter_control")
-}
