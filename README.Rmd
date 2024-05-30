@@ -35,7 +35,7 @@ devtools::install_github("glmgen/trendfilter")
 
 This is a basic example which shows you how to solve a common problem:
 
-```{r example}
+```{r example, dev='svg'}
 library(trendfilter)
 library(ggplot2)
 x <- 1:100 / 101 * 2 * pi
