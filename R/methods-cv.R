@@ -180,8 +180,8 @@ predict.cv_trendfilter <- function(object,
     which_lambda <- arg_match(which_lambda)
     which_lambda <- object[[which_lambda]]
   } else {
-    assert_numeric(which_lambda, lower = min(x$full_fit$lambda),
-                   upper = max(x$full_fit$lambda), null.ok = TRUE)
+    assert_numeric(which_lambda, lower = min(object$full_fit$lambda),
+                   upper = max(object$full_fit$lambda), null.ok = TRUE)
   }
   predict(object$full_fit, newx, which_lambda, ...)
 }

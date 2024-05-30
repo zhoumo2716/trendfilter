@@ -109,9 +109,9 @@ Eigen::VectorXd project_polynomials(
   qr.compute(row_scale(basis_mat, sqrt_weights));
   VectorXd beta = qr.solve((y.array()*sqrt_weights).matrix());
   VectorXd projection = basis_mat*beta;
-  if (qr.info() > 0) {
-    std::cerr << "Eigen QR solve returned nonzero exit status.\n";
-  }
+  // if (qr.info() > 0) {
+  //  std::cerr << "Eigen QR solve returned nonzero exit status.\n";
+  // }
   return projection;
 }
 

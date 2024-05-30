@@ -1,5 +1,5 @@
 Package: trendfilter
-Title: Univariate trend filtering.
+Title: Univariate trend filtering
 Version: 0.0.1
 Date: 2024-06-01
 Authors@R: 
@@ -9,8 +9,8 @@ License: MIT + file LICENSE
 Imports: 
     checkmate,
     cli,
+    dspline,
     ggplot2,
-    Matrix,
     Rcpp (>= 1.0.10),
     rlang
 Suggests: 

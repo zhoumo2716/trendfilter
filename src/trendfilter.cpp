@@ -147,9 +147,9 @@ Eigen::VectorXd admm_single_lambda(
 
     std::tie(theta, computation_info) = linear_system.solve(
         wy + rho * Dktv(alpha + u, k, xd), tridiag);
-    if (computation_info > 1) {
-      std::cerr << "Eigen Sparse QR solve returned nonzero exit status.\n";
-    }
+    // if (computation_info > 1) {
+    //  std::cerr << "Eigen Sparse QR solve returned nonzero exit status.\n";
+    // }
     Dth_tmp = Dkv(theta, k, xd);
     tmp = Dth_tmp - u;
     // alpha update
@@ -240,7 +240,7 @@ Rcpp::List admm_lambda_seq(
   return out;
 }
 
-// [[Rcpp::export]]
+
 Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
     Eigen::VectorXd& y, const Eigen::ArrayXd& weights, int k,
     double lam, int max_iter, double rho,
@@ -284,9 +284,9 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
     std::tie(theta, computation_info) = linear_system.solve(
         wy + rho * (dk_mat.transpose() * (alpha + u)),
         tridiag);
-    if (computation_info > 1) {
-      std::cerr << "Eigen Sparse QR solve returned nonzero exit status.\n";
-    }
+    // if (computation_info > 1) {
+    //   std::cerr << "Eigen Sparse QR solve returned nonzero exit status.\n";
+    // }
     tmp = dk_mat*theta - u;
     // alpha update
     tf_dp(n-k, tmp.data(), lam/rho, alpha.data());
