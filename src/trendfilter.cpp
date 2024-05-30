@@ -103,20 +103,20 @@ VectorXd init_u(const VectorXd& residual, const NumericVector& xd, int k,
   return qr.solve((residual.array()*weights).matrix());
 }
 
-// [[Rcpp::export]]
-Eigen::VectorXd admm_single_lambda(
+void admm_single_lambda(
     int n, const Eigen::VectorXd& y,
-    const Eigen::ArrayXd& weights, int k,
-    const Eigen::VectorXd& theta_init,
     const NumericVector& xd,
+    const Eigen::ArrayXd& weights, int k,
+    Eigen::VectorXd& theta,
+    Eigen::VectorXd& alpha,
+    Eigen::VectorXd& u,
+    int iter,
+    double obj_val,
     const Eigen::SparseMatrix<double>& dk_mat_sq,
     double lam, int max_iter, double rho,
     double tol = 1e-5,
     bool tridiag = false) {
-  // Initialize theta, alpha, u
-  VectorXd theta = theta_init;
-  VectorXd alpha = Dkv(theta, k, xd);
-  VectorXd u = init_u((theta-y)/rho, xd, k, weights);
+  // Initialize internals
   VectorXd tmp(n-k);
   VectorXd Dth_tmp(alpha.size());
   VectorXd alpha_old(alpha);
@@ -137,7 +137,7 @@ Eigen::VectorXd admm_single_lambda(
 
   // Perform ADMM updates
   int computation_info;
-  int iter = 0;
+  iter = 0;
   double best_objective = tf_objective(y, theta, xd, weights, lam, k);
   VectorXd best_theta = theta;
   for (iter = 1; iter < max_iter; iter++) {
@@ -170,7 +170,6 @@ Eigen::VectorXd admm_single_lambda(
   }
   // For checking the criteria. Generally, the dual (ss) is much slower.
   // Rcpp::Rcout << iter << ": rr = " << rr << " ss = " << ss << std::endl;
-  return best_theta;
 }
 
 /*
@@ -196,45 +195,52 @@ Rcpp::List admm_lambda_seq(
   get_lambda_seq(lambda, lambda_max, lambda_min, lambda_min_ratio, nlambda);
 
 
-  Eigen::MatrixXd theta_mat(n, nlambda);
+  Eigen::MatrixXd theta(n, nlambda);
+  Rcpp::NumericVector objective_val(nlambda);
   Rcpp::NumericVector iters(nlambda);
 
   // Use DP solution for k=0.
   if (k == 0) {
     for (int i = 0; i < nlambda; i++) {
       tf_dp_weight(n, y.data(), weights.data(), lambda[i],
-                   theta_mat.col(i).data());
+                   theta.col(i).data());
+      objective_val[i] = tf_objective(y, theta.col(i), x, weights, lambda[i], k);
     }
     Rcpp::List out = Rcpp::List::create(
-      Rcpp::Named("theta") = theta_mat,
+      Rcpp::Named("theta") = theta,
       Rcpp::Named("lambda") = lambda,
+      Rcpp::Named("tf_objective") = objective_val,
       Rcpp::Named("iters") = iters
     );
     return out;
   }
 
+
   // Initialize difference matrices and other helper objects
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
+  Eigen::MatrixXd alpha(n-k, nlambda);
 
+  // Initialize ADMM variables
   // Project onto Legendre polynomials to initialize for largest lambda.
-  VectorXd theta_init = project_polynomials(x, y, weights, k);
+  theta.col(0) = project_polynomials(x, y, weights, k);
+  alpha.col(0) = Dkv(theta.col(0), k, x);
+  VectorXd u = init_u((theta.col(0) - y)/(lambda[0]*rho_scale), x, k, weights);
 
-  // Solve TF at largest lambda
-  theta_mat.col(0) = admm_single_lambda(n, y, weights, k, theta_init, x,
-      dk_mat_sq, lambda[0], max_iter, lambda[0]*rho_scale,
-      tol, tridiag);
 
-  // Solve TF at rest of lambda
-  for (int i = 1; i < nlambda; i++) {
+  for (int i = 0; i < nlambda; i++) {
     Rcpp::checkUserInterrupt();
-    theta_mat.col(i) = admm_single_lambda(n, y, weights, k, theta_mat.col(i-1),
-        x, dk_mat_sq, lambda[i], max_iter, lambda[i]*rho_scale,
-        tol, tridiag);
+    admm_single_lambda(n, y, x, weights, k,
+      theta.col(i).data(), alpha.col(i).data(), u.data(), // return vals
+      iters[i], objective_val[i],
+      dk_mat_sq.data(), lambda[i], max_iter, lambda[i]*rho_scale,
+      tol, tridiag);
   }
   Rcpp::List out = Rcpp::List::create(
-    Rcpp::Named("theta") = theta_mat,
+    Rcpp::Named("theta") = theta,
+    Rcpp::Named("alpha") = alpha,
     Rcpp::Named("lambda") = lambda,
+    Rcpp::Named("tf_objective") = objective_val,
     Rcpp::Named("iters") = iters
   );
   return out;
