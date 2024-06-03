@@ -239,9 +239,10 @@ void get_lambda_seq(
 // ---- Do we alter the function signatures in dspline?
 
 // [[Rcpp::export]]
-Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd) {
+Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd,
+                    bool tf_weighting) {
   Rcpp::NumericVector nv(Rcpp::wrap(v));
-  Rcpp::NumericVector out = dspline::rcpp_d_mat_mult(nv, k, xd, false, false);
+  Rcpp::NumericVector out = dspline::rcpp_d_mat_mult(nv, k, xd, tf_weighting, false);
   return Rcpp::as<Eigen::Map<VectorXd> >(out);
 }
 
@@ -249,13 +250,6 @@ Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd) {
 Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd) {
   Rcpp::NumericVector nv(Rcpp::wrap(v));
   Rcpp::NumericVector out = dspline::rcpp_d_mat_mult(nv, k, xd, false, true);
-  return Rcpp::as<Eigen::Map<VectorXd> >(out);
-}
-
-Eigen::VectorXd penv(Eigen::VectorXd v, int k, const NumericVector& xd,
-                     bool tf_weighting) {
-  Rcpp::NumericVector nv(Rcpp::wrap(v));
-  Rcpp::NumericVector out = dspline::rcpp_d_mat_mult(nv, k, xd, tf_weighting, false);
   return Rcpp::as<Eigen::Map<VectorXd> >(out);
 }
 

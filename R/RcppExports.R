@@ -21,7 +21,7 @@ get_lambda_seq_r <- function(lambda, lambda_max, lambda_min, lambda_min_ratio, n
     .Call(`_trendfilter_get_lambda_seq_r`, lambda, lambda_max, lambda_min, lambda_min_ratio, n_lambda)
 }
 
-Dkv <- function(v, k, xd) {
-    .Call(`_trendfilter_Dkv`, v, k, xd)
+Dkv <- function(v, k, xd, tf_weighting) {
+    .Call(`_trendfilter_Dkv`, v, k, xd, tf_weighting)
 }
 

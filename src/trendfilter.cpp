@@ -69,7 +69,7 @@ double tf_gauss_loss(const VectorXd& y,
 }
 
 double tf_penalty(const VectorXd& theta, const NumericVector& xd, double lam, int k) {
-  Eigen::VectorXd Dv = penv(theta, k + 1, xd);
+  Eigen::VectorXd Dv = Dkv(theta, k + 1, xd, true);
   return lam * Dv.lpNorm<1>();
 }
 

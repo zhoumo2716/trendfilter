@@ -37,10 +37,9 @@ Eigen::VectorXd get_lambda_seq_r(Eigen::VectorXd lambda, double lambda_max,
                                  int n_lambda);
 
 // Workarounds for interfacing with dspline
-Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd);
+Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd,
+                    bool tf_weighting = false);
 Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd);
-Eigen::VectorXd penv(Eigen::VectorXd v, int k, const NumericVector& xd,
-                     bool tf_weighting = true);
 
 #endif
 
