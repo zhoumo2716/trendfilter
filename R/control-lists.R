@@ -26,6 +26,16 @@ admm_control_list <- function(
   structure(enlist(max_iter, rho_scale, tolerance), class = "admm_control")
 }
 
+#' @export
+#' @method print admm_control
+print.admm_control <- function(x, prefix = "An", ...) {
+  rlang::check_dots_empty()
+  cli::cli_h2(paste(prefix, "ADMM configuration"))
+  d <- cli::cli_div(theme = list(span.dt = list(color = "cornflowerblue")))
+  cli::cli_dl(x)
+  cli::cli_end(d)
+}
+
 #' Trendfilter control list
 #'
 #' These arguments are used to handle the internals of `trendfilter()`
@@ -52,3 +62,15 @@ trendfilter_control_list <- function(
   assert_class(admm_control, "admm_control")
   structure(enlist(obj_tol, x_cond, admm_control), class = "trendfilter_control")
 }
+
+#' @export
+#' @method print trendfilter_control
+print.trendfilter_control <- function(x, ...) {
+  rlang::check_dots_empty()
+  cli::cli_h2("A `trendfilter()` configuration")
+  d <- cli::cli_div(theme = list(span.dt = list(color = "cornflowerblue")))
+  cli::cli_dl(x[1:2])
+  cli::cli_end(d)
+  print(x[[3]], prefix = "with an")
+}
+
