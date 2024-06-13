@@ -62,6 +62,8 @@ std::tuple<VectorXd,int> LinearSystem::solve(const VectorXd& v, bool tridiag) {
   }
 }
 
+LinearSystem linear_system;
+
 double tf_gauss_loss(const VectorXd& y,
                      const VectorXd& theta,
                      const ArrayXd& weights) {
@@ -109,9 +111,9 @@ void admm_single_lambda(
     const NumericVector& xd,
     const Eigen::ArrayXd& weights,
     int k,
-    Eigen::VectorXd theta,
-    Eigen::VectorXd alpha,
-    Eigen::VectorXd u,
+    Eigen::Ref<Eigen::VectorXd> theta,
+    Eigen::Ref<Eigen::VectorXd> alpha,
+    Eigen::Ref<Eigen::VectorXd> u,
     int& iter,
     double& obj_val,
     const Eigen::SparseMatrix<double>& dk_mat_sq,
@@ -132,7 +134,8 @@ void admm_single_lambda(
   A.diagonal().array() += weights;
   A.makeCompressed();
 
-  LinearSystem linear_system;
+
+  // LinearSystem linear_system;
   // Technically, can form one SparseQR object, analyze the pattern once,
   // and then re-use it.
   // So call analyzePattern once, and then factorize repeatedly.
@@ -142,8 +145,8 @@ void admm_single_lambda(
   // Perform ADMM updates
   int computation_info;
   iter = 0;
-  double best_objective = tf_objective(y, theta, xd, weights, lam, k);
-  VectorXd best_theta = theta;
+  // double best_objective = tf_objective(y, theta, xd, weights, lam, k);
+  // VectorXd best_theta = theta;
   for (iter = 1; iter < max_iter; iter++) {
     if (iter % 1000 == 0) Rcpp::checkUserInterrupt(); // check if killed
 
@@ -160,11 +163,7 @@ void admm_single_lambda(
     tf_dp(n-k, tmp.data(), lam/rho, alpha.data());
     // u update
     u += alpha - Dth_tmp;
-    double cur_objective = tf_objective(y, theta, xd, weights, lam, k);
-    if (cur_objective < best_objective) {
-      best_objective = cur_objective;
-      best_theta = theta;
-    }
+    // double cur_objective = tf_objective(y, theta, xd, weights, lam, k);
 
     // Check for convergence
     rr = (Dth_tmp - alpha).norm() / alpha.size();
@@ -172,7 +171,6 @@ void admm_single_lambda(
     alpha_old = alpha;
     if (rr < tol && ss < tol) break;
   }
-  // For checking the criteria. Generally, the dual (ss) is much slower.
   // Rcpp::Rcout << iter << ": rr = " << rr << " ss = " << ss << std::endl;
 }
 
@@ -245,6 +243,10 @@ Rcpp::List admm_lambda_seq(
       iters[i], objective_val[i],
       dk_mat_sq, lambda[i], max_iter, lambda[i]*rho_scale,
       tol, tridiag);
+    if (i + 1 < nlambda) {
+      theta.col(i + 1) = theta.col(i);
+      alpha.col(i + 1) = alpha.col(i);
+    }
   }
   Rcpp::List out = Rcpp::List::create(
     Rcpp::Named("theta") = theta,
