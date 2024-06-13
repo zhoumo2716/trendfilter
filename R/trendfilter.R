@@ -101,8 +101,9 @@ trendfilter <- function(y,
   lambda <- sort(lambda, decreasing = TRUE) %||% double(nlambda)
   nlambda <- length(lambda)
 
+  xsc <- (x - min(x)) / diff(range(x)) * n
   out <- admm_lambda_seq(
-    x, y, weights, k,
+    xsc, y, weights, k,
     lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio,
     control$admm_control$max_iter, control$admm_control$rho_scale,
     control$admm_control$tol,
