@@ -2,8 +2,11 @@ Package: trendfilter
 Title: Univariate trend filtering
 Version: 0.0.1
 Date: 2024-06-01
-Authors@R: 
-    person("Addison", "Hu", , "mail@huisaddison.com", role = "cre")
+Authors@R: c(
+    person("Addison", "Hu", , "mail@huisaddison.com", role = c("aut", "cre")),
+    person("Ryan J.", "Tibshirani", , "ryantibs@berkeley.edu", role = c("aut", "cph")),
+    person("Daniel J.", "McDonald", , "daniel@stat.ubc.ca", role = "aut")
+  )
 Description: Implementation of univariate trend filtering.
 License: MIT + file LICENSE
 Imports: 

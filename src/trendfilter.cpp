@@ -171,6 +171,7 @@ void admm_single_lambda(
     alpha_old = alpha;
     if (rr < tol && ss < tol) break;
   }
+  obj_val = tf_objective(y, theta, xd, weights, lam, k);
   // Rcpp::Rcout << iter << ": rr = " << rr << " ss = " << ss << std::endl;
 }
 

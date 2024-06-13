@@ -109,12 +109,17 @@ trendfilter <- function(y,
     tridiag = (k == 1L)
   )
 
+  count_knots <- function(x) sum(abs(diff(x)) > sqrt(.Machine$double.eps))
+  dof <- apply(out$alpha %||% out$theta, 2, count_knots) + k + 1
+
   structure(enlist(
     y, x, weights, k,
     theta = drop(out$theta),
     alpha = drop(out$alpha),
     lambda = out$lambda,
     iters = out$iters,
+    objective = out$tf_objective,
+    dof = dof,
     call = match.call()
   ), class = "trendfilter")
 }
