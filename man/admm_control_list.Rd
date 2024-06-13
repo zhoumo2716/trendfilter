@@ -2,7 +2,7 @@
 % Please edit documentation in R/control-lists.R
 \name{admm_control_list}
 \alias{admm_control_list}
-\title{ADMMM control list}
+\title{ADMM control list}
 \usage{
 admm_control_list(max_iter = 10000, rho_scale = 1, tolerance = 1e-04, ...)
 }
@@ -10,7 +10,7 @@ admm_control_list(max_iter = 10000, rho_scale = 1, tolerance = 1e-04, ...)
 \item{max_iter}{Integer. Maximum number of iterations per \code{lambda} value.}
 
 \item{rho_scale}{Double. The ratio of \code{lambda} divided by the augmented
-Lagrangian penalty parameter $rho$.}
+Lagrangian penalty parameter \eqn{\rho}.}
 
 \item{tolerance}{Double. The convergence tolerance for the ADMM algorithm.}
 

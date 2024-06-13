@@ -1,11 +1,11 @@
-#' ADMMM control list
+#' ADMM control list
 #'
 #' These arguments are used to handle the internals of the ADMM algorithm
 #' used to solve the trendfilter optimization problem.
 #'
 #' @param max_iter Integer. Maximum number of iterations per `lambda` value.
 #' @param rho_scale Double. The ratio of `lambda` divided by the augmented
-#'   Lagrangian penalty parameter $rho$.
+#'   Lagrangian penalty parameter \eqn{\rho}.
 #' @param tolerance Double. The convergence tolerance for the ADMM algorithm.
 #' @param ... not used
 #'
