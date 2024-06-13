@@ -25,7 +25,9 @@ predict.trendfilter <- function(object, newx = NULL, lambda = NULL, deriv = 0L, 
   assert_numeric(newx, lower = min(object$x), upper = max(object$x))
   assert_numeric(lambda, lower = min(object$lambda), upper = max(object$lambda))
 
-  if (is.null(newx) && is.null(lambda) && deriv == 0L) return(object$theta)
+  if (is.null(newx) && is.null(lambda) && deriv == 0L) {
+    return(object$theta)
+  }
 
   # 1. we interpolate at newx for ALL lambda
   interp <- apply(object$theta, 2, function(th) {
@@ -52,8 +54,8 @@ summary.trendfilter <- function(object, ...) {
   tab <- with(object, data.frame(
     lambda = lambda[xlam],
     index = xlam
-    #approx_dof = dof[xlam],
-    #niterations = niter[xlam]
+    # approx_dof = dof[xlam],
+    # niterations = niter[xlam]
   ))
   rownames(tab) <- names(xlam)
   out <- structure(
@@ -132,4 +134,3 @@ plot.trendfilter <- function(x, lambda = NULL, ...) {
     ggplot2::theme(axis.title.y = ggplot2::element_text(angle = 0, vjust = 0.5))
   return(plt)
 }
-

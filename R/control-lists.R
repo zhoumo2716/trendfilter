@@ -17,8 +17,7 @@
 #' admm_control_list(max_iter = 10L)
 #' admm_control_list(tolerance = 1e-8)
 admm_control_list <- function(
-    max_iter = 1e4, rho_scale = 1.0, tolerance = 1e-4, ...
-) {
+    max_iter = 1e4, rho_scale = 1.0, tolerance = 1e-4, ...) {
   rlang::check_dots_empty()
   assert_integerish(max_iter, lower = 1L, len = 1L)
   assert_numeric(rho_scale, lower = .Machine$double.eps, finite = TRUE, len = 1L)
@@ -54,8 +53,7 @@ print.admm_control <- function(x, prefix = "An", ...) {
 #' trendfilter_control_list(obj_tol = 1e-12)
 #' trendfilter_control_list(admm_control = admm_control_list(tolerance = 1e-5))
 trendfilter_control_list <- function(
-    obj_tol = 1e-6, x_cond = 1e11, admm_control = admm_control_list(), ...
-) {
+    obj_tol = 1e-6, x_cond = 1e11, admm_control = admm_control_list(), ...) {
   rlang::check_dots_empty()
   assert_numeric(obj_tol, lower = .Machine$double.eps, finite = TRUE, len = 1L)
   assert_numeric(x_cond, lower = 1, finite = TRUE, len = 1L)
@@ -73,4 +71,3 @@ print.trendfilter_control <- function(x, ...) {
   cli::cli_end(d)
   print(x[[3]], prefix = "with an")
 }
-

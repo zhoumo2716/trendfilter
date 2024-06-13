@@ -73,7 +73,6 @@ trendfilter <- function(y,
                         lambda_min = NULL,
                         lambda_min_ratio = 1e-5,
                         control = trendfilter_control_list()) {
-
   family <- arg_match(family)
   if (family != "gaussian") {
     cli_abort("Data family {.val {family}} is not yet implemented.")
@@ -88,10 +87,14 @@ trendfilter <- function(y,
   assert_numeric(weights, lower = 0, finite = TRUE, len = n)
   assert_integerish(k, lower = 0L, upper = n - 1L, len = 1L)
   assert_integerish(nlambda, lower = 1L, len = 1L)
-  assert_numeric(lambda_max, len = 1L, lower = lambda_min %||% 0, finite = TRUE,
-                 null.ok = TRUE)
-  assert_numeric(lambda_min, len = 1L, lower = 0, upper = lambda_max %||% Inf,
-                 finite = TRUE, null.ok = TRUE)
+  assert_numeric(lambda_max,
+    len = 1L, lower = lambda_min %||% 0, finite = TRUE,
+    null.ok = TRUE
+  )
+  assert_numeric(lambda_min,
+    len = 1L, lower = 0, upper = lambda_max %||% Inf,
+    finite = TRUE, null.ok = TRUE
+  )
   assert_numeric(lambda_min_ratio, lower = 0, upper = 1, len = 1L)
   assert_numeric(lambda, finite = TRUE, lower = 0, null.ok = TRUE)
   assert_class(control, "trendfilter_control")

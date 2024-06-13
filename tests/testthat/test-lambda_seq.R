@@ -1,5 +1,4 @@
 test_that("get_lambda_seq works", {
-
   # user specified sequence (note that there is no error checking)
   # This directly accesses the cpp code
   # There are no default arguments to avoid seg faults

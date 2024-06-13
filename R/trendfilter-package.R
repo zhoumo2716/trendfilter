@@ -1,4 +1,3 @@
-
 #' @importFrom Rcpp sourceCpp
 #' @importFrom checkmate assert_scalar assert_logical assert_numeric
 #' @importFrom checkmate assert_character assert_integerish assert_class

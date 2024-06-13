@@ -7,16 +7,16 @@ summary.cv_trendfilter <- function(object, ...) {
     lambda = lambda,
     index = seq_along(lambda),
     cv_scores = cv_scores,
-    cv_se = cv_se
-    # dof = full_fit$dof[seq_along(lambda)]
+    cv_se = cv_se,
+    dof = full_fit$dof[seq_along(lambda)]
   ))
   n <- nrow(tab)
   if (n > 5) {
-    l1 <- which(abs(object$lambda - object$lambda.min) < 1e-10)
-    l2 <- which(abs(object$lambda - object$lambda.1se) < 1e-10)
+    l1 <- which(abs(object$lambda - object$lambda_1se) < 1e-10)
+    l2 <- which(abs(object$lambda - object$lambda_min) < 1e-10)
     idx <- c(1, l1, l2, n)
     tab <- tab[idx, ]
-    rownames(tab) <- c("Max Lambda", "CV Minimizer", "1se Lambda", "Min Lambda")
+    rownames(tab) <- c("Max Lambda", "1se Lambda", "CV Minimizer", "Min Lambda")
   }
 
   out <- structure(
@@ -93,8 +93,7 @@ print.summary.cv_trendfilter <- function(
 #' plot(cv, which_lambda = "lambda_1se")
 #' plot(cv, NULL)
 plot.cv_trendfilter <- function(
-    x, which_lambda = c("cv_scores", "lambda_min", "lambda_1se"), ...
-) {
+    x, which_lambda = c("cv_scores", "lambda_min", "lambda_1se"), ...) {
   rlang::check_dots_empty()
   plt_scores <- FALSE
   if (is.character(which_lambda)) {
@@ -105,8 +104,10 @@ plot.cv_trendfilter <- function(
       which_lambda <- x[[which_lambda]]
     }
   } else {
-    assert_numeric(which_lambda, lower = min(x$full_fit$lambda),
-                   upper = max(x$full_fit$lambda), null.ok = TRUE)
+    assert_numeric(which_lambda,
+      lower = min(x$full_fit$lambda),
+      upper = max(x$full_fit$lambda), null.ok = TRUE
+    )
   }
 
   if (plt_scores) {
@@ -126,7 +127,7 @@ plot.cv_trendfilter <- function(
         width = 0.1
       )) +
       ggplot2::geom_point(ggplot2::aes(x = .data$lambda, y = .data$cv_scores),
-                          color = "darkblue"
+        color = "darkblue"
       ) +
       ggplot2::geom_vline(xintercept = x$lambda_min, linetype = "dotted") +
       ggplot2::geom_vline(xintercept = x$lambda_1se, linetype = "dotted") +
@@ -144,7 +145,6 @@ plot.cv_trendfilter <- function(
 
 
 #' Predict with trendfilter at new (interior) design points
-#'#'
 #'
 #' @param object result of `cv_trendfilter()` of class `cv_trendfilter`
 #' @param which_lambda select which solutions to show. If provided a
@@ -180,9 +180,10 @@ predict.cv_trendfilter <- function(object,
     which_lambda <- arg_match(which_lambda)
     which_lambda <- object[[which_lambda]]
   } else {
-    assert_numeric(which_lambda, lower = min(object$full_fit$lambda),
-                   upper = max(object$full_fit$lambda), null.ok = TRUE)
+    assert_numeric(which_lambda,
+      lower = min(object$full_fit$lambda),
+      upper = max(object$full_fit$lambda), null.ok = TRUE
+    )
   }
   predict(object$full_fit, newx, which_lambda, ...)
 }
-

@@ -26,4 +26,3 @@ interpolate_mat <- function(mat, lam_list, lambda) {
     mat[, lam_list$right, drop = FALSE] %*% diag(1 - lam_list$frac, m, m)
   drop(out)
 }
-

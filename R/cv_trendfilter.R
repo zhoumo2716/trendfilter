@@ -30,7 +30,7 @@
 #' @examples
 #' x <- 1:100 / 101 * 2 * pi
 #' y <- sin(x) + .2 * rnorm(100)
-#' cv <- cv_trendfilter(y, x, nlambda = 20L)
+#' cv <- cv_trendfilter(y, x)
 cv_trendfilter <- function(
     y,
     x = seq_along(y),
@@ -38,8 +38,7 @@ cv_trendfilter <- function(
     k = 2L,
     error_measure = c("deviance", "mse", "mae"),
     nfolds = 5L,
-    ...
-) {
+    ...) {
   n <- length(y)
   min_n_train <- (n - 2) %/% nfolds * (nfolds - 1)
   assert_numeric(y, finite = TRUE)
@@ -59,8 +58,7 @@ cv_trendfilter <- function(
   cvall <- matrix(NA, nfolds, length(lambda))
 
   error_measure <- match.arg(error_measure)
-  err_fun <- switch(
-    error_measure,
+  err_fun <- switch(error_measure,
     mse = function(y, m) (y - m)^2,
     mae = function(y, m) abs(y - m),
     deviance = function(y, m) (y - m)^2
