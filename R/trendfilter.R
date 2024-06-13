@@ -49,10 +49,9 @@
 #'     each column corresponding to one value of `lambda`.
 #' * `lambda` the values of `lambda` actually used in the algorithm.
 #' * `korder` degree of the estimated piecewise polynomial curve.
-#' * `dof` degrees of freedom of the estimated trend filtering problem.
-#' * `niter` the required number of iterations for each value of `lambda`.
-#' * `convergence` if number of iterations for each value of `lambda` is less
-#'     than the maximum number of iterations for the estimation algorithm.
+#' * `dof` the estimated degrees of freedom of the solution
+#' * `iters` the required number of iterations for each value of `lambda`.
+#' * `objective` the value of the objective function for each value of `lambda`.
 #' @export
 #'
 #' @examples
@@ -103,6 +102,12 @@ trendfilter <- function(y,
   lambda_max <- lambda_max %||% -1.0
   lambda <- sort(lambda, decreasing = TRUE) %||% double(nlambda)
   nlambda <- length(lambda)
+
+  if (is.unsorted(x)) {
+    ord <- order(x)
+    y <- y[ord]
+    x <- x[ord]
+  }
 
   xsc <- (x - min(x)) / diff(range(x)) * n
   out <- admm_lambda_seq(

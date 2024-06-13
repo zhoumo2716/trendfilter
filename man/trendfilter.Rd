@@ -84,10 +84,9 @@ An object with S3 class \code{trendfilter}. Among the list components:
 each column corresponding to one value of \code{lambda}.
 \item \code{lambda} the values of \code{lambda} actually used in the algorithm.
 \item \code{korder} degree of the estimated piecewise polynomial curve.
-\item \code{dof} degrees of freedom of the estimated trend filtering problem.
-\item \code{niter} the required number of iterations for each value of \code{lambda}.
-\item \code{convergence} if number of iterations for each value of \code{lambda} is less
-than the maximum number of iterations for the estimation algorithm.
+\item \code{dof} the estimated degrees of freedom of the solution
+\item \code{iters} the required number of iterations for each value of \code{lambda}.
+\item \code{objective} the value of the objective function for each value of \code{lambda}.
 }
 }
 \description{
