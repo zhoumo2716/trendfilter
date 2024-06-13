@@ -2,8 +2,7 @@
 % Please edit documentation in R/methods-cv.R
 \name{predict.cv_trendfilter}
 \alias{predict.cv_trendfilter}
-\title{Predict with trendfilter at new (interior) design points
-#'}
+\title{Predict with trendfilter at new (interior) design points}
 \usage{
 \method{predict}{cv_trendfilter}(object, newx = NULL, which_lambda = c("lambda_min", "lambda_1se"), ...)
 }
@@ -32,7 +31,6 @@ A vector or matrix of predictions.
 }
 \description{
 Predict with trendfilter at new (interior) design points
-#'
 }
 \examples{
 x <- 1:100 / 101 * 2 * pi
