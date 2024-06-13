@@ -34,24 +34,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// admm_single_lambda_with_tracking
-Rcpp::List admm_single_lambda_with_tracking(NumericVector x, Eigen::VectorXd& y, const Eigen::ArrayXd& weights, int k, double lam, int max_iter, double rho, bool tridiag);
-RcppExport SEXP _trendfilter_admm_single_lambda_with_tracking(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP lamSEXP, SEXP max_iterSEXP, SEXP rhoSEXP, SEXP tridiagSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const Eigen::ArrayXd& >::type weights(weightsSEXP);
-    Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    Rcpp::traits::input_parameter< double >::type lam(lamSEXP);
-    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
-    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
-    Rcpp::traits::input_parameter< bool >::type tridiag(tridiagSEXP);
-    rcpp_result_gen = Rcpp::wrap(admm_single_lambda_with_tracking(x, y, weights, k, lam, max_iter, rho, tridiag));
-    return rcpp_result_gen;
-END_RCPP
-}
 // get_dk_mat
 Eigen::SparseMatrix<double> get_dk_mat(int k, NumericVector xd, bool tf_weighting);
 RcppExport SEXP _trendfilter_get_dk_mat(SEXP kSEXP, SEXP xdSEXP, SEXP tf_weightingSEXP) {
@@ -95,26 +77,26 @@ BEGIN_RCPP
 END_RCPP
 }
 // Dkv
-Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd);
-RcppExport SEXP _trendfilter_Dkv(SEXP vSEXP, SEXP kSEXP, SEXP xdSEXP) {
+Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd, bool tf_weighting);
+RcppExport SEXP _trendfilter_Dkv(SEXP vSEXP, SEXP kSEXP, SEXP xdSEXP, SEXP tf_weightingSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type v(vSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type xd(xdSEXP);
-    rcpp_result_gen = Rcpp::wrap(Dkv(v, k, xd));
+    Rcpp::traits::input_parameter< bool >::type tf_weighting(tf_weightingSEXP);
+    rcpp_result_gen = Rcpp::wrap(Dkv(v, k, xd, tf_weighting));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 13},
-    {"_trendfilter_admm_single_lambda_with_tracking", (DL_FUNC) &_trendfilter_admm_single_lambda_with_tracking, 8},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},
     {"_trendfilter_get_lambda_seq_r", (DL_FUNC) &_trendfilter_get_lambda_seq_r, 5},
-    {"_trendfilter_Dkv", (DL_FUNC) &_trendfilter_Dkv, 3},
+    {"_trendfilter_Dkv", (DL_FUNC) &_trendfilter_Dkv, 4},
     {NULL, NULL, 0}
 };
 

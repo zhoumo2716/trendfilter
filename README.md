@@ -34,7 +34,7 @@ plot(out) +
   geom_point(data = data.frame(x = x, y = y), aes(x, y), color = "black")
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-example-1.svg" width="100%" />
 
 What is special about using `README.Rmd` instead of just `README.md`?
 You can include R chunks like so:

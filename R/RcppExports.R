@@ -5,10 +5,6 @@ admm_lambda_seq <- function(x, y, weights, k, lambda, nlambda = 50L, lambda_max 
     .Call(`_trendfilter_admm_lambda_seq`, x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, tridiag)
 }
 
-admm_single_lambda_with_tracking <- function(x, y, weights, k, lam, max_iter, rho, tridiag = FALSE) {
-    .Call(`_trendfilter_admm_single_lambda_with_tracking`, x, y, weights, k, lam, max_iter, rho, tridiag)
-}
-
 get_dk_mat <- function(k, xd, tf_weighting) {
     .Call(`_trendfilter_get_dk_mat`, k, xd, tf_weighting)
 }
@@ -21,7 +17,7 @@ get_lambda_seq_r <- function(lambda, lambda_max, lambda_min, lambda_min_ratio, n
     .Call(`_trendfilter_get_lambda_seq_r`, lambda, lambda_max, lambda_min, lambda_min_ratio, n_lambda)
 }
 
-Dkv <- function(v, k, xd) {
-    .Call(`_trendfilter_Dkv`, v, k, xd)
+Dkv <- function(v, k, xd, tf_weighting) {
+    .Call(`_trendfilter_Dkv`, v, k, xd, tf_weighting)
 }
 

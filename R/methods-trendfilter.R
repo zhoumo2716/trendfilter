@@ -44,7 +44,7 @@ summary.trendfilter <- function(object, ...) {
   ns <- length(object$lambda)
   if (ns > 5) {
     xlam <- round(stats::quantile(1:ns))
-    names(xlam) <- rev(c("Max.", "3rd Qu.", "Median", "1st Qu.", "Min."))
+    names(xlam) <- c("Max.", "3rd Qu.", "Median", "1st Qu.", "Min.")
   } else {
     xlam <- seq_len(ns)
     names(xlam) <- paste0("s", seq_len(ns))
