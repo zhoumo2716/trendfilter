@@ -194,6 +194,17 @@ double get_lambda_max(
 }
 
 // [[Rcpp::export]]
+int calc_degrees_of_freedom(Eigen::VectorXd const &v, int k, double tol) {
+  int dof = k + 1;
+  for (int i = 1; i < v.size(); i++) {
+    if (abs(v(i) - v(i - 1)) > tol) {
+      dof++;
+    }
+  }
+  return dof;
+}
+
+// [[Rcpp::export]]
 Eigen::VectorXd get_lambda_seq_r(
     Eigen::VectorXd lambda,
     double lambda_max,

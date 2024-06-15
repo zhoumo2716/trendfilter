@@ -36,6 +36,8 @@ Eigen::VectorXd get_lambda_seq_r(Eigen::VectorXd lambda, double lambda_max,
                                  double lambda_min, double lambda_min_ratio,
                                  int n_lambda);
 
+int calc_degrees_of_freedom(Eigen::VectorXd const &v, int k, double tol = 1e-8);
+
 // Workarounds for interfacing with dspline
 Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd,
                     bool tf_weighting = false);

@@ -13,6 +13,10 @@ get_lambda_max <- function(x, y, weights, k) {
     .Call(`_trendfilter_get_lambda_max`, x, y, weights, k)
 }
 
+calc_degrees_of_freedom <- function(v, k, tol) {
+    .Call(`_trendfilter_calc_degrees_of_freedom`, v, k, tol)
+}
+
 get_lambda_seq_r <- function(lambda, lambda_max, lambda_min, lambda_min_ratio, n_lambda) {
     .Call(`_trendfilter_get_lambda_seq_r`, lambda, lambda_max, lambda_min, lambda_min_ratio, n_lambda)
 }

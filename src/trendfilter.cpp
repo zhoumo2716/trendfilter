@@ -207,6 +207,7 @@ Rcpp::List admm_lambda_seq(
   Eigen::MatrixXd theta(n, nlambda);
   Rcpp::NumericVector objective_val(nlambda);
   Rcpp::IntegerVector iters(nlambda);
+  Rcpp::IntegerVector dof(nlambda);
 
   // Use DP solution for k=0.
   if (k == 0) {
@@ -214,6 +215,7 @@ Rcpp::List admm_lambda_seq(
       tf_dp_weight(n, y.data(), weights.data(), lambda[i],
                    theta.col(i).data());
       objective_val[i] = tf_objective(y, theta.col(i), x, weights, lambda[i], k);
+      dof[i] = calc_degrees_of_freedom(theta.col(i), k);
     }
     Rcpp::List out = Rcpp::List::create(
       Rcpp::Named("theta") = theta,
@@ -244,6 +246,7 @@ Rcpp::List admm_lambda_seq(
       iters[i], objective_val[i],
       dk_mat_sq, lambda[i], max_iter, lambda[i]*rho_scale,
       tol, tridiag);
+    dof[i] = calc_degrees_of_freedom(alpha.col(i), k);
     if (i + 1 < nlambda) {
       theta.col(i + 1) = theta.col(i);
       alpha.col(i + 1) = alpha.col(i);
@@ -254,7 +257,8 @@ Rcpp::List admm_lambda_seq(
     Rcpp::Named("alpha") = alpha,
     Rcpp::Named("lambda") = lambda,
     Rcpp::Named("tf_objective") = objective_val,
-    Rcpp::Named("iters") = iters
+    Rcpp::Named("iters") = iters,
+    Rcpp::Named("dof") = dof
   );
   return out;
 }

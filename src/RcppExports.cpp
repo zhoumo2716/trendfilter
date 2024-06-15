@@ -61,6 +61,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_degrees_of_freedom
+int calc_degrees_of_freedom(Eigen::VectorXd const& v, int k, double tol);
+RcppExport SEXP _trendfilter_calc_degrees_of_freedom(SEXP vSEXP, SEXP kSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd const& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_degrees_of_freedom(v, k, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_lambda_seq_r
 Eigen::VectorXd get_lambda_seq_r(Eigen::VectorXd lambda, double lambda_max, double lambda_min, double lambda_min_ratio, int n_lambda);
 RcppExport SEXP _trendfilter_get_lambda_seq_r(SEXP lambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP n_lambdaSEXP) {
@@ -95,6 +108,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 13},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},
+    {"_trendfilter_calc_degrees_of_freedom", (DL_FUNC) &_trendfilter_calc_degrees_of_freedom, 3},
     {"_trendfilter_get_lambda_seq_r", (DL_FUNC) &_trendfilter_get_lambda_seq_r, 5},
     {"_trendfilter_Dkv", (DL_FUNC) &_trendfilter_Dkv, 4},
     {NULL, NULL, 0}
