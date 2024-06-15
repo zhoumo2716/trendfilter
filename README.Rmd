@@ -27,8 +27,8 @@ You can install the development version of trendfilter from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("glmgen/trendfilter")
+# install.packages("remotes")
+remotes::install_github("glmgen/trendfilter")
 ```
 
 ## Example
