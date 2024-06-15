@@ -2,10 +2,12 @@
 #'
 #' @param y vector of observations of length `n`
 #' @param x vector of positions at which the `y` have been observed, defaults
-#'   to `1:n`
-#' @param weights vector of weights for the observations, defaults to `rep(1, n)`
+#'   to `1:n`. These should be in increasing order, but will be sorted if
+#'   necessary.
+#' @param weights vector of weights for the observations, defaults to `rep(1, n)`.
+#'   Note that internally, these are rescaled to sum to 1.
 #' @param k Integer. Degree of the piecewise polynomial curve to be
-#'   estimated. For example, `korder = 0` corresponds to a piecewise constant
+#'   estimated. For example, `k = 0` corresponds to a piecewise constant
 #'   curve.
 #' @param family Character or function. Specifies the loss function
 #'   to use. Valid options are:
@@ -21,23 +23,22 @@
 #' @param method Character. Specifies the estimation algorithm to use.
 #' @param nlambda Integer. Number of lambda values to use in the sequence.
 #' @param lambda Vector. A user supplied sequence of tuning parameters which
-#'   determines the balance between data fidelity and
-#'   smoothness of the estimated curve; larger `lambda` results in a smoother
-#'   estimate. The default, `NULL`
-#'   results in an automatic computation based on `nlambda`, the largest value
-#'   of `lambda` that would result in a maximally smooth estimate, and `lambda_min_ratio`.
-#'   Supplying a value of `lambda` overrides
+#'   determines the balance between data fidelity and smoothness of the
+#'   estimated curve; larger `lambda` results in a smoother estimate. The
+#'   default, `NULL` results in an automatic computation based on `nlambda`,
+#'   the largest value of `lambda` that would result in a maximally smooth
+#'   estimate, and `lambda_min_ratio`. Supplying a value of `lambda` overrides
 #'   this behaviour. It is likely better to supply a
 #'   decreasing sequence of `lambda` values than a single (small) value. If
 #'   supplied, the user-defined `lambda` sequence is automatically sorted in
 #'   decreasing order.
 #' @param lambda_max Optional value for the largest `lambda` to use.
-#' @param lambda_min Optional value for the smallest `lambda` to use. This should
-#'   be greater than zero.
-#' @param lambda_min_ratio If neither `lambda` nor `lambda_min` is specified, the
-#'   program will generate a `lambdamin` by `lambda_max * lambda_min_ratio`.
-#'   A very small value will lead to the solution `theta = y`.
-#'   This argument has no effect if there is a user-defined `lambda` sequence.
+#' @param lambda_min Optional value for the smallest `lambda` to use (> 0).
+#' @param lambda_min_ratio If neither `lambda` nor `lambda_min` is specified,
+#'   `lambda_min = lambda_max * lambda_min_ratio`.
+#'   A very small value will lead to the solution `theta = y` (for the Gaussian
+#'   loss). This argument has no effect if there is a user-defined `lambda`
+#'   sequence.
 #' @param control A list of control parameters for the estimation algorithm.
 #'   See the constructor `trendfilter_control_list()`.
 #'

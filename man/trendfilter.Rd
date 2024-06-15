@@ -23,12 +23,14 @@ trendfilter(
 \item{y}{vector of observations of length \code{n}}
 
 \item{x}{vector of positions at which the \code{y} have been observed, defaults
-to \code{1:n}}
+to \code{1:n}. These should be in increasing order, but will be sorted if
+necessary.}
 
-\item{weights}{vector of weights for the observations, defaults to \code{rep(1, n)}}
+\item{weights}{vector of weights for the observations, defaults to \code{rep(1, n)}.
+Note that internally, these are rescaled to sum to 1.}
 
 \item{k}{Integer. Degree of the piecewise polynomial curve to be
-estimated. For example, \code{korder = 0} corresponds to a piecewise constant
+estimated. For example, \code{k = 0} corresponds to a piecewise constant
 curve.}
 
 \item{family}{Character or function. Specifies the loss function
@@ -48,12 +50,11 @@ will be much faster.character.}
 \item{method}{Character. Specifies the estimation algorithm to use.}
 
 \item{lambda}{Vector. A user supplied sequence of tuning parameters which
-determines the balance between data fidelity and
-smoothness of the estimated curve; larger \code{lambda} results in a smoother
-estimate. The default, \code{NULL}
-results in an automatic computation based on \code{nlambda}, the largest value
-of \code{lambda} that would result in a maximally smooth estimate, and \code{lambda_min_ratio}.
-Supplying a value of \code{lambda} overrides
+determines the balance between data fidelity and smoothness of the
+estimated curve; larger \code{lambda} results in a smoother estimate. The
+default, \code{NULL} results in an automatic computation based on \code{nlambda},
+the largest value of \code{lambda} that would result in a maximally smooth
+estimate, and \code{lambda_min_ratio}. Supplying a value of \code{lambda} overrides
 this behaviour. It is likely better to supply a
 decreasing sequence of \code{lambda} values than a single (small) value. If
 supplied, the user-defined \code{lambda} sequence is automatically sorted in
@@ -63,13 +64,13 @@ decreasing order.}
 
 \item{lambda_max}{Optional value for the largest \code{lambda} to use.}
 
-\item{lambda_min}{Optional value for the smallest \code{lambda} to use. This should
-be greater than zero.}
+\item{lambda_min}{Optional value for the smallest \code{lambda} to use (> 0).}
 
-\item{lambda_min_ratio}{If neither \code{lambda} nor \code{lambda_min} is specified, the
-program will generate a \code{lambdamin} by \code{lambda_max * lambda_min_ratio}.
-A very small value will lead to the solution \code{theta = y}.
-This argument has no effect if there is a user-defined \code{lambda} sequence.}
+\item{lambda_min_ratio}{If neither \code{lambda} nor \code{lambda_min} is specified,
+\code{lambda_min = lambda_max * lambda_min_ratio}.
+A very small value will lead to the solution \code{theta = y} (for the Gaussian
+loss). This argument has no effect if there is a user-defined \code{lambda}
+sequence.}
 
 \item{control}{A list of control parameters for the estimation algorithm.
 See the constructor \code{trendfilter_control_list()}.}

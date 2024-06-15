@@ -18,12 +18,14 @@ cv_trendfilter(
 \item{y}{vector of observations of length \code{n}}
 
 \item{x}{vector of positions at which the \code{y} have been observed, defaults
-to \code{1:n}}
+to \code{1:n}. These should be in increasing order, but will be sorted if
+necessary.}
 
-\item{weights}{vector of weights for the observations, defaults to \code{rep(1, n)}}
+\item{weights}{vector of weights for the observations, defaults to \code{rep(1, n)}.
+Note that internally, these are rescaled to sum to 1.}
 
 \item{k}{Integer. Degree of the piecewise polynomial curve to be
-estimated. For example, \code{korder = 0} corresponds to a piecewise constant
+estimated. For example, \code{k = 0} corresponds to a piecewise constant
 curve.}
 
 \item{error_measure}{Metric used to calculate cross validation scores. May
