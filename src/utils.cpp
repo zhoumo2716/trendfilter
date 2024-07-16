@@ -264,3 +264,144 @@ Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd) {
   return Rcpp::as<Eigen::Map<VectorXd> >(out);
 }
 
+// in-place computation of Ptemp given P and A
+Eigen::MatrixXd computePtemp(Eigen::MatrixXd A, Eigen::MatrixXd P) {
+  int k = P.rows();
+  Eigen::MatrixXd temp = A.row(0) * P;
+  Eigen::MatrixXd var = A.row(0) * temp.transpose();
+
+  // in-place block replacement starting from the last component:
+  P.block(1, 1, k - 1, k - 1).reverse() = P.block(0, 0, k - 1, k - 1).reverse();
+  P(0, 0) = var(0, 0);
+  temp.conservativeResize(1, k - 1);  // drop the last component
+  P.block(0, 1, 1, k - 1) = temp;
+  P.block(1, 0, k - 1, 1) = temp.transpose();
+  return P;
+}
+
+// [[Rcpp::export]]
+Eigen::MatrixXd smat_to_mat2(const Eigen::SparseMatrix<double>& sparseMat, int k) {
+    MatrixXd denseMat(sparseMat);
+    int n = denseMat.rows();
+    MatrixXd Dseq(n, k+1);
+    
+    
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < k + 1; j++) {
+        Dseq(i, j) = denseMat(i, i+j);
+      }
+    }
+    
+    return Dseq;
+}
+
+void f1step(double y,
+            double c,
+            double Z,
+            double H,
+            const Eigen::MatrixXd& A,
+            double RQR,
+            Eigen::VectorXd& a,
+            Eigen::MatrixXd& P,
+            double& vt,
+            double& Ft,
+            Eigen::VectorXd& Kt) {
+  VectorXd a_temp = A * a;
+  a_temp(0) += c;
+  MatrixXd Ptemp = computePtemp(A, P);  // A * P * A.transpose();
+  Ptemp(0, 0) += RQR;
+
+  vt = y - Z * a_temp(0);
+  Ft = pow(Z, 2) * Ptemp(0, 0) + H;
+  Kt = Ptemp.col(0) * Z;
+  a = a_temp + Kt * vt / Ft;
+  P = Ptemp - Kt * Z * Ptemp.row(0) / Ft;
+
+  // symmetrize
+  Ptemp = P;
+  Ptemp += P.transpose();
+  P = Ptemp / 2;
+
+  // Some entries of P can be _really_ small in magnitude, set them to 0
+  // but maintain symmetric / posdef
+  for (int i = 0; i < P.rows(); i++) {
+    for (int j = 0; j <= i; j++) {
+      if (abs(P(i, j)) < 1e-30) {
+        if (i == j) {
+          P.row(i).setZero();
+          P.col(i).setZero();
+        } else {
+          P(i, j) = 0;
+          P(j, i) = 0;
+        }
+      }
+    }
+  }
+}
+
+void df1step(double y,
+             double Z,
+             double H,
+             const Eigen::MatrixXd& A,
+             double RQR,
+             Eigen::VectorXd& a,
+             Eigen::MatrixXd& P,
+             Eigen::MatrixXd& Pinf,
+             int& rankp,
+             double& vt,
+             double& Ft,
+             double& Finf,
+             Eigen::VectorXd& Kt,
+             Eigen::VectorXd& Kinf) {
+  double tol = Eigen::NumTraits<double>::epsilon();
+  tol = std::sqrt(tol);
+  int k = a.size();
+  MatrixXd Ptemp(k, k);
+
+  a = A * a;
+  P = computePtemp(A, P);  // A * P * A.transpose();
+  P(0, 0) += RQR;
+  Pinf = computePtemp(A, Pinf);  // A * Pinf * A.transpose();
+
+  vt = y - Z * a(0);
+  Kt = P.col(0) * Z;
+  Ft = Z * Kt(0) + H;
+  Kinf = Pinf.col(0) * Z;
+  Finf = Z * Kinf(0);
+
+  if (Finf > tol) {  // should always happen
+    a += vt * Kinf / Finf;
+    P += Ft * Kinf * Kinf.transpose() / pow(Finf, 2);
+    P -= Kt * Kinf.transpose() / Finf + Kinf * Kt.transpose() / Finf;
+    Pinf -= Kinf * Kinf.transpose() / Finf;
+    rankp--;
+  } else {  // should never happen
+    Finf = 0;
+    if (Ft > tol) {
+      a += vt * Kt / Ft;
+      P -= Kt * Kt.transpose() / Ft;
+    }
+  }
+  if (Ft < tol)
+    Ft = 0;
+
+  // symmetrize
+  Ptemp = P;
+  Ptemp += P.transpose();
+  P = Ptemp / 2;
+  Ptemp = Pinf;
+  Ptemp += Pinf.transpose();
+  Pinf = Ptemp / 2;
+
+  // Fix possible negative definiteness, should never happen
+  for (int i = 0; i < k; i++) {
+    if (P(i, i) < 0) {
+      P.row(i).setZero();
+      P.col(i).setZero();
+    }
+    if (Pinf(i, i) < 0) {
+      Pinf.row(i).setZero();
+      Pinf.col(i).setZero();
+    }
+  }
+}

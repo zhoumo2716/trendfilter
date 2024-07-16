@@ -7,6 +7,10 @@
 #' @param rho_scale Double. The ratio of `lambda` divided by the augmented
 #'   Lagrangian penalty parameter \eqn{\rho}.
 #' @param tolerance Double. The convergence tolerance for the ADMM algorithm.
+#' @param k Integer. Degree of the piecewise polynomial curve to be
+#'   estimated.
+#' @param linear_solver Integer. Solver for the linear system in ADMM when k > 1.
+#'   `1`: sparse QR decomposition, `2`: Kalman filter.
 #' @param ... not used
 #'
 #' @return an object of class `admm_control`
@@ -17,12 +21,16 @@
 #' admm_control_list(max_iter = 10L)
 #' admm_control_list(tolerance = 1e-8)
 admm_control_list <- function(
-    max_iter = 1e4, rho_scale = 1.0, tolerance = 1e-4, ...) {
+    max_iter = 1e4, rho_scale = 1.0, tolerance = 1e-4, k = 2L,
+    linear_solver = 2L,...) {
   rlang::check_dots_empty()
   assert_integerish(max_iter, lower = 1L, len = 1L)
   assert_numeric(rho_scale, lower = .Machine$double.eps, finite = TRUE, len = 1L)
   assert_numeric(tolerance, lower = .Machine$double.eps, finite = TRUE, len = 1L)
-  structure(enlist(max_iter, rho_scale, tolerance), class = "admm_control")
+  assert_integerish(linear_solver, lower = 1L, upper = 2L, len = 1L)
+  if (k == 1) linear_solver <- 0L
+  structure(enlist(max_iter, rho_scale, tolerance, linear_solver),
+            class = "admm_control")
 }
 
 #' @export

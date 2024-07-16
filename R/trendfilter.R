@@ -72,7 +72,9 @@ trendfilter <- function(y,
                         lambda_max = NULL,
                         lambda_min = NULL,
                         lambda_min_ratio = 1e-5,
-                        control = trendfilter_control_list()) {
+                        control = trendfilter_control_list(
+                          admm_control = admm_control_list(
+                            k = 2L, linear_solver = 2L))) {
   family <- arg_match(family)
   if (family != "gaussian") {
     cli_abort("Data family {.val {family}} is not yet implemented.")
@@ -118,7 +120,7 @@ trendfilter <- function(y,
     lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio,
     control$admm_control$max_iter, control$admm_control$rho_scale,
     control$admm_control$tol,
-    tridiag = (k == 1L)
+    control$admm_control$linear_solver
   )
 
   structure(enlist(

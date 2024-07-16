@@ -43,5 +43,31 @@ Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd,
                     bool tf_weighting = false);
 Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd);
 
+Eigen::MatrixXd computePtemp(Eigen::MatrixXd A, Eigen::MatrixXd P);
+Eigen::MatrixXd smat_to_mat2(const Eigen::SparseMatrix<double>& sparseMat, int k);
+void f1step(double y,
+            double c,
+            double Z,
+            double H,
+            const Eigen::MatrixXd& A,
+            double RQR,
+            Eigen::VectorXd& a,
+            Eigen::MatrixXd& P,
+            double& vt,
+            double& Ft,
+            Eigen::VectorXd& Kt);
+void df1step(double y,
+             double Z,
+             double H,
+             const Eigen::MatrixXd& A,
+             double RQR,
+             Eigen::VectorXd& a,
+             Eigen::MatrixXd& P,
+             Eigen::MatrixXd& Pinf,
+             int& rankp,
+             double& vt,
+             double& Ft,
+             double& Finf,
+             Eigen::VectorXd& Kt,
+             Eigen::VectorXd& Kinf);
 #endif
-
