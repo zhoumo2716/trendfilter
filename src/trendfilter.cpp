@@ -73,7 +73,7 @@ void LinearSystem::construct(const Eigen::VectorXd& y, const Eigen::ArrayXd& wei
       break;
     }
     case 2: {
-      kf_init(y, weights, k, rho, dk_mat);
+      LinearSystem::kf_init(y, weights, k, rho, dk_mat);
       break;
     }
   } 
@@ -114,7 +114,7 @@ std::tuple<VectorXd,int> LinearSystem::solve(const Eigen::VectorXd& adj_mean, in
       break;
     }
     case 2: {
-      kf_iter(adj_mean);
+      LinearSystem::kf_iter(adj_mean);
       break;
     }
   }
@@ -222,7 +222,6 @@ void admm_single_lambda(
     if (iter % 1000 == 0) Rcpp::checkUserInterrupt(); // check if killed
 
     // theta update
-
     std::tie(theta, computation_info) = linear_system.solve(
         alpha + u, k, xd, rho, linear_solver);
     // if (computation_info > 1) {
@@ -452,14 +451,20 @@ void LinearSystem::kf_init(const Eigen::VectorXd& y, const Eigen::ArrayXd& weigh
   L0 = MatrixXd::Zero(k, k);
   L1 = MatrixXd::Zero(k, k);
   Ptemp = MatrixXd::Zero(k, k);
-
-  sol = VectorXd::Zero(n);
 }
 
 void LinearSystem::kf_iter(const Eigen::VectorXd& c) {
   int n = yw.size();
   int k = a1.size();
   sol = VectorXd::Zero(n);
+  // initialize or reset iterator
+  d = 0;
+  rankp = k;
+  // initialize or reset states and covariance matrices
+  a1 = VectorXd::Zero(k);
+  P1 = MatrixXd::Zero(k, k);
+  P1inf = MatrixXd::Identity(k, k);
+  Pinf.col(0) = Map<Eigen::VectorXd>(P1inf.data(), k * k);
   while (rankp > 0 && d < n) {
     df1step(yw(d), wsqrt(d), 1, T, RQR(0), a1, P1, P1inf, rankp, vt_b, Ft_b,
             Finf_b, Kt_b, Kinf_b);
