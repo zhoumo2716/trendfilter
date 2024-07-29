@@ -44,6 +44,7 @@ Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd,
 Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd);
 
 Eigen::MatrixXd computePtemp(Eigen::MatrixXd A, Eigen::MatrixXd P);
+Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k);
 Eigen::MatrixXd smat_to_mat2(const Eigen::SparseMatrix<double>& sparseMat, int k);
 void f1step(double y,
             double c,

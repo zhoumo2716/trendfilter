@@ -323,7 +323,7 @@ Rcpp::List admm_lambda_seq(
     // construct dense D mat with only nonzero entries from sparse D mat:
     denseD = smat_to_mat2(dk_mat, k);
     // ideally, construct dense denseD directly:
-    //MatrixXd denseD = b_mat_triplet(k, x, VectorXi::LinSpaced(n - k, 0, n - k -   1));
+    // denseD = b_mat(k, x, VectorXi::LinSpaced(n - k, 0, n - k - 1));
     // re-construct denseD in which each row saves values for T.row(0) per iterate: 
     s_seq = VectorXd::Ones(n - k);
     s_seq = denseD.block(0, k, n - k, 1);
@@ -387,7 +387,7 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
     // construct dense D mat with only nonzero entries from sparse D mat:
     denseD = smat_to_mat2(dk_mat, k);
     // ideally, construct dense denseD directly:
-    //MatrixXd denseD = b_mat_triplet(k, x, VectorXi::LinSpaced(n - k, 0, n - k -   1));
+    // denseD = b_mat(k, x, Eigen::VectorXi::LinSpaced(n - k, 0, n - k - 1));
     // re-construct denseD in which each row saves values for T.row(0) per iterate: 
     s_seq = VectorXd::Ones(n - k);
     s_seq = denseD.block(0, k, n - k, 1);

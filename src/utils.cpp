@@ -280,11 +280,31 @@ Eigen::MatrixXd computePtemp(Eigen::MatrixXd A, Eigen::MatrixXd P) {
 }
 
 // [[Rcpp::export]]
+Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k) {
+  int rows = sparseMat.rows(); // n-k
+  Eigen::MatrixXd denseMat(rows, k + 1);
+  std::vector<double> rowNonzeros;
+  // Iterate over nonzero coefficients in each row of the sparse matrix
+  for (int i = 0; i < sparseMat.outerSize(); ++i) {
+    std::vector<double> rowNonzeros;
+    for (SparseMatrix<double>::InnerIterator it(sparseMat, i); it; ++it) 
+      rowNonzeros.push_back(it.value());
+    int m = rowNonzeros.size();
+    for (int j = 0; j < m; j++) {
+      if (i < rows) 
+        denseMat(i - j, j) = rowNonzeros[m - 1 - j];
+      else  
+        denseMat(rows - 1 - j, j + i - rows + 1) = rowNonzeros[m - 1 - j];
+    }
+  }
+  return denseMat;
+}
+
+// [[Rcpp::export]]
 Eigen::MatrixXd smat_to_mat2(const Eigen::SparseMatrix<double>& sparseMat, int k) {
     MatrixXd denseMat(sparseMat);
     int n = denseMat.rows();
     MatrixXd Dseq(n, k+1);
-    
     
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < k + 1; j++) {
@@ -295,17 +315,9 @@ Eigen::MatrixXd smat_to_mat2(const Eigen::SparseMatrix<double>& sparseMat, int k
     return Dseq;
 }
 
-void f1step(double y,
-            double c,
-            double Z,
-            double H,
-            const Eigen::MatrixXd& A,
-            double RQR,
-            Eigen::VectorXd& a,
-            Eigen::MatrixXd& P,
-            double& vt,
-            double& Ft,
-            Eigen::VectorXd& Kt) {
+void f1step(double y, double c, double Z, double H, const Eigen::MatrixXd& A, 
+  double RQR, Eigen::VectorXd& a, Eigen::MatrixXd& P, double& vt, double& Ft,
+  Eigen::VectorXd& Kt) {
   VectorXd a_temp = A * a;
   a_temp(0) += c;
   MatrixXd Ptemp = computePtemp(A, P);  // A * P * A.transpose();
@@ -339,20 +351,9 @@ void f1step(double y,
   }
 }
 
-void df1step(double y,
-             double Z,
-             double H,
-             const Eigen::MatrixXd& A,
-             double RQR,
-             Eigen::VectorXd& a,
-             Eigen::MatrixXd& P,
-             Eigen::MatrixXd& Pinf,
-             int& rankp,
-             double& vt,
-             double& Ft,
-             double& Finf,
-             Eigen::VectorXd& Kt,
-             Eigen::VectorXd& Kinf) {
+void df1step(double y, double Z, double H, const Eigen::MatrixXd& A, double RQR,
+  Eigen::VectorXd& a, Eigen::MatrixXd& P, Eigen::MatrixXd& Pinf, int& rankp,
+  double& vt, double& Ft, double& Finf, Eigen::VectorXd& Kt, Eigen::VectorXd& Kinf) {
   double tol = Eigen::NumTraits<double>::epsilon();
   tol = std::sqrt(tol);
   int k = a.size();
