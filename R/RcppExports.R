@@ -33,7 +33,3 @@ smat_to_mat <- function(sparseMat, k) {
     .Call(`_trendfilter_smat_to_mat`, sparseMat, k)
 }
 
-smat_to_mat2 <- function(sparseMat, k) {
-    .Call(`_trendfilter_smat_to_mat2`, sparseMat, k)
-}
-

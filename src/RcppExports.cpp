@@ -131,18 +131,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// smat_to_mat2
-Eigen::MatrixXd smat_to_mat2(const Eigen::SparseMatrix<double>& sparseMat, int k);
-RcppExport SEXP _trendfilter_smat_to_mat2(SEXP sparseMatSEXP, SEXP kSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type sparseMat(sparseMatSEXP);
-    Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    rcpp_result_gen = Rcpp::wrap(smat_to_mat2(sparseMat, k));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_linear_single_solve_test", (DL_FUNC) &_trendfilter_linear_single_solve_test, 6},
@@ -153,7 +141,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_get_lambda_seq_r", (DL_FUNC) &_trendfilter_get_lambda_seq_r, 5},
     {"_trendfilter_Dkv", (DL_FUNC) &_trendfilter_Dkv, 4},
     {"_trendfilter_smat_to_mat", (DL_FUNC) &_trendfilter_smat_to_mat, 2},
-    {"_trendfilter_smat_to_mat2", (DL_FUNC) &_trendfilter_smat_to_mat2, 2},
     {NULL, NULL, 0}
 };
 

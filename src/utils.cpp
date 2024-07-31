@@ -300,21 +300,6 @@ Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k)
   return denseMat;
 }
 
-// [[Rcpp::export]]
-Eigen::MatrixXd smat_to_mat2(const Eigen::SparseMatrix<double>& sparseMat, int k) {
-    MatrixXd denseMat(sparseMat);
-    int n = denseMat.rows();
-    MatrixXd Dseq(n, k+1);
-    
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < k + 1; j++) {
-        Dseq(i, j) = denseMat(i, i+j);
-      }
-    }
-    
-    return Dseq;
-}
-
 void f1step(double y, double c, double Z, double H, const Eigen::MatrixXd& A, 
   double RQR, Eigen::VectorXd& a, Eigen::MatrixXd& P, double& vt, double& Ft,
   Eigen::VectorXd& Kt) {
