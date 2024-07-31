@@ -130,20 +130,21 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   MatrixXd denseD;
   VectorXd s_seq;
   // construct dense D mat with only nonzero entries from sparse D mat:
-  denseD = smat_to_mat(dk_mat, k);
-  // ideally, construct dense denseD directly:
-  //MatrixXd denseD = b_mat_triplet(k, x, VectorXi::LinSpaced(n - k, 0, n - k-   1));
-  // re-construct denseD in which each row saves values for T.row(0) periterate: 
-  s_seq = VectorXd::Ones(n - k);
-  s_seq = denseD.block(0, k, n - k, 1);
-  denseD.conservativeResize(n - k, k);
-  MatrixXd firstRow(1, k);
-  for (int i = 0; i < n - k; i++) {
-    firstRow = -denseD.row(i) / s_seq(i);
-    std::reverse(firstRow.data(), firstRow.data() + k);
-    denseD.row(i) = firstRow;
+  if (linear_solver == 2) {
+    denseD = smat_to_mat(dk_mat, k);
+    // ideally, construct dense denseD directly:
+    //MatrixXd denseD = b_mat_triplet(k, x, VectorXi::LinSpaced(n - k, 0, n - k-   1));
+    // re-construct denseD in which each row saves values for T.row(0) periterate: 
+    s_seq = VectorXd::Ones(n - k);
+    s_seq = denseD.block(0, k, n - k, 1);
+    denseD.conservativeResize(n - k, k);
+    MatrixXd firstRow(1, k);
+    for (int i = 0; i < n - k; i++) {
+      firstRow = -denseD.row(i) / s_seq(i);
+      std::reverse(firstRow.data(), firstRow.data() + k);
+      denseD.row(i) = firstRow;
+    }
   }
-  
   VectorXd sol = VectorXd::Zero(n);
   LinearSystem linear_system;
   int info = 0;
