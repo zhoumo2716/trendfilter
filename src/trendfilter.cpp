@@ -130,7 +130,7 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   MatrixXd denseD;
   VectorXd s_seq;
   // construct dense D mat with only nonzero entries from sparse D mat:
-  denseD = smat_to_mat2(dk_mat, k);
+  denseD = smat_to_mat(dk_mat, k);
   // ideally, construct dense denseD directly:
   //MatrixXd denseD = b_mat_triplet(k, x, VectorXi::LinSpaced(n - k, 0, n - k-   1));
   // re-construct denseD in which each row saves values for T.row(0) periterate: 
@@ -321,7 +321,7 @@ Rcpp::List admm_lambda_seq(
   VectorXd s_seq;
   if (linear_solver == 2) {
     // construct dense D mat with only nonzero entries from sparse D mat:
-    denseD = smat_to_mat2(dk_mat, k);
+    denseD = smat_to_mat(dk_mat, k);
     // ideally, construct dense denseD directly:
     // denseD = b_mat(k, x, VectorXi::LinSpaced(n - k, 0, n - k - 1));
     // re-construct denseD in which each row saves values for T.row(0) per iterate: 
@@ -385,7 +385,7 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   VectorXd s_seq;
   if (linear_solver == 2) {
     // construct dense D mat with only nonzero entries from sparse D mat:
-    denseD = smat_to_mat2(dk_mat, k);
+    denseD = smat_to_mat(dk_mat, k);
     // ideally, construct dense denseD directly:
     // denseD = b_mat(k, x, Eigen::VectorXi::LinSpaced(n - k, 0, n - k - 1));
     // re-construct denseD in which each row saves values for T.row(0) per iterate: 
