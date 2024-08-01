@@ -120,14 +120,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // smat_to_mat
-Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k);
-RcppExport SEXP _trendfilter_smat_to_mat(SEXP sparseMatSEXP, SEXP kSEXP) {
+Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k, bool equal_spaced);
+RcppExport SEXP _trendfilter_smat_to_mat(SEXP sparseMatSEXP, SEXP kSEXP, SEXP equal_spacedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type sparseMat(sparseMatSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    rcpp_result_gen = Rcpp::wrap(smat_to_mat(sparseMat, k));
+    Rcpp::traits::input_parameter< bool >::type equal_spaced(equal_spacedSEXP);
+    rcpp_result_gen = Rcpp::wrap(smat_to_mat(sparseMat, k, equal_spaced));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -140,7 +141,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_calc_degrees_of_freedom", (DL_FUNC) &_trendfilter_calc_degrees_of_freedom, 3},
     {"_trendfilter_get_lambda_seq_r", (DL_FUNC) &_trendfilter_get_lambda_seq_r, 5},
     {"_trendfilter_Dkv", (DL_FUNC) &_trendfilter_Dkv, 4},
-    {"_trendfilter_smat_to_mat", (DL_FUNC) &_trendfilter_smat_to_mat, 2},
+    {"_trendfilter_smat_to_mat", (DL_FUNC) &_trendfilter_smat_to_mat, 3},
     {NULL, NULL, 0}
 };
 

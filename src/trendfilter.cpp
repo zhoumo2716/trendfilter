@@ -37,9 +37,9 @@ class LinearSystem {
   public:
     void construct(const Eigen::VectorXd&, const Eigen::ArrayXd&, int, double, const Eigen::SparseMatrix<double>&, const Eigen::MatrixXd&, const Eigen::VectorXd&, int);
     void compute(int);
-    std::tuple<VectorXd,int> solve(const Eigen::VectorXd&, int, Rcpp::NumericVector, double, const Eigen::MatrixXd&, const Eigen::VectorXd&, int);
+    std::tuple<VectorXd,int> solve(const Eigen::VectorXd&, int, Rcpp::NumericVector, double, const Eigen::MatrixXd&, const Eigen::VectorXd&, int, bool);
     void kf_init(const VectorXd&, const Eigen::ArrayXd&, int, double, const Eigen::MatrixXd&, const Eigen::VectorXd&);
-    void kf_iter(const Eigen::VectorXd&, const Eigen::MatrixXd&, const Eigen::VectorXd&);
+    void kf_iter(const Eigen::VectorXd&, const Eigen::MatrixXd&, const Eigen::VectorXd&, bool);
   private:
     // tridiag
     VectorXd a, b, c, cp;
@@ -99,7 +99,7 @@ void LinearSystem::compute(int solver) {
       break;
   }
 }
-std::tuple<VectorXd,int> LinearSystem::solve(const Eigen::VectorXd& adj_mean, int k, Rcpp::NumericVector x, double rho, const Eigen::MatrixXd& Dseq, const Eigen::VectorXd& s_seq, int solver) {
+std::tuple<VectorXd,int> LinearSystem::solve(const Eigen::VectorXd& adj_mean, int k, Rcpp::NumericVector x, double rho, const Eigen::MatrixXd& Dseq, const Eigen::VectorXd& s_seq, int solver, bool equal_space) {
   int info = 0;
   switch(solver) {
     case 0: {
@@ -114,7 +114,7 @@ std::tuple<VectorXd,int> LinearSystem::solve(const Eigen::VectorXd& adj_mean, in
       break;
     }
     case 2: {
-      LinearSystem::kf_iter(adj_mean, Dseq, s_seq);
+      LinearSystem::kf_iter(adj_mean, Dseq, s_seq, equal_space);
       break;
     }
   }
@@ -129,20 +129,32 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   MatrixXd denseD;
   VectorXd s_seq;
-  // construct dense D mat with only nonzero entries from sparse D mat:
+  bool equal_space = TRUE;
   if (linear_solver == 2) {
-    denseD = smat_to_mat(dk_mat, k);
+    // check if `x` is equally spaced
+    double diff = x[1] - x[0];
+    for (int i = 2; i < n; ++i) 
+      if (x[i] - x[i-1] != diff) {
+        equal_space = false;
+        break;
+      }
+    // construct dense D mat with only nonzero entries from sparse D mat:
+    denseD = smat_to_mat(dk_mat, k, equal_space);
     // ideally, construct dense denseD directly:
-    //MatrixXd denseD = b_mat_triplet(k, x, VectorXi::LinSpaced(n - k, 0, n - k-   1));
-    // re-construct denseD in which each row saves values for T.row(0) periterate: 
-    s_seq = VectorXd::Ones(n - k);
-    s_seq = denseD.block(0, k, n - k, 1);
-    denseD.conservativeResize(n - k, k);
-    MatrixXd firstRow(1, k);
-    for (int i = 0; i < n - k; i++) {
-      firstRow = -denseD.row(i) / s_seq(i);
-      std::reverse(firstRow.data(), firstRow.data() + k);
-      denseD.row(i) = firstRow;
+    // denseD = b_mat(k, x, VectorXi::LinSpaced(n - k, 0, n - k - 1));
+    // re-construct denseD in which each row saves values for T.row(0) per iterate: 
+    if (equal_space) { 
+      s_seq = denseD.block(0, k, 1, 1);
+      denseD.conservativeResize(1, k);
+    } else {
+      s_seq = denseD.block(0, k, n - k, 1);
+      denseD.conservativeResize(n - k, k);
+      MatrixXd firstRow(1, k);
+      for (int i = 0; i < n - k; i++) {
+        firstRow = -denseD.row(i) / s_seq(i);
+        std::reverse(firstRow.data(), firstRow.data() + k);
+        denseD.row(i) = firstRow;
+      }
     }
   }
   VectorXd sol = VectorXd::Zero(n);
@@ -150,7 +162,7 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   int info = 0;
   linear_system.construct(y, weights, k, rho, dk_mat_sq, denseD, s_seq, linear_solver);
   linear_system.compute(linear_solver);
-  std::tie(sol, info) = linear_system.solve(adj_mean, k, x, rho, denseD, s_seq, linear_solver);
+  std::tie(sol, info) = linear_system.solve(adj_mean, k, x, rho, denseD, s_seq, linear_solver, equal_space);
   return sol;
 }
 
@@ -215,7 +227,8 @@ void admm_single_lambda(
     int max_iter,
     double rho,
     double tol = 1e-5,
-    int linear_solver = 2) {
+    int linear_solver = 2,
+    bool equal_space = false) {
   // Initialize internals
   VectorXd tmp(n-k);
   VectorXd Dth_tmp(alpha.size());
@@ -241,7 +254,7 @@ void admm_single_lambda(
 
     // theta update
     std::tie(theta, computation_info) = linear_system.solve(
-        alpha + u, k, xd, rho, denseD, s_seq, linear_solver);
+        alpha + u, k, xd, rho, denseD, s_seq, linear_solver, equal_space);
     // if (computation_info > 1) {
     //  std::cerr << "Eigen Sparse QR solve returned nonzero exit status.\n";
     // }
@@ -320,20 +333,33 @@ Rcpp::List admm_lambda_seq(
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   MatrixXd denseD;
   VectorXd s_seq;
+  bool equal_space = TRUE;
   if (linear_solver == 2) {
+    // check if `x` is equally spaced
+    double diff = x[1] - x[0];
+    for (int i = 2; i < n; ++i) 
+      if (x[i] - x[i-1] != diff) {
+        equal_space = false;
+        break;
+      }
     // construct dense D mat with only nonzero entries from sparse D mat:
-    denseD = smat_to_mat(dk_mat, k);
+    denseD = smat_to_mat(dk_mat, k, equal_space);
     // ideally, construct dense denseD directly:
     // denseD = b_mat(k, x, VectorXi::LinSpaced(n - k, 0, n - k - 1));
     // re-construct denseD in which each row saves values for T.row(0) per iterate: 
-    s_seq = VectorXd::Ones(n - k);
-    s_seq = denseD.block(0, k, n - k, 1);
-    denseD.conservativeResize(n - k, k);
-    MatrixXd firstRow(1, k);
-    for (int i = 0; i < n - k; i++) {
-      firstRow = -denseD.row(i) / s_seq(i);
-      std::reverse(firstRow.data(), firstRow.data() + k);
-      denseD.row(i) = firstRow;
+    if (equal_space) { 
+      s_seq = denseD.block(0, k, 1, 1);
+      denseD.conservativeResize(1, k);
+    } else {
+      //s_seq = VectorXd::Ones(n - k);
+      s_seq = denseD.block(0, k, n - k, 1);
+      denseD.conservativeResize(n - k, k);
+      MatrixXd firstRow(1, k);
+      for (int i = 0; i < n - k; i++) {
+        firstRow = -denseD.row(i) / s_seq(i);
+        std::reverse(firstRow.data(), firstRow.data() + k);
+        denseD.row(i) = firstRow;
+      }
     }
   }
   
@@ -352,7 +378,7 @@ Rcpp::List admm_lambda_seq(
       theta.col(i), alpha.col(i), u, 
       iters[i], objective_val[i], 
       dk_mat_sq, denseD, s_seq, lambda[i], max_iter, lambda[i]*rho_scale,
-      tol, linear_solver);
+      tol, linear_solver, equal_space);
     dof[i] = calc_degrees_of_freedom(alpha.col(i), k);
     if (i + 1 < nlambda) {
       theta.col(i + 1) = theta.col(i);
@@ -384,20 +410,32 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   MatrixXd denseD;
   VectorXd s_seq;
+  bool equal_space = TRUE;
   if (linear_solver == 2) {
+    // check if `x` is equally spaced
+    double diff = x[1] - x[0];
+    for (int i = 2; i < n; ++i) 
+      if (x[i] - x[i-1] != diff) {
+        equal_space = false;
+        break;
+      }
     // construct dense D mat with only nonzero entries from sparse D mat:
-    denseD = smat_to_mat(dk_mat, k);
+    denseD = smat_to_mat(dk_mat, k, equal_space);
     // ideally, construct dense denseD directly:
-    // denseD = b_mat(k, x, Eigen::VectorXi::LinSpaced(n - k, 0, n - k - 1));
+    // denseD = b_mat(k, x, VectorXi::LinSpaced(n - k, 0, n - k - 1));
     // re-construct denseD in which each row saves values for T.row(0) per iterate: 
-    s_seq = VectorXd::Ones(n - k);
-    s_seq = denseD.block(0, k, n - k, 1);
-    denseD.conservativeResize(n - k, k);
-    MatrixXd firstRow(1, k);
-    for (int i = 0; i < n - k; i++) {
-      firstRow = -denseD.row(i) / s_seq(i);
-      std::reverse(firstRow.data(), firstRow.data() + k);
-      denseD.row(i) = firstRow;
+    if (equal_space) { 
+      s_seq = denseD.block(0, k, 1, 1);
+      denseD.conservativeResize(1, k);
+    } else {
+      s_seq = denseD.block(0, k, n - k, 1);
+      denseD.conservativeResize(n - k, k);
+      MatrixXd firstRow(1, k);
+      for (int i = 0; i < n - k; i++) {
+        firstRow = -denseD.row(i) / s_seq(i);
+        std::reverse(firstRow.data(), firstRow.data() + k);
+        denseD.row(i) = firstRow;
+      }
     }
   }
 
@@ -428,7 +466,7 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   for (iter = 1; iter < max_iter; iter++) {
     // theta update
     std::tie(theta, computation_info) = linear_system.solve(
-        alpha + u, k, x, rho, denseD, s_seq, linear_solver);
+        alpha + u, k, x, rho, denseD, s_seq, linear_solver, equal_space);
     // if (computation_info > 1) {
     //   std::cerr << "Eigen Sparse QR solve returned nonzero exit status.\n";
     // }
@@ -462,7 +500,7 @@ void LinearSystem::kf_init(const Eigen::VectorXd& y, const Eigen::ArrayXd& weigh
   T = MatrixXd::Zero(k, k);
   T.block(1, 0, k - 1, k - 1).diagonal() = VectorXd::Ones(k - 1);
   // other initialization: 
-  RQR = VectorXd::Zero(n - k);
+  // RQR = VectorXd::Zero(n - k);
   a1 = VectorXd::Zero(k);
   at = MatrixXd::Zero(k, n + 1);
   P1 = MatrixXd::Zero(k, k);
@@ -495,20 +533,21 @@ void LinearSystem::kf_init(const Eigen::VectorXd& y, const Eigen::ArrayXd& weigh
   Ptemp = MatrixXd::Zero(k, k);
 }
 
-void LinearSystem::kf_iter(const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq, const Eigen::VectorXd& s_seq) {
+void LinearSystem::kf_iter(const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq, const Eigen::VectorXd& s_seq, bool equal_space) {
   int n = yw.size();
   int k = a1.size();
   sol = VectorXd::Zero(n);
   // initialize or reset iterator
   d = 0;
   rankp = k;
+  double rqr = RQR(0);
   // initialize or reset states and covariance matrices
   a1 = VectorXd::Zero(k);
   P1 = MatrixXd::Zero(k, k);
   P1inf = MatrixXd::Identity(k, k);
   Pinf.col(0) = Map<Eigen::VectorXd>(P1inf.data(), k * k);
   while (rankp > 0 && d < n) {
-    df1step(yw(d), wsqrt(d), 1, T, RQR(0), a1, P1, P1inf, rankp, vt_b, Ft_b,
+    df1step(yw(d), wsqrt(d), 1, T, rqr, a1, P1, P1inf, rankp, vt_b, Ft_b,
             Finf_b, Kt_b, Kinf_b);
     at.col(d + 1) = a1;
     vt(d) = vt_b;
@@ -521,7 +560,9 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq
     d++;
   }
   for (int i = d; i < n; i++) {
-    f1step(yw(i), c(i - d) / s_seq(i - d), wsqrt(i), 1, T, RQR(i - d), a1, P1,
+    if (!equal_space) 
+      double rqr = RQR(i - d);
+    f1step(yw(i), c(i - d) / s_seq(i - d), wsqrt(i), 1, T, rqr, a1, P1,
            vt_b, Ft_b, Kt_b);
     vt(i) = vt_b;
     Ft(i) = Ft_b;
@@ -529,7 +570,7 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq
     at.col(i + 1) = a1;
     Pt.col(i + 1) = Map<VectorXd>(P1.data(), k * k);
     // update transition matrix T for next iterate:
-    if (i < n - 1)
+    if (!equal_space && i < n - 1)
       T.row(0) = Dseq.row(i - d + 1);
   }
   for (int i = n - 1; i >= d; i--) {
@@ -540,7 +581,7 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq
     r1(0) -= wsqrt(i) * vt(i) / Ft(i);
     r = T.transpose() * r1;
     // update transition matrix T for next iterate:
-    if (i > d)
+    if (!equal_space && i > d)
       T.row(0) = Dseq.row(i - d - 1);
   }
   for (int i = d - 1; i >= 0; i--) {

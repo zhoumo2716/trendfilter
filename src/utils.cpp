@@ -280,7 +280,7 @@ Eigen::MatrixXd computePtemp(Eigen::MatrixXd A, Eigen::MatrixXd P) {
 }
 
 // [[Rcpp::export]]
-Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k) {
+Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k, bool equal_spaced) {
   int rows = sparseMat.rows(); // n-k
   Eigen::MatrixXd denseMat(rows, k + 1);
   std::vector<double> rowNonzeros;
@@ -296,6 +296,10 @@ Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k)
       else  
         denseMat(rows - 1 - j, j + i - rows + 1) = rowNonzeros[m - 1 - j];
     }
+    if (equal_spaced && i == k) {
+      denseMat.conservativeResize(1, k + 1);
+      return denseMat;
+    } 
   }
   return denseMat;
 }

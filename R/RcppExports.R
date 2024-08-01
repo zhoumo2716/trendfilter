@@ -29,7 +29,7 @@ Dkv <- function(v, k, xd, tf_weighting) {
     .Call(`_trendfilter_Dkv`, v, k, xd, tf_weighting)
 }
 
-smat_to_mat <- function(sparseMat, k) {
-    .Call(`_trendfilter_smat_to_mat`, sparseMat, k)
+smat_to_mat <- function(sparseMat, k, equal_spaced) {
+    .Call(`_trendfilter_smat_to_mat`, sparseMat, k, equal_spaced)
 }
 
