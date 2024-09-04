@@ -37,9 +37,9 @@ class LinearSystem {
   public:
     void construct(const Eigen::VectorXd&, const Eigen::ArrayXd&, int, double, const Eigen::SparseMatrix<double>&, const Eigen::MatrixXd&, const Eigen::VectorXd&, int);
     void compute(int);
-    std::tuple<VectorXd,int> solve(const Eigen::VectorXd&, int, Rcpp::NumericVector, double, const Eigen::MatrixXd&, const Eigen::VectorXd&, int, bool);
-    void kf_init(const VectorXd&, const Eigen::ArrayXd&, int, double, const Eigen::MatrixXd&, const Eigen::VectorXd&);
-    void kf_iter(const Eigen::VectorXd&, const Eigen::MatrixXd&, const Eigen::VectorXd&, bool);
+    std::tuple<VectorXd,int> solve(const Eigen::VectorXd&, const Eigen::ArrayXd&, const Eigen::VectorXd&, int, Rcpp::NumericVector, double, const Eigen::MatrixXd&, const Eigen::VectorXd&, int, bool);
+    void kf_init(int, double, const Eigen::MatrixXd&, const Eigen::VectorXd&);
+    void kf_iter(const Eigen::VectorXd&, const Eigen::ArrayXd&, const Eigen::VectorXd&, const Eigen::MatrixXd&, const Eigen::VectorXd&, bool);
   private:
     // tridiag
     VectorXd a, b, c, cp;
@@ -50,7 +50,7 @@ class LinearSystem {
     // kf: 
     int d, rankp;
     double vt_b, Ft_b, Finf_b;
-    VectorXd wsqrt, yw, RQR, a1, vt, Ft, Finf, Kt_b, Kinf_b, r,  r1, rtmp, sol;
+    VectorXd RQR, a1, vt, Ft, Finf, Kt_b, Kinf_b, r,  r1, rtmp, sol;
     MatrixXd T, at, P1, Pt, P1inf, Pinf, Kt, Kinf, L0, L1, Ptemp;
 };
 
@@ -73,7 +73,7 @@ void LinearSystem::construct(const Eigen::VectorXd& y, const Eigen::ArrayXd& wei
       break;
     }
     case 2: {
-      LinearSystem::kf_init(y, weights, k, rho, Dseq, s_seq);
+      LinearSystem::kf_init(k, rho, Dseq, s_seq);
       break;
     }
   } 
@@ -99,7 +99,7 @@ void LinearSystem::compute(int solver) {
       break;
   }
 }
-std::tuple<VectorXd,int> LinearSystem::solve(const Eigen::VectorXd& adj_mean, int k, Rcpp::NumericVector x, double rho, const Eigen::MatrixXd& Dseq, const Eigen::VectorXd& s_seq, int solver, bool equal_space) {
+std::tuple<VectorXd,int> LinearSystem::solve(const Eigen::VectorXd& y, const Eigen::ArrayXd& weights, const Eigen::VectorXd& adj_mean, int k, Rcpp::NumericVector x, double rho, const Eigen::MatrixXd& Dseq, const Eigen::VectorXd& s_seq, int solver, bool equal_space) {
   int info = 0;
   switch(solver) {
     case 0: {
@@ -114,7 +114,7 @@ std::tuple<VectorXd,int> LinearSystem::solve(const Eigen::VectorXd& adj_mean, in
       break;
     }
     case 2: {
-      LinearSystem::kf_iter(adj_mean, Dseq, s_seq, equal_space);
+      LinearSystem::kf_iter(y, weights, adj_mean, Dseq, s_seq, equal_space);
       break;
     }
   }
@@ -162,7 +162,7 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   int info = 0;
   linear_system.construct(y, weights, k, rho, dk_mat_sq, denseD, s_seq, linear_solver);
   linear_system.compute(linear_solver);
-  std::tie(sol, info) = linear_system.solve(adj_mean, k, x, rho, denseD, s_seq, linear_solver, equal_space);
+  std::tie(sol, info) = linear_system.solve(y, weights, adj_mean, k, x, rho, denseD, s_seq, linear_solver, equal_space);
   return sol;
 }
 
@@ -253,7 +253,7 @@ void admm_single_lambda(
     if (iter % 1000 == 0) Rcpp::checkUserInterrupt(); // check if killed
 
     // theta update
-    std::tie(theta, computation_info) = linear_system.solve(
+    std::tie(theta, computation_info) = linear_system.solve(y, weights, 
         alpha + u, k, xd, rho, denseD, s_seq, linear_solver, equal_space);
     // if (computation_info > 1) {
     //  std::cerr << "Eigen Sparse QR solve returned nonzero exit status.\n";
@@ -465,7 +465,7 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   double best_objective = objective_vec[iter];
   for (iter = 1; iter < max_iter; iter++) {
     // theta update
-    std::tie(theta, computation_info) = linear_system.solve(
+    std::tie(theta, computation_info) = linear_system.solve(y, weights, 
         alpha + u, k, x, rho, denseD, s_seq, linear_solver, equal_space);
     // if (computation_info > 1) {
     //   std::cerr << "Eigen Sparse QR solve returned nonzero exit status.\n";
@@ -491,11 +491,9 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   return return_list;
 }
 
-void LinearSystem::kf_init(const Eigen::VectorXd& y, const Eigen::ArrayXd& weights, int k, double rho, 
-              const Eigen::MatrixXd& Dseq, const Eigen::VectorXd& s_seq) {
-  int n = y.size();
-  wsqrt = weights.sqrt();
-  yw = y.array() * wsqrt.array();
+void LinearSystem::kf_init(int k, double rho, const Eigen::MatrixXd& Dseq, 
+  const Eigen::VectorXd& s_seq) {
+  int n = s_seq.size() + k;
   // construct transition matrix A:
   T = MatrixXd::Zero(k, k);
   T.block(1, 0, k - 1, k - 1).diagonal() = VectorXd::Ones(k - 1);
@@ -533,8 +531,10 @@ void LinearSystem::kf_init(const Eigen::VectorXd& y, const Eigen::ArrayXd& weigh
   Ptemp = MatrixXd::Zero(k, k);
 }
 
-void LinearSystem::kf_iter(const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq, const Eigen::VectorXd& s_seq, bool equal_space) {
-  int n = yw.size();
+void LinearSystem::kf_iter(const Eigen::VectorXd& y, const Eigen::ArrayXd& w, 
+  const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq, const Eigen::VectorXd& s_seq, 
+  bool equal_space) {
+  int n = y.size();
   int k = a1.size();
   sol = VectorXd::Zero(n);
   // initialize or reset iterator
@@ -547,7 +547,7 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq
   P1inf = MatrixXd::Identity(k, k);
   Pinf.col(0) = Map<Eigen::VectorXd>(P1inf.data(), k * k);
   while (rankp > 0 && d < n) {
-    df1step(yw(d), wsqrt(d), 1, T, rqr, a1, P1, P1inf, rankp, vt_b, Ft_b,
+    df1step(y(d), 1, 1 / w(d), T, rqr, a1, P1, P1inf, rankp, vt_b, Ft_b,
             Finf_b, Kt_b, Kinf_b);
     at.col(d + 1) = a1;
     vt(d) = vt_b;
@@ -562,8 +562,8 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq
   for (int i = d; i < n; i++) {
     if (!equal_space) 
       double rqr = RQR(i - d);
-    f1step(yw(i), c(i - d) / s_seq(i - d), wsqrt(i), 1, T, rqr, a1, P1,
-           vt_b, Ft_b, Kt_b);
+    f1step(y(i), c(i - d) / s_seq(i - d), 1, 1 / w(i), T, rqr, a1, P1,
+           vt_b, Ft_b, Kt_b); 
     vt(i) = vt_b;
     Ft(i) = Ft_b;
     Kt.col(i) = Kt_b;
@@ -576,9 +576,9 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq
   for (int i = n - 1; i >= d; i--) {
     P1 = Map<MatrixXd>(Pt.col(i + 1).data(), k, k);
     sol(i) = at.col(i + 1)(0) - P1.row(0) * r;
-    L0.col(0) = Kt.col(i) * wsqrt(i) / Ft(i);
+    L0.col(0) = Kt.col(i) / Ft(i);
     r1 = r - L0.transpose() * r;
-    r1(0) -= wsqrt(i) * vt(i) / Ft(i);
+    r1(0) -=  vt(i) / Ft(i); 
     r = T.transpose() * r1;
     // update transition matrix T for next iterate:
     if (!equal_space && i > d)
@@ -592,18 +592,18 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& c, const Eigen::MatrixXd& Dseq
     if (i > 0) {
       if (Finf(i) > 0) {
         // simple version w/o mat multiplication:
-        L0.col(0) = Kinf.col(i) * wsqrt(i) / Finf(i);
+        L0.col(0) = Kinf.col(i) / Finf(i);
         L1.col(0) = L0.col(0) * Ft(i) / Finf(i);
-        L1.col(0) -= Kt.col(i) * wsqrt(i) / Finf(i);
+        L1.col(0) -= Kt.col(i) / Finf(i);
         rtmp = r1 - L0.transpose() * r1 + L1.transpose() * r;
-        rtmp(0) -= wsqrt(i) * vt(i) / Finf(i);
+        rtmp(0) -= vt(i) / Finf(i); 
         r1 = T.transpose() * rtmp;
         rtmp = r - L0.transpose() * r;
         r = T.transpose() * rtmp;
       } else {
-        L1.col(0) = Kt.col(i) * wsqrt(i) / Ft(i);
+        L1.col(0) = Kt.col(i) / Ft(i);
         rtmp = r - L1.transpose() * r;
-        rtmp(0) -= wsqrt(i) * vt(i) / Ft(i);
+        rtmp(0) -= vt(i) / Ft(i);
         r = T.transpose() * rtmp;
         rtmp = r1 - L1.transpose() * r1;
         r1 = T.transpose() * rtmp;
