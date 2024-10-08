@@ -21,8 +21,8 @@
 #' admm_control_list(max_iter = 10L)
 #' admm_control_list(tolerance = 1e-8)
 admm_control_list <- function(
-    max_iter = 1e4, rho_scale = 1.0, tolerance = 1e-4, k = 2L,
-    linear_solver = 2L,...) {
+    max_iter = 1e4, rho_scale = 1.0, tolerance = 1e-4,
+    linear_solver = c("kalman_filter", "sparse_qr"), ...) {
   rlang::check_dots_empty()
   assert_integerish(max_iter, lower = 1L, len = 1L)
   assert_numeric(rho_scale, lower = .Machine$double.eps, finite = TRUE, len = 1L)
