@@ -27,8 +27,7 @@ admm_control_list <- function(
   assert_integerish(max_iter, lower = 1L, len = 1L)
   assert_numeric(rho_scale, lower = .Machine$double.eps, finite = TRUE, len = 1L)
   assert_numeric(tolerance, lower = .Machine$double.eps, finite = TRUE, len = 1L)
-  assert_integerish(linear_solver, lower = 1L, upper = 2L, len = 1L)
-  if (k == 1) linear_solver <- 0L
+  linear_solver <- rlang::arg_match(linear_solver)
   structure(enlist(max_iter, rho_scale, tolerance, linear_solver),
             class = "admm_control")
 }
