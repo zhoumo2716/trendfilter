@@ -1,6 +1,11 @@
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <Rcpp.h>
 #include <RcppEigen.h>
+#include "utils.h"
 #include "kf_utils.h"
+
+// [[Rcpp::depends(RcppEigen)]]
 
 using Eigen::SparseMatrix;
 using Eigen::SparseQR;
@@ -64,13 +69,28 @@ void configure_denseD(Rcpp::NumericVector x, Eigen::MatrixXd& denseD, Eigen::Vec
       //s_seq = VectorXd::Ones(n - k);
       s_seq = denseD.block(0, k, n - k, 1);
       denseD.conservativeResize(n - k, k);
-      MatrixXd firstRow(1, k);
-      for (int i = 0; i < n - k; i++) {
-        firstRow = -denseD.row(i) / s_seq(i);
-        std::reverse(firstRow.data(), firstRow.data() + k);
-        denseD.row(i) = firstRow;
-      }
     }
+    // reverse order
+    MatrixXd firstRow(1, k);
+    int m = denseD.rows();
+    for (int i = 0; i < m; i++) {
+      firstRow = -denseD.row(i) / s_seq(i);
+      std::reverse(firstRow.data(), firstRow.data() + k);
+      denseD.row(i) = firstRow;
+    }
+}
+
+// [[Rcpp::export]]
+Rcpp::List configure_denseD_test(Rcpp::NumericVector x, int k) {
+    SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
+    int n = x.size();
+    bool equal_space = is_equal_space(x, 0.1);
+    MatrixXd denseD = equal_space ? MatrixXd::Zero(1, k) : MatrixXd::Zero(n, k);
+    VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
+  
+    configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);
+    
+    return Rcpp::List::create(Rcpp::Named("s_seq") = s_seq, Rcpp::Named("D_mat") = denseD);
 }
 
 void f1step(double y, double c, double Z, double H, const Eigen::MatrixXd& A, 
