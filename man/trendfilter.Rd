@@ -16,8 +16,8 @@ trendfilter(
   lambda_max = NULL,
   lambda_min = NULL,
   lambda_min_ratio = 1e-05,
-  control = trendfilter_control_list(admm_control = admm_control_list(k = 2L,
-    linear_solver = 2L))
+  control = trendfilter_control_list(admm_control = admm_control_list(linear_solver =
+    "kalman_filter"))
 )
 }
 \arguments{

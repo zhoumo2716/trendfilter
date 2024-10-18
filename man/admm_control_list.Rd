@@ -8,8 +8,7 @@ admm_control_list(
   max_iter = 10000,
   rho_scale = 1,
   tolerance = 1e-04,
-  k = 2L,
-  linear_solver = 2L,
+  linear_solver = c("kalman_filter", "sparse_qr"),
   ...
 )
 }
@@ -21,11 +20,8 @@ Lagrangian penalty parameter \eqn{\rho}.}
 
 \item{tolerance}{Double. The convergence tolerance for the ADMM algorithm.}
 
-\item{k}{Integer. Degree of the piecewise polynomial curve to be
-estimated.}
-
-\item{linear_solver}{Integer. Solver for the linear system in ADMM when k > 1.
-\code{1}: sparse QR decomposition, \code{2}: Kalman filter.}
+\item{linear_solver}{Integer. Solver for the linear system in ADMM when
+k > 1: \code{kalman_filter} for Kalman filter or \code{sparse_qr} for sparse QR decomposition.}
 
 \item{...}{not used}
 }
