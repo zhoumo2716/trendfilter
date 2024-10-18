@@ -7,10 +7,8 @@
 #' @param rho_scale Double. The ratio of `lambda` divided by the augmented
 #'   Lagrangian penalty parameter \eqn{\rho}.
 #' @param tolerance Double. The convergence tolerance for the ADMM algorithm.
-#' @param k Integer. Degree of the piecewise polynomial curve to be
-#'   estimated.
-#' @param linear_solver Integer. Solver for the linear system in ADMM when k > 1.
-#'   `1`: sparse QR decomposition, `2`: Kalman filter.
+#' @param linear_solver Integer. Solver for the linear system in ADMM when
+#'   k > 1: `kalman_filter` for Kalman filter or `sparse_qr` for sparse QR decomposition.
 #' @param ... not used
 #'
 #' @return an object of class `admm_control`

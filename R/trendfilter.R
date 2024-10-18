@@ -73,8 +73,7 @@ trendfilter <- function(y,
                         lambda_min = NULL,
                         lambda_min_ratio = 1e-5,
                         control = trendfilter_control_list(
-                          admm_control = admm_control_list(
-                            k = 2L, linear_solver = 2L))) {
+                          admm_control = admm_control_list(linear_solver = "kalman_filter"))) {
   family <- arg_match(family)
   if (family != "gaussian") {
     cli_abort("Data family {.val {family}} is not yet implemented.")
