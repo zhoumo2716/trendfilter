@@ -3,9 +3,11 @@
 #include <tuple>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+#include <iostream>
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "utils.h"
+#include "kf_utils.h"
 extern "C"{
   #include "tf_dp.h"
 }
@@ -37,33 +39,26 @@ class LinearSystem {
   public:
     void construct(const Eigen::VectorXd&, const Eigen::ArrayXd&, int, double, const Eigen::SparseMatrix<double>&, const Eigen::MatrixXd&, const Eigen::VectorXd&, int);
     void compute(int);
-    std::tuple<VectorXd,int> solve(const Eigen::VectorXd&, const Eigen::ArrayXd&, const Eigen::VectorXd&, int, Rcpp::NumericVector, double, const Eigen::MatrixXd&, const Eigen::VectorXd&, int, bool);
+    std::tuple<Eigen::VectorXd,int> solve(const Eigen::VectorXd&, const Eigen::ArrayXd&, const Eigen::VectorXd&, int, Rcpp::NumericVector, double, const Eigen::MatrixXd&, const Eigen::VectorXd&, int, bool);
     void kf_init(int, double, const Eigen::MatrixXd&, const Eigen::VectorXd&);
     void kf_iter(const Eigen::VectorXd&, const Eigen::ArrayXd&, const Eigen::VectorXd&, const Eigen::MatrixXd&, const Eigen::VectorXd&, bool);
   private:
     // tridiag
-    VectorXd a, b, c, cp;
-    VectorXd wy;
+    Eigen::VectorXd a, b, c, cp;
+    Eigen::VectorXd wy;
     // sparse_qr
-    SparseQR<SparseMatrix<double>, Ord> qr;
-    SparseMatrix<double> A;
+    Eigen::SparseQR<Eigen::SparseMatrix<double>, Ord> qr;
+    Eigen::SparseMatrix<double> A;
     // kf: 
     int d, rankp;
     double vt_b, Ft_b, Finf_b;
-    VectorXd RQR, a1, vt, Ft, Finf, Kt_b, Kinf_b, r,  r1, rtmp, sol;
-    MatrixXd T, at, P1, Pt, P1inf, Pinf, Kt, Kinf, L0, L1, Ptemp;
+    Eigen::VectorXd RQR, a1, vt, Ft, Finf, Kt_b, Kinf_b, r,  r1, rtmp, sol;
+    Eigen::MatrixXd T, at, P1, Pt, P1inf, Pinf, Kt, Kinf, L0, L1, Ptemp;
 };
 
 void LinearSystem::construct(const Eigen::VectorXd& y, const Eigen::ArrayXd& weights, int k, double rho, const Eigen::SparseMatrix<double>& dk_mat_sq, const Eigen::MatrixXd& Dseq, const Eigen::VectorXd& s_seq, int solver) {
   switch(solver) {
-    case 0: {
-      wy = (y.array() * weights).matrix();
-      // Form Gram matrix and set up linear system for theta update
-      A = rho * dk_mat_sq;
-      A.diagonal().array() += weights;
-      A.makeCompressed();
-      break;
-    }
+    case 0: 
     case 1: {
       wy = (y.array() * weights).matrix();
       // Form Gram matrix and set up linear system for theta update
@@ -127,36 +122,30 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   int k = n - adj_mean.size();
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
-  MatrixXd denseD;
-  VectorXd s_seq;
+  // check if `x` is equally spaced
   bool equal_space = TRUE;
-  if (linear_solver == 2) {
-    // check if `x` is equally spaced
-    double diff = x[1] - x[0];
-    for (int i = 2; i < n; ++i) 
-      if (x[i] - x[i-1] != diff) {
-        equal_space = false;
-        break;
-      }
-    // construct dense D mat with only nonzero entries from sparse D mat:
-    denseD = smat_to_mat(dk_mat, k, equal_space);
-    // ideally, construct dense denseD directly:
-    // denseD = b_mat(k, x, VectorXi::LinSpaced(n - k, 0, n - k - 1));
-    // re-construct denseD in which each row saves values for T.row(0) per iterate: 
-    if (equal_space) { 
-      s_seq = denseD.block(0, k, 1, 1);
-      denseD.conservativeResize(1, k);
-    } else {
-      s_seq = denseD.block(0, k, n - k, 1);
-      denseD.conservativeResize(n - k, k);
-      MatrixXd firstRow(1, k);
-      for (int i = 0; i < n - k; i++) {
-        firstRow = -denseD.row(i) / s_seq(i);
-        std::reverse(firstRow.data(), firstRow.data() + k);
-        denseD.row(i) = firstRow;
-      }
+  Eigen::VectorXd diff(n - 1);
+  //diff = x.tail(n - 1) - x.head(n - 1);
+  for(int i = 0; i < n - 1; i++)
+    diff[i] = x[i + 1] - x[i];
+  double averaged_diff = (x[n-1] - x[0]) / (n-1);
+  for (int i = 0; i < n - 1; ++i) 
+    // if any signal distance is greater or smaller than the averaged space 
+    if (diff[i] / averaged_diff > 1.1 || diff[i] / averaged_diff < 0.9) {
+      equal_space = false;
+      break;
     }
+  // initialize D mat and s_seq
+  MatrixXd denseD = MatrixXd::Zero(n, k);
+  VectorXd s_seq = VectorXd::Zero(n);
+  if (equal_space) {
+    denseD.resize(1, k);
+    s_seq.resize(1);
   }
+  // configure dense D matrix if using Kalman filter
+  if (linear_solver == 2) 
+    configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);   
+  
   VectorXd sol = VectorXd::Zero(n);
   LinearSystem linear_system;
   int info = 0;
@@ -331,37 +320,29 @@ Rcpp::List admm_lambda_seq(
   // Initialize difference matrices and other helper objects
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
-  MatrixXd denseD;
-  VectorXd s_seq;
+  // check if `x` is equally spaced
   bool equal_space = TRUE;
-  if (linear_solver == 2) {
-    // check if `x` is equally spaced
-    double diff = x[1] - x[0];
-    for (int i = 2; i < n; ++i) 
-      if (x[i] - x[i-1] != diff) {
-        equal_space = false;
-        break;
-      }
-    // construct dense D mat with only nonzero entries from sparse D mat:
-    denseD = smat_to_mat(dk_mat, k, equal_space);
-    // ideally, construct dense denseD directly:
-    // denseD = b_mat(k, x, VectorXi::LinSpaced(n - k, 0, n - k - 1));
-    // re-construct denseD in which each row saves values for T.row(0) per iterate: 
-    if (equal_space) { 
-      s_seq = denseD.block(0, k, 1, 1);
-      denseD.conservativeResize(1, k);
-    } else {
-      //s_seq = VectorXd::Ones(n - k);
-      s_seq = denseD.block(0, k, n - k, 1);
-      denseD.conservativeResize(n - k, k);
-      MatrixXd firstRow(1, k);
-      for (int i = 0; i < n - k; i++) {
-        firstRow = -denseD.row(i) / s_seq(i);
-        std::reverse(firstRow.data(), firstRow.data() + k);
-        denseD.row(i) = firstRow;
-      }
+  Eigen::VectorXd diff(n - 1);
+  // diff = x.tail(n - 1) - x.head(n - 1);
+  for(int i = 0; i < n - 1; i++)
+    diff[i] = x[i + 1] - x[i];
+  double averaged_diff = (x[n-1] - x[0]) / (n-1);
+  for (int i = 0; i < n - 1; ++i) 
+    // if any signal distance is greater or smaller than the averaged space 
+    if (diff[i] / averaged_diff > 1.1 || diff[i] / averaged_diff < 0.9) {
+      equal_space = false;
+      break;
     }
+  // initialize D mat and s_seq
+  MatrixXd denseD = MatrixXd::Zero(n, k);
+  VectorXd s_seq = VectorXd::Zero(n);
+  if (equal_space) {
+    denseD.resize(1, k);
+    s_seq.resize(1);
   }
+  // configure dense D matrix if using Kalman filter
+  if (linear_solver == 2) 
+    configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);   
   
   Eigen::MatrixXd alpha(n-k, nlambda);
 
@@ -408,37 +389,31 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   SparseMatrix<double> penalty_mat = get_penalty_mat(k+1, x);
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
-  MatrixXd denseD;
-  VectorXd s_seq;
+  
+  // check if `x` is equally spaced
   bool equal_space = TRUE;
-  if (linear_solver == 2) {
-    // check if `x` is equally spaced
-    double diff = x[1] - x[0];
-    for (int i = 2; i < n; ++i) 
-      if (x[i] - x[i-1] != diff) {
-        equal_space = false;
-        break;
-      }
-    // construct dense D mat with only nonzero entries from sparse D mat:
-    denseD = smat_to_mat(dk_mat, k, equal_space);
-    // ideally, construct dense denseD directly:
-    // denseD = b_mat(k, x, VectorXi::LinSpaced(n - k, 0, n - k - 1));
-    // re-construct denseD in which each row saves values for T.row(0) per iterate: 
-    if (equal_space) { 
-      s_seq = denseD.block(0, k, 1, 1);
-      denseD.conservativeResize(1, k);
-    } else {
-      s_seq = denseD.block(0, k, n - k, 1);
-      denseD.conservativeResize(n - k, k);
-      MatrixXd firstRow(1, k);
-      for (int i = 0; i < n - k; i++) {
-        firstRow = -denseD.row(i) / s_seq(i);
-        std::reverse(firstRow.data(), firstRow.data() + k);
-        denseD.row(i) = firstRow;
-      }
+  Eigen::VectorXd diff(n - 1);
+  // diff = x.tail(n - 1) - x.head(n - 1);
+  for(int i = 0; i < n - 1; i++)
+    diff[i] = x[i + 1] - x[i];
+  double averaged_diff = (x[n-1] - x[0]) / (n-1);
+  for (int i = 0; i < n - 1; ++i) 
+    // if any signal distance is greater or smaller than the averaged space 
+    if (diff[i] / averaged_diff > 1.1 || diff[i] / averaged_diff < 0.9) {
+      equal_space = false;
+      break;
     }
+  // initialize D mat and s_seq
+  MatrixXd denseD = MatrixXd::Zero(n, k);
+  VectorXd s_seq = VectorXd::Zero(n);
+  if (equal_space) {
+    denseD.resize(1, k);
+    s_seq.resize(1);
   }
-
+  // configure dense D matrix if using Kalman filter
+  if (linear_solver == 2) 
+    configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);   
+  
   VectorXd wy = (y.array()*weights).matrix();
 
   // Initialize theta, alpha, u
@@ -490,6 +465,7 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
       Rcpp::Named("computation_info")=computation_info);
   return return_list;
 }
+
 
 void LinearSystem::kf_init(int k, double rho, const Eigen::MatrixXd& Dseq, 
   const Eigen::VectorXd& s_seq) {
