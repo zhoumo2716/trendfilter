@@ -42,5 +42,6 @@ int calc_degrees_of_freedom(Eigen::VectorXd const &v, int k, double tol = 1e-8);
 Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd,
                     bool tf_weighting = false);
 Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd);
+bool is_equal_space(Rcpp::NumericVector x, double space_tolerance_ratio);
 
 #endif

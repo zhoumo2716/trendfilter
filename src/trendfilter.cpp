@@ -3,7 +3,6 @@
 #include <tuple>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include <iostream>
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "utils.h"
@@ -98,7 +97,7 @@ std::tuple<VectorXd,int> LinearSystem::solve(const Eigen::VectorXd& y, const Eig
   int info = 0;
   switch(solver) {
     case 0: {
-      VectorXd v = wy + rho * Dktv(adj_mean, k, x); // c = alpha + u
+      VectorXd v = wy + rho * Dktv(adj_mean, k, x); 
       sol = tridiag_backsolve(a, b, cp, v);
       break;
     }
@@ -123,25 +122,10 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   // check if `x` is equally spaced
-  bool equal_space = TRUE;
-  Eigen::VectorXd diff(n - 1);
-  //diff = x.tail(n - 1) - x.head(n - 1);
-  for(int i = 0; i < n - 1; i++)
-    diff[i] = x[i + 1] - x[i];
-  double averaged_diff = (x[n-1] - x[0]) / (n-1);
-  for (int i = 0; i < n - 1; ++i) 
-    // if any signal distance is greater or smaller than the averaged space 
-    if (diff[i] / averaged_diff > 1.1 || diff[i] / averaged_diff < 0.9) {
-      equal_space = false;
-      break;
-    }
+  bool equal_space = is_equal_space(x, 0.1);
   // initialize D mat and s_seq
-  MatrixXd denseD = MatrixXd::Zero(n, k);
-  VectorXd s_seq = VectorXd::Zero(n);
-  if (equal_space) {
-    denseD.resize(1, k);
-    s_seq.resize(1);
-  }
+  MatrixXd denseD = equal_space ? MatrixXd::Zero(1, k) : MatrixXd::Zero(n, k);
+  VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
   // configure dense D matrix if using Kalman filter
   if (linear_solver == 2) 
     configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);   
@@ -321,25 +305,10 @@ Rcpp::List admm_lambda_seq(
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   // check if `x` is equally spaced
-  bool equal_space = TRUE;
-  Eigen::VectorXd diff(n - 1);
-  // diff = x.tail(n - 1) - x.head(n - 1);
-  for(int i = 0; i < n - 1; i++)
-    diff[i] = x[i + 1] - x[i];
-  double averaged_diff = (x[n-1] - x[0]) / (n-1);
-  for (int i = 0; i < n - 1; ++i) 
-    // if any signal distance is greater or smaller than the averaged space 
-    if (diff[i] / averaged_diff > 1.1 || diff[i] / averaged_diff < 0.9) {
-      equal_space = false;
-      break;
-    }
+  bool equal_space = is_equal_space(x, 0.1);
   // initialize D mat and s_seq
-  MatrixXd denseD = MatrixXd::Zero(n, k);
-  VectorXd s_seq = VectorXd::Zero(n);
-  if (equal_space) {
-    denseD.resize(1, k);
-    s_seq.resize(1);
-  }
+  MatrixXd denseD = equal_space ? MatrixXd::Zero(1, k) : MatrixXd::Zero(n, k);
+  VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
   // configure dense D matrix if using Kalman filter
   if (linear_solver == 2) 
     configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);   
@@ -391,25 +360,10 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   
   // check if `x` is equally spaced
-  bool equal_space = TRUE;
-  Eigen::VectorXd diff(n - 1);
-  // diff = x.tail(n - 1) - x.head(n - 1);
-  for(int i = 0; i < n - 1; i++)
-    diff[i] = x[i + 1] - x[i];
-  double averaged_diff = (x[n-1] - x[0]) / (n-1);
-  for (int i = 0; i < n - 1; ++i) 
-    // if any signal distance is greater or smaller than the averaged space 
-    if (diff[i] / averaged_diff > 1.1 || diff[i] / averaged_diff < 0.9) {
-      equal_space = false;
-      break;
-    }
+  bool equal_space = is_equal_space(x, 0.1);
   // initialize D mat and s_seq
-  MatrixXd denseD = MatrixXd::Zero(n, k);
-  VectorXd s_seq = VectorXd::Zero(n);
-  if (equal_space) {
-    denseD.resize(1, k);
-    s_seq.resize(1);
-  }
+  MatrixXd denseD = equal_space ? MatrixXd::Zero(1, k) : MatrixXd::Zero(n, k);
+  VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
   // configure dense D matrix if using Kalman filter
   if (linear_solver == 2) 
     configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);   
