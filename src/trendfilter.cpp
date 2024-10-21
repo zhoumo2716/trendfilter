@@ -1,4 +1,5 @@
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 #include <tuple>
 #include <Eigen/Dense>
@@ -141,7 +142,8 @@ Rcpp::List admm_lambda_seq(
     int max_iter = 200,
     double rho_scale = 1.0,
     double tol = 1e-5,
-    int linear_solver = 2) {
+    int linear_solver = 2,
+    double space_tolerance_ratio = 1.49012e-08) {
 
   int n = x.size();
 
@@ -178,7 +180,7 @@ Rcpp::List admm_lambda_seq(
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   // check if `x` is equally spaced
-  bool equal_space = is_equal_space(x, 0.1);
+  bool equal_space = is_equal_space(x, space_tolerance_ratio);
   // initialize D mat and s_seq
   MatrixXd denseD = MatrixXd::Zero(n, k + 1);
   VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
@@ -223,7 +225,8 @@ Rcpp::List admm_lambda_seq(
 Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
     Eigen::VectorXd& y, const Eigen::ArrayXd& weights, int k,
     double lam, int max_iter, double rho,
-    int linear_solver = 2) {
+    int linear_solver = 2, 
+    double space_tolerance_ratio = 1.49012e-08) {
 
   int n = x.size();
 
@@ -233,7 +236,7 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   
   // check if `x` is equally spaced
-  bool equal_space = is_equal_space(x, 0.1);
+  bool equal_space = is_equal_space(x, space_tolerance_ratio);
   // initialize D mat and s_seq
   MatrixXd denseD = MatrixXd::Zero(n, k + 1); // the size of nonzero values in `dk_mat` 
   // contain the (k+1)st nonzero value per row

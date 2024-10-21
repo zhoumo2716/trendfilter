@@ -1,4 +1,5 @@
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 #include <tuple>
 #include <Eigen/Dense>
@@ -98,7 +99,7 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   // check if `x` is equally spaced
-  bool equal_space = is_equal_space(x, 0.1);
+  bool equal_space = is_equal_space(x, 1.49012e-08);
   
   // contain the nonzero values in the first `k` columns in reverse order multiplied by `-1` in `dk_mat`
   MatrixXd denseD;
