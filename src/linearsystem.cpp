@@ -100,14 +100,11 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   // check if `x` is equally spaced
   bool equal_space = is_equal_space(x, 1.49012e-08);
-  
-  // contain the nonzero values in the first `k` columns in reverse order multiplied by `-1` in `dk_mat`
-  MatrixXd denseD;
-  // contain the last columns of the nonzero values in `dk_mat`; if equal_space, only contain the first row
-  VectorXd s_seq;
-  // if equal_space, only contain the first row in `dk_mat`
+  MatrixXd denseD = MatrixXd::Zero(n, k + 1);
+  VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
+  // configure `denseD` if using Kalman filter
   if (linear_solver == 2) 
-    configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space); 
+    configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);   
   
   VectorXd sol = VectorXd::Zero(n);
   LinearSystem linear_system;

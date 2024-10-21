@@ -1,5 +1,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+#include <tuple>
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include "utils.h"
@@ -56,21 +57,22 @@ Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k,
 
 void configure_denseD(Rcpp::NumericVector x, Eigen::MatrixXd& denseD, Eigen::VectorXd& s_seq, Eigen::SparseMatrix<double>& dk_mat, int k, bool equal_space) {
     int n = x.size();
-    // construct dense D mat with only nonzero entries from sparse D mat:
+    // First, construct denseD with only nonzero entries from sparse matrix `dk_mat`:
     denseD = smat_to_mat(dk_mat, k, equal_space);
-
-    // ideally, construct dense denseD directly:
+    // ideally, construct `denseD` directly without computing and transforming the sparse matrix: 
     // denseD = b_mat(k, x, VectorXi::LinSpaced(n - k, 0, n - k - 1));
-    // re-construct denseD in which each row saves values for T.row(0) per iterate: 
-    if (equal_space) {  // if x is equally spaced, the dense D matrix only contains the nonzero band.
-      s_seq = denseD.block(0, k, 1, 1);
-      denseD.conservativeResize(1, k);
+
+    // Second, resize and re-construct `denseD` so that each row contains the values 
+    //    for the first row of the transition matrix per iterate: 
+    // `s_seq` contains the multipliers of the latest states for each transition
+    if (equal_space) { // the nonzero band is the same per row
+      s_seq = denseD.block(0, k, 1, 1); // assign the rightmost in the first row in `denseD` to `s_seq`
+      denseD.conservativeResize(1, k); // keep only the first row and drop the rightmost column
     } else {
-      //s_seq = VectorXd::Ones(n - k);
-      s_seq = denseD.block(0, k, n - k, 1);
-      denseD.conservativeResize(n - k, k);
+      s_seq = denseD.block(0, k, n - k, 1); // assign the rightmost column in `denseD` to `s_seq`
+      denseD.conservativeResize(n - k, k); // drop the rightmost column
     }
-    // reverse order
+    // 2. reverse the order of values in each row and divide them by the negative `s_seq` per row
     MatrixXd firstRow(1, k);
     int m = denseD.rows();
     for (int i = 0; i < m; i++) {
@@ -85,12 +87,12 @@ Rcpp::List configure_denseD_test(Rcpp::NumericVector x, int k) {
     SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
     int n = x.size();
     bool equal_space = is_equal_space(x, 0.1);
-    MatrixXd denseD = equal_space ? MatrixXd::Zero(1, k) : MatrixXd::Zero(n, k);
+    MatrixXd denseD = MatrixXd::Zero(n, k + 1);
     VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
   
     configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);
     
-    return Rcpp::List::create(Rcpp::Named("s_seq") = s_seq, Rcpp::Named("D_mat") = denseD);
+    return Rcpp::List::create(Rcpp::Named("Dk") = dk_mat, Rcpp::Named("s_seq") = s_seq, Rcpp::Named("dense_D") = denseD);
 }
 
 void f1step(double y, double c, double Z, double H, const Eigen::MatrixXd& A, 
@@ -106,7 +108,6 @@ void f1step(double y, double c, double Z, double H, const Eigen::MatrixXd& A,
   Kt = Ptemp.col(0) * Z;
   a = a_temp + Kt * vt / Ft;
   P = Ptemp - Kt * Z * Ptemp.row(0) / Ft;
-
   // symmetrize
   Ptemp = P;
   Ptemp += P.transpose();
