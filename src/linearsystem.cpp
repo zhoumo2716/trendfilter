@@ -1,5 +1,4 @@
 #include <cmath>
-#include <limits>
 #include <stdexcept>
 #include <tuple>
 #include <Eigen/Dense>
@@ -99,13 +98,13 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   // check if `x` is equally spaced
-  bool equal_space = is_equal_space(x, 1.49012e-08);
+  bool equal_space = is_equal_space(x, std::sqrt(Eigen::NumTraits<double>::epsilon()));
   MatrixXd denseD = MatrixXd::Zero(n, k + 1);
   VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
   // configure `denseD` if using Kalman filter
   if (linear_solver == 2) 
     configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);   
-  
+
   VectorXd sol = VectorXd::Zero(n);
   LinearSystem linear_system;
   int info = 0;
