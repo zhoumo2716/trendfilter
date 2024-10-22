@@ -53,8 +53,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // admm_lambda_seq
-Rcpp::List admm_lambda_seq(NumericVector x, Eigen::VectorXd y, Eigen::ArrayXd weights, int k, Eigen::VectorXd lambda, int nlambda, double lambda_max, double lambda_min, double lambda_min_ratio, int max_iter, double rho_scale, double tol, int linear_solver);
-RcppExport SEXP _trendfilter_admm_lambda_seq(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP lambdaSEXP, SEXP nlambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP max_iterSEXP, SEXP rho_scaleSEXP, SEXP tolSEXP, SEXP linear_solverSEXP) {
+Rcpp::List admm_lambda_seq(NumericVector x, Eigen::VectorXd y, Eigen::ArrayXd weights, int k, Eigen::VectorXd lambda, int nlambda, double lambda_max, double lambda_min, double lambda_min_ratio, int max_iter, double rho_scale, double tol, int linear_solver, double space_tolerance_ratio);
+RcppExport SEXP _trendfilter_admm_lambda_seq(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP lambdaSEXP, SEXP nlambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP max_iterSEXP, SEXP rho_scaleSEXP, SEXP tolSEXP, SEXP linear_solverSEXP, SEXP space_tolerance_ratioSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -71,7 +71,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type rho_scale(rho_scaleSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< int >::type linear_solver(linear_solverSEXP);
-    rcpp_result_gen = Rcpp::wrap(admm_lambda_seq(x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver));
+    Rcpp::traits::input_parameter< double >::type space_tolerance_ratio(space_tolerance_ratioSEXP);
+    rcpp_result_gen = Rcpp::wrap(admm_lambda_seq(x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -161,7 +162,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_smat_to_mat", (DL_FUNC) &_trendfilter_smat_to_mat, 3},
     {"_trendfilter_configure_denseD_test", (DL_FUNC) &_trendfilter_configure_denseD_test, 2},
     {"_trendfilter_linear_single_solve_test", (DL_FUNC) &_trendfilter_linear_single_solve_test, 6},
-    {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 13},
+    {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 14},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},
     {"_trendfilter_calc_degrees_of_freedom", (DL_FUNC) &_trendfilter_calc_degrees_of_freedom, 3},

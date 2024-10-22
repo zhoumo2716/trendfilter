@@ -13,8 +13,8 @@ linear_single_solve_test <- function(linear_solver, y, weights, x, rho, adj_mean
     .Call(`_trendfilter_linear_single_solve_test`, linear_solver, y, weights, x, rho, adj_mean)
 }
 
-admm_lambda_seq <- function(x, y, weights, k, lambda, nlambda = 50L, lambda_max = -1.0, lambda_min = -1.0, lambda_min_ratio = 1e-5, max_iter = 200L, rho_scale = 1.0, tol = 1e-5, linear_solver = 2L) {
-    .Call(`_trendfilter_admm_lambda_seq`, x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver)
+admm_lambda_seq <- function(x, y, weights, k, lambda, nlambda = 50L, lambda_max = -1.0, lambda_min = -1.0, lambda_min_ratio = 1e-5, max_iter = 200L, rho_scale = 1.0, tol = 1e-5, linear_solver = 2L, space_tolerance_ratio = -1.0) {
+    .Call(`_trendfilter_admm_lambda_seq`, x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio)
 }
 
 get_dk_mat <- function(k, xd, tf_weighting) {

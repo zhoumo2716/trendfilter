@@ -40,7 +40,4 @@ class LinearSystem {
     Eigen::MatrixXd T, at, P1, Pt, P1inf, Pinf, Kt, Kinf, L0, L1, Ptemp;
 };
 
-Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorXd y, 
-    const Eigen::ArrayXd weights, const Rcpp::NumericVector x, double rho, 
-    const Eigen::VectorXd adj_mean);
 #endif

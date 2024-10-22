@@ -105,7 +105,6 @@ test_that("test linear solvers run with no errors for lambda sequences", {
   expect_no_error(mod_sparse_qr)
   # equal estimates from the first model
   expect_equal(mod_kf$theta[,1], mod_sparse_qr$theta[,1])
-
   # Scenario 2
   mod_kf <- trendfilter(
     y2, x2, weights = weig2, k = k2, nlambda = nlam,
