@@ -103,7 +103,7 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
   // configure `denseD` if using Kalman filter
   if (linear_solver == 2) 
-    configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);   
+    configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);
 
   VectorXd sol = VectorXd::Zero(n);
   LinearSystem linear_system;
@@ -195,7 +195,7 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& y, const Eigen::ArrayXd& w,
     // update transition matrix T for next iterate:
     if (!equal_space && i < n - 1) {
       T.row(0) = Dseq.row(i - d + 1);
-      s = s_seq(i - d);
+      s = s_seq(i - d + 1);
     }
   }
   for (int i = n - 1; i >= d; i--) {
