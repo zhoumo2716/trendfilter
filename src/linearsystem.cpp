@@ -104,7 +104,7 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   VectorXd s_seq;
   if (linear_solver == 2) {
     equal_space = is_equal_space(x, std::sqrt(Eigen::NumTraits<double>::epsilon()));
-    denseD = MatrixXd::Zero(n - 1, k + 1);
+    denseD = MatrixXd::Zero(n - k, k + 1);
     s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
     configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);
   }

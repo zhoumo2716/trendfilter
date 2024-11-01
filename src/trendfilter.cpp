@@ -189,7 +189,7 @@ Rcpp::List admm_lambda_seq(
     equal_space = is_equal_space(x, space_tolerance_ratio < 0 ? std::sqrt(
       Eigen::NumTraits<double>::epsilon()) : space_tolerance_ratio);
     // initialize with the size of nonzero values in `dk_mat`
-    denseD = MatrixXd::Zero(n - 1, k + 1);
+    denseD = MatrixXd::Zero(n - k, k + 1);
     // if using Kalman filter, save the rightmost nonzero value per row in 
     //  `dk_mat` for unevenly space signals. For equally spaced signals, 
     //  simplify it to one value.
@@ -245,18 +245,16 @@ Rcpp::List admm_single_lambda_with_tracking(NumericVector x,
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   
   // check if `x` is equally spaced
-  bool equal_space = is_equal_space(x, space_tolerance_ratio < 0 ? std::sqrt(
-    Eigen::NumTraits<double>::epsilon()) : space_tolerance_ratio);
-  // initialize with the size of nonzero values in `dk_mat`
-  MatrixXd denseD = MatrixXd::Zero(n, k + 1);
-  // if using Kalman filter, save the rightmost nonzero value per row in 
-  //  `dk_mat` for unevenly space signals. For equally spaced signals, 
-  //  simplify it to one value.
-  VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
-  // configure `denseD` if using Kalman filter to contain the information in
-  //  the first k nonzero columns in `dk_mat`. If evenly spaced, resize it to 1*k.
-  if (linear_solver == 2) 
+  bool equal_space = false;
+  MatrixXd denseD;
+  VectorXd s_seq;
+  if (linear_solver == 2) {
+    equal_space = is_equal_space(x, space_tolerance_ratio < 0 ? std::sqrt(
+      Eigen::NumTraits<double>::epsilon()) : space_tolerance_ratio);
+    denseD = MatrixXd::Zero(n - k, k + 1);
+    s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
     configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);   
+  }
 
   VectorXd wy = (y.array()*weights).matrix();
 
