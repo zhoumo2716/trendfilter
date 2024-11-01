@@ -98,12 +98,16 @@ Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorX
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
   // check if `x` is equally spaced
-  bool equal_space = is_equal_space(x, std::sqrt(Eigen::NumTraits<double>::epsilon()));
-  MatrixXd denseD = MatrixXd::Zero(n, k + 1);
-  VectorXd s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
+  bool equal_space = false;
   // configure `denseD` if using Kalman filter
-  if (linear_solver == 2) 
+  MatrixXd denseD;
+  VectorXd s_seq;
+  if (linear_solver == 2) {
+    equal_space = is_equal_space(x, std::sqrt(Eigen::NumTraits<double>::epsilon()));
+    denseD = MatrixXd::Zero(n - 1, k + 1);
+    s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
     configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);
+  }
 
   VectorXd sol = VectorXd::Zero(n);
   LinearSystem linear_system;
