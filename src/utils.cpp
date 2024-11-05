@@ -56,6 +56,7 @@ Eigen::SparseMatrix<double> get_dk_mat(
   return dspline::rcpp_b_mat(k, xd, tf_weighting, Rcpp::seq(0, n - k - 1), true);
 }
 
+// [[Rcpp::export]]
 Eigen::SparseMatrix<double> get_penalty_mat(int k, NumericVector xd) {
   int n = xd.size();
   return dspline::rcpp_b_mat(k, xd, true, Rcpp::seq(0, n - k - 1), true);

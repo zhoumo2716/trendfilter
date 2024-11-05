@@ -47,6 +47,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_penalty_mat
+Eigen::SparseMatrix<double> get_penalty_mat(int k, NumericVector xd);
+RcppExport SEXP _trendfilter_get_penalty_mat(SEXP kSEXP, SEXP xdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type xd(xdSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_penalty_mat(k, xd));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_lambda_max
 double get_lambda_max(const NumericVector& x, const Eigen::VectorXd& y, const Eigen::ArrayXd& weights, int k);
 RcppExport SEXP _trendfilter_get_lambda_max(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP) {
@@ -107,6 +119,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 13},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
+    {"_trendfilter_get_penalty_mat", (DL_FUNC) &_trendfilter_get_penalty_mat, 2},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},
     {"_trendfilter_calc_degrees_of_freedom", (DL_FUNC) &_trendfilter_calc_degrees_of_freedom, 3},
     {"_trendfilter_get_lambda_seq_r", (DL_FUNC) &_trendfilter_get_lambda_seq_r, 5},
