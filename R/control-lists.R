@@ -28,7 +28,7 @@ admm_control_list <- function(
   assert_numeric(rho_scale, lower = .Machine$double.eps, finite = TRUE, len = 1L)
   assert_numeric(tolerance, lower = .Machine$double.eps, finite = TRUE, len = 1L)
   linear_solver <- rlang::arg_match(linear_solver)
-  assert_numeric(space_tolerance_ratio, lower = sqrt(.Machine$double.eps), finite = TRUE, len = 1L)
+  assert_numeric(space_tolerance_ratio, lower = 0, finite = TRUE, len = 1L)
   structure(enlist(max_iter, rho_scale, tolerance, linear_solver, space_tolerance_ratio),
             class = "admm_control")
 }
