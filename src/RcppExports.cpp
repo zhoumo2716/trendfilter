@@ -12,14 +12,14 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // admm_lambda_seq
-Rcpp::List admm_lambda_seq(NumericVector x, Eigen::VectorXd y, Eigen::ArrayXd weights, int k, Eigen::VectorXd lambda, int nlambda, double lambda_max, double lambda_min, double lambda_min_ratio, int max_iter, double rho_scale, double tol, bool tridiag);
+Rcpp::List admm_lambda_seq(NumericVector x, Eigen::VectorXd const y, Eigen::ArrayXd const weights, int k, Eigen::VectorXd lambda, int nlambda, double lambda_max, double lambda_min, double lambda_min_ratio, int max_iter, double rho_scale, double tol, bool tridiag);
 RcppExport SEXP _trendfilter_admm_lambda_seq(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP lambdaSEXP, SEXP nlambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP max_iterSEXP, SEXP rho_scaleSEXP, SEXP tolSEXP, SEXP tridiagSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::ArrayXd >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd const >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::ArrayXd const >::type weights(weightsSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< int >::type nlambda(nlambdaSEXP);

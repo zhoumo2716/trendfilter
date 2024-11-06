@@ -3,10 +3,12 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include <dspline.h>
+#include <tvdenoising.h>
 #include "utils.h"
 
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::depends(dspline)]]
+// [[Rcpp::depends(tvdenoising)]]
 
 typedef Eigen::COLAMDOrdering<int> Ord;
 
@@ -265,3 +267,19 @@ Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd) {
   return Rcpp::as<Eigen::Map<VectorXd> >(out);
 }
 
+// ---- Workarounds to access NumericVector utilities in tvdenoising
+// ---- We may be able to refactor here (replacing Eigen::VectorXd with NumericVector)
+
+Eigen::VectorXd tf_dp(Eigen::VectorXd v, double lambda) {
+   Rcpp::NumericVector nv(Rcpp::wrap(v));
+   Rcpp::NumericVector out = tvdenoising::flsa_dp(nv, lambda);
+   return Rcpp::as<Eigen::Map<VectorXd> >(out);
+ }
+
+Eigen::VectorXd tf_dp_weight(Eigen::VectorXd v, double lambda,
+                             Eigen::VectorXd w) {
+  Rcpp::NumericVector nv(Rcpp::wrap(v));
+  Rcpp::NumericVector nw(Rcpp::wrap(w));
+  Rcpp::NumericVector out = tvdenoising::flsa_dp_weighted(nv, lambda, nw);
+  return Rcpp::as<Eigen::Map<VectorXd> >(out);
+}
