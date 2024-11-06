@@ -17,12 +17,13 @@ Imports:
     Rcpp (>= 1.0.10),
     rlang
 Suggests: 
+    Matrix,
     testthat (>= 3.0.0)
 LinkingTo: 
     dspline,
-    tvdenoising,
     Rcpp,
-    RcppEigen
+    RcppEigen,
+    tvdenoising
 Remotes:
     glmgen/dspline,
     glmgen/tvdenoising
