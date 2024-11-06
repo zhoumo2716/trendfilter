@@ -11,9 +11,55 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// smat_to_mat
+Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k, bool equal_spaced);
+RcppExport SEXP _trendfilter_smat_to_mat(SEXP sparseMatSEXP, SEXP kSEXP, SEXP equal_spacedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type sparseMat(sparseMatSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< bool >::type equal_spaced(equal_spacedSEXP);
+    rcpp_result_gen = Rcpp::wrap(smat_to_mat(sparseMat, k, equal_spaced));
+    return rcpp_result_gen;
+END_RCPP
+}
+// configure_denseD_test
+Rcpp::List configure_denseD_test(Rcpp::NumericVector x, int k);
+RcppExport SEXP _trendfilter_configure_denseD_test(SEXP xSEXP, SEXP kSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    rcpp_result_gen = Rcpp::wrap(configure_denseD_test(x, k));
+    return rcpp_result_gen;
+END_RCPP
+}
+// linear_single_solve_test
+Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorXd y, const Eigen::ArrayXd weights, const Rcpp::NumericVector x, double rho, const Eigen::VectorXd adj_mean);
+RcppExport SEXP _trendfilter_linear_single_solve_test(SEXP linear_solverSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP xSEXP, SEXP rhoSEXP, SEXP adj_meanSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type linear_solver(linear_solverSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Eigen::ArrayXd >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd >::type adj_mean(adj_meanSEXP);
+    rcpp_result_gen = Rcpp::wrap(linear_single_solve_test(linear_solver, y, weights, x, rho, adj_mean));
+    return rcpp_result_gen;
+END_RCPP
+}
 // admm_lambda_seq
+<<<<<<< HEAD
 Rcpp::List admm_lambda_seq(NumericVector x, Eigen::VectorXd const y, Eigen::ArrayXd const weights, int k, Eigen::VectorXd lambda, int nlambda, double lambda_max, double lambda_min, double lambda_min_ratio, int max_iter, double rho_scale, double tol, bool tridiag);
 RcppExport SEXP _trendfilter_admm_lambda_seq(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP lambdaSEXP, SEXP nlambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP max_iterSEXP, SEXP rho_scaleSEXP, SEXP tolSEXP, SEXP tridiagSEXP) {
+=======
+Rcpp::List admm_lambda_seq(NumericVector x, Eigen::VectorXd y, Eigen::ArrayXd weights, int k, Eigen::VectorXd lambda, int nlambda, double lambda_max, double lambda_min, double lambda_min_ratio, int max_iter, double rho_scale, double tol, int linear_solver, double space_tolerance_ratio);
+RcppExport SEXP _trendfilter_admm_lambda_seq(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP lambdaSEXP, SEXP nlambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP max_iterSEXP, SEXP rho_scaleSEXP, SEXP tolSEXP, SEXP linear_solverSEXP, SEXP space_tolerance_ratioSEXP) {
+>>>>>>> djm/package
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -29,8 +75,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< double >::type rho_scale(rho_scaleSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< bool >::type tridiag(tridiagSEXP);
-    rcpp_result_gen = Rcpp::wrap(admm_lambda_seq(x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, tridiag));
+    Rcpp::traits::input_parameter< int >::type linear_solver(linear_solverSEXP);
+    Rcpp::traits::input_parameter< double >::type space_tolerance_ratio(space_tolerance_ratioSEXP);
+    rcpp_result_gen = Rcpp::wrap(admm_lambda_seq(x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -115,15 +162,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// is_equal_space
+bool is_equal_space(Rcpp::NumericVector x, double space_tolerance_ratio);
+RcppExport SEXP _trendfilter_is_equal_space(SEXP xSEXP, SEXP space_tolerance_ratioSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type space_tolerance_ratio(space_tolerance_ratioSEXP);
+    rcpp_result_gen = Rcpp::wrap(is_equal_space(x, space_tolerance_ratio));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 13},
+    {"_trendfilter_smat_to_mat", (DL_FUNC) &_trendfilter_smat_to_mat, 3},
+    {"_trendfilter_configure_denseD_test", (DL_FUNC) &_trendfilter_configure_denseD_test, 2},
+    {"_trendfilter_linear_single_solve_test", (DL_FUNC) &_trendfilter_linear_single_solve_test, 6},
+    {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 14},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_penalty_mat", (DL_FUNC) &_trendfilter_get_penalty_mat, 2},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},
     {"_trendfilter_calc_degrees_of_freedom", (DL_FUNC) &_trendfilter_calc_degrees_of_freedom, 3},
     {"_trendfilter_get_lambda_seq_r", (DL_FUNC) &_trendfilter_get_lambda_seq_r, 5},
     {"_trendfilter_Dkv", (DL_FUNC) &_trendfilter_Dkv, 4},
+    {"_trendfilter_is_equal_space", (DL_FUNC) &_trendfilter_is_equal_space, 2},
     {NULL, NULL, 0}
 };
 

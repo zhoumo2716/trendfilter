@@ -4,7 +4,14 @@
 \alias{admm_control_list}
 \title{ADMM control list}
 \usage{
-admm_control_list(max_iter = 10000, rho_scale = 1, tolerance = 1e-04, ...)
+admm_control_list(
+  max_iter = 10000,
+  rho_scale = 1,
+  tolerance = 1e-04,
+  linear_solver = c("kalman_filter", "sparse_qr"),
+  space_tolerance_ratio = sqrt(.Machine$double.eps),
+  ...
+)
 }
 \arguments{
 \item{max_iter}{Integer. Maximum number of iterations per \code{lambda} value.}
@@ -13,6 +20,11 @@ admm_control_list(max_iter = 10000, rho_scale = 1, tolerance = 1e-04, ...)
 Lagrangian penalty parameter \eqn{\rho}.}
 
 \item{tolerance}{Double. The convergence tolerance for the ADMM algorithm.}
+
+\item{linear_solver}{Integer. Solver for the linear system in ADMM when
+k > 1: \code{kalman_filter} for Kalman filter or \code{sparse_qr} for sparse QR decomposition.}
+
+\item{space_tolerance_ratio}{Double. The tolerance ratio of equally spaced signals.}
 
 \item{...}{not used}
 }
