@@ -9,7 +9,7 @@
 #' @param tolerance Double. The convergence tolerance for the ADMM algorithm.
 #' @param linear_solver Integer. Solver for the linear system in ADMM when
 #'   k > 1: `kalman_filter` for Kalman filter or `sparse_qr` for sparse QR decomposition.
-#' @param space_tolerance_ratio Double. The tolerance ratio of equally spaced signals.
+#' @param space_tolerance_ratio Double. The tolerance ratio of to detect that the signal is equally spaced.
 #' @param ... not used
 #'
 #' @return an object of class `admm_control`
