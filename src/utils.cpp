@@ -265,3 +265,18 @@ Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd) {
   return Rcpp::as<Eigen::Map<VectorXd> >(out);
 }
 
+// [[Rcpp::export]]
+bool is_equal_space(Rcpp::NumericVector x, double space_tolerance_ratio) {
+  bool equal_space = TRUE;
+  int n = x.size();
+  double averaged_diff = (x[n-1] - x[0]) / (n - 1);
+  double space_tolerance = space_tolerance_ratio * averaged_diff;
+  Rcpp::NumericVector diff = tail(x, n - 1) - head(x, n - 1);
+  for (int i = 0; i < n - 1; ++i) 
+    // if any signal distance is greater or smaller than the averaged difference with a tolerance, return False
+    if (diff[i] < averaged_diff - space_tolerance || diff[i] > averaged_diff + space_tolerance) {
+      equal_space = false;
+      break;
+    }
+  return equal_space;
+}
