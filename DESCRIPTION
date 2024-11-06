@@ -17,13 +17,16 @@ Imports:
     Rcpp (>= 1.0.10),
     rlang
 Suggests: 
+    Matrix,
     testthat (>= 3.0.0)
 LinkingTo: 
     dspline,
     Rcpp,
-    RcppEigen
+    RcppEigen,
+    tvdenoising
 Remotes:
-    glmgen/dspline
+    glmgen/dspline,
+    glmgen/tvdenoising
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

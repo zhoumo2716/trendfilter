@@ -3,10 +3,12 @@
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include <dspline.h>
+#include <tvdenoising.h>
 #include "utils.h"
 
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::depends(dspline)]]
+// [[Rcpp::depends(tvdenoising)]]
 
 typedef Eigen::COLAMDOrdering<int> Ord;
 
@@ -265,6 +267,23 @@ Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd) {
   return Rcpp::as<Eigen::Map<VectorXd> >(out);
 }
 
+// ---- Workarounds to access NumericVector utilities in tvdenoising
+// ---- We may be able to refactor here (replacing Eigen::VectorXd with NumericVector)
+
+Eigen::VectorXd tf_dp(Eigen::VectorXd v, double lambda) {
+   Rcpp::NumericVector nv(Rcpp::wrap(v));
+   Rcpp::NumericVector out = tvdenoising::flsa_dp(nv, lambda);
+   return Rcpp::as<Eigen::Map<VectorXd> >(out);
+ }
+
+Eigen::VectorXd tf_dp_weight(Eigen::VectorXd v, double lambda,
+                             Eigen::VectorXd w) {
+  Rcpp::NumericVector nv(Rcpp::wrap(v));
+  Rcpp::NumericVector nw(Rcpp::wrap(w));
+  Rcpp::NumericVector out = tvdenoising::flsa_dp_weighted(nv, lambda, nw);
+  return Rcpp::as<Eigen::Map<VectorXd> >(out);
+}
+
 // [[Rcpp::export]]
 bool is_equal_space(Rcpp::NumericVector x, double space_tolerance_ratio) {
   bool equal_space = TRUE;
@@ -272,7 +291,7 @@ bool is_equal_space(Rcpp::NumericVector x, double space_tolerance_ratio) {
   double averaged_diff = (x[n-1] - x[0]) / (n - 1);
   double space_tolerance = space_tolerance_ratio * averaged_diff;
   Rcpp::NumericVector diff = tail(x, n - 1) - head(x, n - 1);
-  for (int i = 0; i < n - 1; ++i) 
+  for (int i = 0; i < n - 1; ++i)
     // if any signal distance is greater or smaller than the averaged difference with a tolerance, return False
     if (diff[i] < averaged_diff - space_tolerance || diff[i] > averaged_diff + space_tolerance) {
       equal_space = false;
