@@ -8,10 +8,12 @@ Authors@R: c(
   )
 Description: Implementation of univariate trend filtering.
 License: MIT + file LICENSE
+Depends:
+    dspline,
+    tvdenoising
 Imports: 
     checkmate,
     cli,
-    dspline,
     ggplot2,
     Rcpp (>= 1.0.10),
     rlang

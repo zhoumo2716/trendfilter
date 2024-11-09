@@ -11,7 +11,6 @@
 #include "kf_utils.h"
 
 // [[Rcpp::depends(RcppEigen)]]
-// [[Rcpp::depends(tvdenoising)]]
 
 typedef Eigen::COLAMDOrdering<int> Ord;
 

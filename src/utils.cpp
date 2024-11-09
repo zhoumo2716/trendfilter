@@ -7,8 +7,6 @@
 #include "utils.h"
 
 // [[Rcpp::depends(RcppEigen)]]
-// [[Rcpp::depends(dspline)]]
-// [[Rcpp::depends(tvdenoising)]]
 
 typedef Eigen::COLAMDOrdering<int> Ord;
 
