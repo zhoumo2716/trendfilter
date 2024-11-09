@@ -50,16 +50,20 @@ test_that("test a single iterate of linear system solvers yields same results", 
   rho <- 2
   # Scenario 1
   Dkx <- dspline::d_mat(k1, x1, FALSE)
-  theta <- solve(diag(weig1) + rho * crossprod(Dkx),
-                 diag(weig1) %*% y1 + rho * t(as.matrix(Dkx)) %*% mn1)[,1]
+  theta <- solve(
+    Diagonal(n1, weig1) + rho * crossprod(Dkx),
+    Diagonal(n1, weig1) %*% y1 + rho * crossprod(Dkx, mn1)
+  )[,1]
   theta_sparseQR <- linear_single_solve_test(1, y1, weig1, x1, rho, mn1)
   theta_kf <- linear_single_solve_test(2, y1, weig1, x1, rho, mn1)
   expect_equal(theta_kf, theta)
   expect_equal(theta_sparseQR, theta)
   # Scenario 2
   Dkx <- dspline::d_mat(k2, x2, FALSE)
-  theta <- solve(diag(weig2) + rho * crossprod(Dkx),
-                 diag(weig2) %*% y2 + rho * t(as.matrix(Dkx)) %*% mn2)[,1]
+  theta <- solve(
+    Diagonal(n2, weig2) + rho * crossprod(Dkx),
+    Diagonal(n2, weig2) %*% y2 + rho * crossprod(Dkx, mn2)
+  )[,1]
   theta_sparseQR <- linear_single_solve_test(1, y2, weig2, x2, rho, mn2)
   theta_kf <- linear_single_solve_test(2, y2, weig2, x2, rho, mn2)
   expect_equal(theta_kf, theta)
