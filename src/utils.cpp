@@ -277,7 +277,7 @@ Eigen::VectorXd tf_dp(Eigen::VectorXd v, double lambda) {
  }
 
 Eigen::VectorXd tf_dp_weight(Eigen::VectorXd v, double lambda,
-                             Eigen::VectorXd w) {
+                             Eigen::ArrayXd w) {
   Rcpp::NumericVector nv(Rcpp::wrap(v));
   Rcpp::NumericVector nw(Rcpp::wrap(w));
   Rcpp::NumericVector out = tvdenoising::flsa_dp_weighted(nv, lambda, nw);
