@@ -27,13 +27,26 @@ Eigen::VectorXd tridiag_backsolve(
         const Eigen::VectorXd& a, const::VectorXd& b,
             const Eigen::VectorXd& cp, const Eigen::VectorXd& d);
 
-/* Miscellaneous */
+// Lambda sequence
 double get_lambda_max(const NumericVector& x, const Eigen::VectorXd& y,
-    const Eigen::ArrayXd& sqrt_weights, int k);
-Eigen::ArrayXd get_lambda_seq(const NumericVector& x, const Eigen::VectorXd& y,
-    const Eigen::ArrayXd& sqrt_weights, int k,
-    double lambda_min_ratio, int n_lambda);
+                      const Eigen::ArrayXd& sqrt_weights, int k);
+void get_lambda_seq(Eigen::VectorXd& lambda, double lambda_max,
+                    double lambda_min, double lambda_min_ratio, int n_lambda);
+Eigen::VectorXd get_lambda_seq_r(Eigen::VectorXd lambda, double lambda_max,
+                                 double lambda_min, double lambda_min_ratio,
+                                 int n_lambda);
+
+int calc_degrees_of_freedom(Eigen::VectorXd const &v, int k, double tol = 1e-8);
+
+bool is_equal_space(Rcpp::NumericVector x, double space_tolerance_ratio);
+
+
+// Workarounds for interfacing with dspline / tvdenoising
+Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd,
+                    bool tf_weighting = false);
+Eigen::VectorXd Dktv(Eigen::VectorXd v, int k, const NumericVector& xd);
+Eigen::VectorXd tf_dp(Eigen::VectorXd v, double lambda);
+Eigen::VectorXd tf_dp_weight(Eigen::VectorXd v, double lambda, Eigen::ArrayXd w);
 
 
 #endif
-
