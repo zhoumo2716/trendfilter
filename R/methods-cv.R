@@ -62,7 +62,7 @@ print.summary.cv_trendfilter <- function(
 
 #' Plot Cross-Validated trendfilter
 #'
-#' @param x the result of `cv_trendfilter()` of class `cv_trendfilter`
+#' @param x the result of [cv_trendfilter()] of class `cv_trendfilter`
 #' @param which_lambda select which solutions to show.
 #'   If not provided, the cross validation score will be plotted. If provided a
 #'   vector of `lambda` values, the corresponding \eqn{\theta} estimates will be
@@ -146,7 +146,7 @@ plot.cv_trendfilter <- function(
 
 #' Predict with trendfilter at new (interior) design points
 #'
-#' @param object result of `cv_trendfilter()` of class `cv_trendfilter`
+#' @param object result of [cv_trendfilter()] of class `cv_trendfilter`
 #' @param which_lambda select which solutions to show. If provided a
 #'   vector of `lambda` values, the corresponding \eqn{\theta} estimates will be
 #'   plotted. If a string, it must be either one of `lambda_min`, or `lambda_1se`.
@@ -158,7 +158,7 @@ plot.cv_trendfilter <- function(
 #'      minimal cross validation score.
 #'    * If NULL, all estimated \eqn{\theta}'s are plotted (at `newx`).
 #' @inheritParams predict.trendfilter
-#' @param ... additional arguments passed to `predict.trendfilter()`
+#' @param ... additional arguments passed to [predict.trendfilter()]
 #'
 #' @return A vector or matrix of predictions.
 #' @export

@@ -40,7 +40,7 @@
 #'   loss). This argument has no effect if there is a user-defined `lambda`
 #'   sequence.
 #' @param control A list of control parameters for the estimation algorithm.
-#'   See the constructor `trendfilter_control_list()`.
+#'   See the constructor [trendfilter_control_list()].
 #'
 #' @return An object with S3 class `trendfilter`. Among the list components:
 #' * `y` the input data.

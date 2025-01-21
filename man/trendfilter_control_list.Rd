@@ -17,7 +17,7 @@ trendfilter_control_list(
 \item{x_cond}{Double. The conditioning of the \code{x} values}
 
 \item{admm_control}{An object of class \code{admm_control} used to control
-as created by \code{admm_control_list()}}
+as created by \code{\link[=admm_control_list]{admm_control_list()}}}
 
 \item{...}{not used}
 }
@@ -25,7 +25,7 @@ as created by \code{admm_control_list()}}
 An object of class \code{trendfilter_control}
 }
 \description{
-These arguments are used to handle the internals of \code{trendfilter()}
+These arguments are used to handle the internals of \code{\link[=trendfilter]{trendfilter()}}
 }
 \examples{
 trendfilter_control_list()

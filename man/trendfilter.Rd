@@ -73,7 +73,7 @@ loss). This argument has no effect if there is a user-defined \code{lambda}
 sequence.}
 
 \item{control}{A list of control parameters for the estimation algorithm.
-See the constructor \code{trendfilter_control_list()}.}
+See the constructor \code{\link[=trendfilter_control_list]{trendfilter_control_list()}}.}
 }
 \value{
 An object with S3 class \code{trendfilter}. Among the list components:

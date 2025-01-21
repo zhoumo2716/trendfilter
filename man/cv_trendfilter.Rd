@@ -11,6 +11,7 @@ cv_trendfilter(
   k = 2L,
   error_measure = c("deviance", "mse", "mae"),
   nfolds = 5L,
+  lambda = NULL,
   ...
 )
 }
@@ -43,7 +44,18 @@ following way:
 Therefore, the folds are not random and running \code{cv_trendfilter()} twice
 will give the same result.}
 
-\item{...}{additional parameters passet along to \code{trendfilter()}.}
+\item{lambda}{Vector. A user supplied sequence of tuning parameters which
+determines the balance between data fidelity and smoothness of the
+estimated curve; larger \code{lambda} results in a smoother estimate. The
+default, \code{NULL} results in an automatic computation based on \code{nlambda},
+the largest value of \code{lambda} that would result in a maximally smooth
+estimate, and \code{lambda_min_ratio}. Supplying a value of \code{lambda} overrides
+this behaviour. It is likely better to supply a
+decreasing sequence of \code{lambda} values than a single (small) value. If
+supplied, the user-defined \code{lambda} sequence is automatically sorted in
+decreasing order.}
+
+\item{...}{additional parameters passed along to \code{\link[=trendfilter]{trendfilter()}}.}
 }
 \value{
 An object with S3 class \code{"cv_trendfilter"}. Among the list components:

@@ -7,7 +7,7 @@
 \method{predict}{cv_trendfilter}(object, newx = NULL, which_lambda = c("lambda_min", "lambda_1se"), ...)
 }
 \arguments{
-\item{object}{result of \code{cv_trendfilter()} of class \code{cv_trendfilter}}
+\item{object}{result of \code{\link[=cv_trendfilter]{cv_trendfilter()}} of class \code{cv_trendfilter}}
 
 \item{newx}{numeric vector of new design points at which to evaluate the. The
 default, \code{NULL} returns the estimates at the original \code{x} values.}
@@ -24,7 +24,7 @@ minimal cross validation score.
 \item If NULL, all estimated \eqn{\theta}'s are plotted (at \code{newx}).
 }}
 
-\item{...}{additional arguments passed to \code{predict.trendfilter()}}
+\item{...}{additional arguments passed to \code{\link[=predict.trendfilter]{predict.trendfilter()}}}
 }
 \value{
 A vector or matrix of predictions.

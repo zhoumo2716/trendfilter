@@ -1,6 +1,6 @@
 #' Predict with trendfilter at new (interior) design points
 #'
-#' @param object the result of `trendfilter()`
+#' @param object the result of [trendfilter()]
 #' @param newx numeric vector of new design points at which to evaluate the. The
 #'   default, `NULL` returns the estimates at the original `x` values.
 #' @inheritParams trendfilter
