@@ -64,7 +64,7 @@
 trendfilter <- function(y,
                         x = seq_along(y),
                         weights = rep(1, n),
-                        k = 2L,
+                        k = 3L,
                         family = c("gaussian", "logistic", "poisson"),
                         method = c("admm", "pdip", "hybrid"),
                         lambda = NULL,
