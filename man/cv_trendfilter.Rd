@@ -8,7 +8,7 @@ cv_trendfilter(
   y,
   x = seq_along(y),
   weights = rep(1, n),
-  k = 2L,
+  k = 3L,
   error_measure = c("deviance", "mse", "mae"),
   nfolds = 5L,
   lambda = NULL,

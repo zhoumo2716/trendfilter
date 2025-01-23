@@ -8,7 +8,7 @@ trendfilter(
   y,
   x = seq_along(y),
   weights = rep(1, n),
-  k = 2L,
+  k = 3L,
   family = c("gaussian", "logistic", "poisson"),
   method = c("admm", "pdip", "hybrid"),
   lambda = NULL,
@@ -16,6 +16,7 @@ trendfilter(
   lambda_max = NULL,
   lambda_min = NULL,
   lambda_min_ratio = 1e-05,
+  standardize = TRUE,
   control = trendfilter_control_list()
 )
 }
@@ -71,6 +72,10 @@ decreasing order.}
 A very small value will lead to the solution \code{theta = y} (for the Gaussian
 loss). This argument has no effect if there is a user-defined \code{lambda}
 sequence.}
+
+\item{standardize}{If \code{TRUE} (the default), \code{y} will be centered and scaled
+by its mean and standard deviation (and the operation inverted for \code{theta}
+internally). This can significantly speed convergence of the algorithm.}
 
 \item{control}{A list of control parameters for the estimation algorithm.
 See the constructor \code{\link[=trendfilter_control_list]{trendfilter_control_list()}}.}
