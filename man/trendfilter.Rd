@@ -96,7 +96,17 @@ each column corresponding to one value of \code{lambda}.
 }
 }
 \description{
-Estimate the trendfilter
+Given observations \eqn{y} at locations \eqn{x} the trendfilter
+estimates the regression function \eqn{\theta(x) = E[Y\ |\ X = x]} by
+by minimizing the smoothness-penalized negative log-likelihood
+of the form:
+
+\deqn{\hat{\theta} = \arg\min_{\theta} \frac{1}{n} \sum_{i=1}^n (y_i -
+  \theta_i)^2 + \lambda\Vert \mathbb{D}_n^{(k+1)}\theta\Vert_1, }
+
+where \eqn{\lambda} controls the balance between the fit to the data and the
+amount of smoothness, and \eqn{\mathbb{D}_n^{(k+1)}} is the \eqn{(k+1)}-th order
+discrete derivative matrix (a function of \eqn{x}).
 }
 \examples{
 x <- 1:100 / 101 * 2 * pi
@@ -104,4 +114,15 @@ y <- sin(x) + .2 * rnorm(100)
 out <- trendfilter(y, x)
 
 plot(out)
+}
+\references{
+Tibshirani (2014). "Adaptive piecewise polynomial estimation via trend
+filtering," \emph{Annals of Statistics}, \strong{42}(1):285–323. \href{https://www.stat.berkeley.edu/~ryantibs/papers/dspline.pdf}{Link}
+
+Tibshirani (2022), "Divided differences, falling factorials, and
+discrete splines: Another look at trend filtering and related problems,"
+\emph{Foundations and Trends® in Machine Learning}, \strong{15}(6):694-846. \href{https://www.stat.berkeley.edu/~ryantibs/papers/trendfilter.pdf}{Link}
+}
+\seealso{
+\code{\link[tvdenoising:tvdenoising]{tvdenoising::tvdenoising()}}
 }

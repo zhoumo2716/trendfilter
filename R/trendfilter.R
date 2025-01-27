@@ -1,5 +1,18 @@
 #' Estimate the trendfilter
 #'
+#' @description
+#' Given observations \eqn{y} at locations \eqn{x} the trendfilter
+#' estimates the regression function \eqn{\theta(x) = E[Y\ |\ X = x]} by
+#' by minimizing the smoothness-penalized negative log-likelihood
+#' of the form:
+#'
+#' \deqn{\hat{\theta} = \arg\min_{\theta} \frac{1}{n} \sum_{i=1}^n (y_i -
+#'   \theta_i)^2 + \lambda\Vert \mathbb{D}_n^{(k+1)}\theta\Vert_1, }
+#'
+#' where \eqn{\lambda} controls the balance between the fit to the data and the
+#' amount of smoothness, and \eqn{\mathbb{D}_n^{(k+1)}} is the \eqn{(k+1)}-th order
+#' discrete derivative matrix (a function of \eqn{x}).
+#'
 #' @param y vector of observations of length `n`
 #' @param x vector of positions at which the `y` have been observed, defaults
 #'   to `1:n`. These should be in increasing order, but will be sorted if
@@ -57,6 +70,18 @@
 #' * `iters` the required number of iterations for each value of `lambda`.
 #' * `objective` the value of the objective function for each value of `lambda`.
 #' @export
+#'
+#' @seealso [tvdenoising::tvdenoising()]
+#'
+#' @references
+#' Tibshirani (2014). "Adaptive piecewise polynomial estimation via trend
+#'   filtering," _Annals of Statistics_, **42**(1):285–323.
+#'   [Link](https://www.stat.berkeley.edu/~ryantibs/papers/dspline.pdf)
+#'
+#' Tibshirani (2022), "Divided differences, falling factorials, and
+#'   discrete splines: Another look at trend filtering and related problems,"
+#'  _Foundations and Trends® in Machine Learning_, **15**(6):694-846.
+#'  [Link](https://www.stat.berkeley.edu/~ryantibs/papers/trendfilter.pdf)
 #'
 #' @examples
 #' x <- 1:100 / 101 * 2 * pi
