@@ -163,7 +163,10 @@ trendfilter <- function(y,
   if (!is.null(out$alpha)) alpha <- drop(out$alpha) * ys
 
   structure(enlist(
-    y * ys + ym, x, weights, k,
+    y = y * ys + ym,
+    x,
+    weights,
+    k,
     theta = drop(out$theta) * ys + ym,
     alpha = alpha,
     lambda = out$lambda,
