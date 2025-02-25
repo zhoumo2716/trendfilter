@@ -57,6 +57,10 @@
 #'   internally). This can significantly speed convergence of the algorithm.
 #' @param control A list of control parameters for the estimation algorithm.
 #'   See the constructor [trendfilter_control_list()].
+#' @param ns Logical. If `TRUE`, uses the natural spline (ns) formulation
+#'   where the design matrix uses natural splines at the boundary instead of the
+#'   standard trend filtering formulation. Defaults to `FALSE`.
+
 #'
 #' @return An object with S3 class `trendfilter`. Among the list components:
 #' * `y` the input data.
@@ -101,7 +105,8 @@ trendfilter <- function(y,
                         lambda_min = NULL,
                         lambda_min_ratio = 1e-5,
                         standardize = TRUE,
-                        control = trendfilter_control_list()) {
+                        control = trendfilter_control_list(),
+                        ns = FALSE) { ## add ns option
   family <- arg_match(family)
   if (family != "gaussian") {
     cli_abort("Data family {.val {family}} is not yet implemented.")
@@ -156,7 +161,8 @@ trendfilter <- function(y,
     control$admm_control$max_iter, control$admm_control$rho_scale,
     control$admm_control$tolerance,
     if (k == 1L) 0L else match(control$admm_control$linear_solver, c("sparse_qr", "kalman_filter")),
-    control$admm_control$space_tolerance_ratio
+    control$admm_control$space_tolerance_ratio,
+    ns = ns
   )
 
   alpha <- NULL

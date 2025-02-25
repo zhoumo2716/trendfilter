@@ -17,7 +17,8 @@ trendfilter(
   lambda_min = NULL,
   lambda_min_ratio = 1e-05,
   standardize = TRUE,
-  control = trendfilter_control_list()
+  control = trendfilter_control_list(),
+  ns = FALSE
 )
 }
 \arguments{
@@ -79,6 +80,10 @@ internally). This can significantly speed convergence of the algorithm.}
 
 \item{control}{A list of control parameters for the estimation algorithm.
 See the constructor \code{\link[=trendfilter_control_list]{trendfilter_control_list()}}.}
+
+\item{ns}{Logical. If \code{TRUE}, uses the natural spline (ns) formulation
+where the design matrix uses natural splines at the boundary instead of the
+standard trend filtering formulation. Defaults to \code{FALSE}.}
 }
 \value{
 An object with S3 class \code{trendfilter}. Among the list components:
