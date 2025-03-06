@@ -160,32 +160,35 @@ trendfilter <- function(y,
 
 
   ####
-  if (boundary_condition) {
-    if (is.null(left_boundary_m)) {
-      left_boundary_m <- -1
-    } else if (!is.numeric(left_boundary_m) || left_boundary_m != as.integer(left_boundary_m) ||
-               left_boundary_m < 1 || left_boundary_m >= k) {
+  # Ensure left_boundary_m is always set
+  if (is.null(left_boundary_m)) {
+    left_boundary_m <- -1
+  } else if (boundary_condition) {
+    if (!is.numeric(left_boundary_m) || left_boundary_m != as.integer(left_boundary_m) ||
+        left_boundary_m < 1 || left_boundary_m >= k) {
       stop("Error: left_boundary_m must be an integer between 1 and (k-1), or NULL to use the default.")
     }
+  }
 
-    if (is.null(right_boundary_m)) {
-      right_boundary_m <- -1
-    } else if (!is.numeric(right_boundary_m) || right_boundary_m != as.integer(right_boundary_m) ||
-               right_boundary_m < 1 || right_boundary_m >= k) {
+  # Ensure right_boundary_m is always set
+  if (is.null(right_boundary_m)) {
+    right_boundary_m <- -1
+  } else if (boundary_condition) {
+    if (!is.numeric(right_boundary_m) || right_boundary_m != as.integer(right_boundary_m) ||
+        right_boundary_m < 1 || right_boundary_m >= k) {
       stop("Error: right_boundary_m must be an integer between 1 and (k-1), or NULL to use the default.")
     }
   }
-  ####
+
 
 
   out <- admm_lambda_seq(
-    xsc, y, wsc, k,
+    xsc, y, wsc, k, boundary_condition, left_boundary_m, right_boundary_m,
     lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio,
     control$admm_control$max_iter, control$admm_control$rho_scale,
     control$admm_control$tolerance,
     if (k == 1L) 0L else match(control$admm_control$linear_solver, c("sparse_qr", "kalman_filter")),
-    control$admm_control$space_tolerance_ratio,
-    boundary_condition = boundary_condition, left_boundary_m = left_boundary_m, right_boundary_m = right_boundary_m
+    control$admm_control$space_tolerance_ratio
   )
 
   alpha <- NULL
@@ -204,4 +207,5 @@ trendfilter <- function(y,
     dof = out$dof,
     call = match.call()
   ), class = "trendfilter")
-}
+
+  }

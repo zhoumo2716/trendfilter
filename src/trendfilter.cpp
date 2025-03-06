@@ -69,12 +69,14 @@ VectorXd init_u(const VectorXd& residual, const NumericVector& xd, int k,
 
 //////////////////////////////////////////////////////////////// main update begins
 void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd,
-                        const Eigen::ArrayXd& weights, int k, Eigen::Ref<Eigen::VectorXd> theta,
+                        const Eigen::ArrayXd& weights, int k,
+                        bool boundary_condition, int left_boundary_m, int right_boundary_m,
+                        Eigen::Ref<Eigen::VectorXd> theta,
                         Eigen::Ref<Eigen::VectorXd> alpha, Eigen::Ref<Eigen::VectorXd> u, int& iter,
                         double& obj_val, const Eigen::SparseMatrix<double>& dk_mat_sq, const Eigen::SparseMatrix<double>& dk_mat,
                         const Eigen::MatrixXd& denseD, const Eigen::VectorXd& s_seq, double lam,
                         int max_iter, double rho, double tol = 1e-5, int linear_solver = 2,
-                        bool equal_space = false, bool boundary_condition = false, int left_boundary_m = -1, int right_boundary_m = -1) { ///added ns option and dk_mat
+                        bool equal_space = false) { ///added ns option and dk_mat
 
 
   // Initialize
@@ -88,14 +90,22 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
   if (boundary_condition) {
     // If left_boundary_m is -1, set it to default
     if (left_boundary_m == -1) {
-      left_boundary_m = round(k / 2);  // Default value
+      if (k > 1){
+        left_boundary_m = round(k / 2);  // Default value
+      } else {
+        left_boundary_m = 1;
+      }
     } else if (left_boundary_m < 1 || left_boundary_m >= k) {
       Rcpp::stop("Error: left_boundary_m must be an integer between 1 and (k-1), or NULL to use the default.");
     }
 
     // If right_boundary_m is -1, set it to default
     if (right_boundary_m == -1) {
-      right_boundary_m = round(k / 2);  // Default value
+      if (k > 1){
+        right_boundary_m = round(k / 2);  // Default value
+      } else {
+        right_boundary_m = 1;
+      }
     } else if (right_boundary_m < 1 || right_boundary_m >= k) {
       Rcpp::stop("Error: right_boundary_m must be an integer between 1 and (k-1), or NULL to use the default.");
     }
@@ -195,6 +205,9 @@ Rcpp::List admm_lambda_seq(
     Eigen::VectorXd const y,
     Eigen::ArrayXd const weights,
     int k,
+    bool boundary_condition,
+    int left_boundary_m,
+    int right_boundary_m,
     Eigen::VectorXd lambda,
     int nlambda = 50,
     double lambda_max = -1.0,
@@ -204,10 +217,7 @@ Rcpp::List admm_lambda_seq(
     double rho_scale = 1.0,
     double tol = 1e-5,
     int linear_solver = 2,
-    double space_tolerance_ratio = -1.0,
-    bool boundary_condition = false,
-    int left_boundary_m = -1,
-    int right_boundary_m = -1) {
+    double space_tolerance_ratio = -1.0) {
 
   int n = x.size();
 
@@ -272,11 +282,11 @@ Rcpp::List admm_lambda_seq(
 
     for (int i = 0; i < nlambda; i++) {
       Rcpp::checkUserInterrupt();
-      admm_single_lambda(n, y, x, weights, k,
+      admm_single_lambda(n, y, x, weights, k, boundary_condition, left_boundary_m, right_boundary_m,
         theta.col(i), alpha.col(i), u,
         iters[i], objective_val[i],
         dk_mat_sq, dk_mat, denseD, s_seq, lambda[i], max_iter, lambda[i]*rho_scale,
-        tol, linear_solver, equal_space, boundary_condition, left_boundary_m, right_boundary_m);
+        tol, linear_solver, equal_space);
       dof[i] = calc_degrees_of_freedom(alpha.col(i), k);
       if (i + 1 < nlambda) {
         theta.col(i + 1) = theta.col(i);
