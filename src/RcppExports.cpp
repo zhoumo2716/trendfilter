@@ -88,20 +88,21 @@ BEGIN_RCPP
 END_RCPP
 }
 // ns_matrix
-NumericMatrix ns_matrix(NumericVector x, int m);
-RcppExport SEXP _trendfilter_ns_matrix(SEXP xSEXP, SEXP mSEXP) {
+NumericMatrix ns_matrix(NumericVector x, int m1, int m2);
+RcppExport SEXP _trendfilter_ns_matrix(SEXP xSEXP, SEXP m1SEXP, SEXP m2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< int >::type m(mSEXP);
-    rcpp_result_gen = Rcpp::wrap(ns_matrix(x, m));
+    Rcpp::traits::input_parameter< int >::type m1(m1SEXP);
+    Rcpp::traits::input_parameter< int >::type m2(m2SEXP);
+    rcpp_result_gen = Rcpp::wrap(ns_matrix(x, m1, m2));
     return rcpp_result_gen;
 END_RCPP
 }
 // admm_lambda_seq
-Rcpp::List admm_lambda_seq(NumericVector x, Eigen::VectorXd const y, Eigen::ArrayXd const weights, int k, Eigen::VectorXd lambda, int nlambda, double lambda_max, double lambda_min, double lambda_min_ratio, int max_iter, double rho_scale, double tol, int linear_solver, double space_tolerance_ratio, bool ns);
-RcppExport SEXP _trendfilter_admm_lambda_seq(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP lambdaSEXP, SEXP nlambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP max_iterSEXP, SEXP rho_scaleSEXP, SEXP tolSEXP, SEXP linear_solverSEXP, SEXP space_tolerance_ratioSEXP, SEXP nsSEXP) {
+Rcpp::List admm_lambda_seq(NumericVector x, Eigen::VectorXd const y, Eigen::ArrayXd const weights, int k, Eigen::VectorXd lambda, int nlambda, double lambda_max, double lambda_min, double lambda_min_ratio, int max_iter, double rho_scale, double tol, int linear_solver, double space_tolerance_ratio, bool boundary_condition, int left_boundary_m, int right_boundary_m);
+RcppExport SEXP _trendfilter_admm_lambda_seq(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP lambdaSEXP, SEXP nlambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP max_iterSEXP, SEXP rho_scaleSEXP, SEXP tolSEXP, SEXP linear_solverSEXP, SEXP space_tolerance_ratioSEXP, SEXP boundary_conditionSEXP, SEXP left_boundary_mSEXP, SEXP right_boundary_mSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -119,8 +120,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< int >::type linear_solver(linear_solverSEXP);
     Rcpp::traits::input_parameter< double >::type space_tolerance_ratio(space_tolerance_ratioSEXP);
-    Rcpp::traits::input_parameter< bool >::type ns(nsSEXP);
-    rcpp_result_gen = Rcpp::wrap(admm_lambda_seq(x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio, ns));
+    Rcpp::traits::input_parameter< bool >::type boundary_condition(boundary_conditionSEXP);
+    Rcpp::traits::input_parameter< int >::type left_boundary_m(left_boundary_mSEXP);
+    Rcpp::traits::input_parameter< int >::type right_boundary_m(right_boundary_mSEXP);
+    rcpp_result_gen = Rcpp::wrap(admm_lambda_seq(x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio, boundary_condition, left_boundary_m, right_boundary_m));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -225,8 +228,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_compute_P_matrix", (DL_FUNC) &_trendfilter_compute_P_matrix, 2},
     {"_trendfilter_compute_C_withoutTheta", (DL_FUNC) &_trendfilter_compute_C_withoutTheta, 1},
     {"_trendfilter_compute_A_matrix", (DL_FUNC) &_trendfilter_compute_A_matrix, 2},
-    {"_trendfilter_ns_matrix", (DL_FUNC) &_trendfilter_ns_matrix, 2},
-    {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 15},
+    {"_trendfilter_ns_matrix", (DL_FUNC) &_trendfilter_ns_matrix, 3},
+    {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 17},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_penalty_mat", (DL_FUNC) &_trendfilter_get_penalty_mat, 2},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},

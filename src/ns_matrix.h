@@ -6,6 +6,6 @@
 using namespace Rcpp; // Optional (can be removed if using explicit scoping)
 
 // Declare the function(s) you implemented in `ns_matrix.cpp`
-NumericMatrix ns_matrix(NumericVector x, int m);
+NumericMatrix ns_matrix(NumericVector x, int m1, int m2);
 
 #endif // NS_MATRIX_H

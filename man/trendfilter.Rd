@@ -10,6 +10,9 @@ trendfilter(
   weights = rep(1, n),
   k = 3L,
   family = c("gaussian", "logistic", "poisson"),
+  boundary_condition = FALSE,
+  left_boundary_m = NULL,
+  right_boundary_m = NULL,
   method = c("admm", "pdip", "hybrid"),
   lambda = NULL,
   nlambda = 50L,
@@ -17,8 +20,7 @@ trendfilter(
   lambda_min = NULL,
   lambda_min_ratio = 1e-05,
   standardize = TRUE,
-  control = trendfilter_control_list(),
-  ns = FALSE
+  control = trendfilter_control_list()
 )
 }
 \arguments{

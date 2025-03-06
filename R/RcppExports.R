@@ -25,12 +25,12 @@ compute_A_matrix <- function(x_target, x_support) {
     .Call(`_trendfilter_compute_A_matrix`, x_target, x_support)
 }
 
-ns_matrix <- function(x, m) {
-    .Call(`_trendfilter_ns_matrix`, x, m)
+ns_matrix <- function(x, m1, m2) {
+    .Call(`_trendfilter_ns_matrix`, x, m1, m2)
 }
 
-admm_lambda_seq <- function(x, y, weights, k, lambda, nlambda = 50L, lambda_max = -1.0, lambda_min = -1.0, lambda_min_ratio = 1e-5, max_iter = 200L, rho_scale = 1.0, tol = 1e-5, linear_solver = 2L, space_tolerance_ratio = -1.0, ns = FALSE) {
-    .Call(`_trendfilter_admm_lambda_seq`, x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio, ns)
+admm_lambda_seq <- function(x, y, weights, k, lambda, nlambda = 50L, lambda_max = -1.0, lambda_min = -1.0, lambda_min_ratio = 1e-5, max_iter = 200L, rho_scale = 1.0, tol = 1e-5, linear_solver = 2L, space_tolerance_ratio = -1.0, boundary_condition = FALSE, left_boundary_m = -1L, right_boundary_m = -1L) {
+    .Call(`_trendfilter_admm_lambda_seq`, x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio, boundary_condition, left_boundary_m, right_boundary_m)
 }
 
 get_dk_mat <- function(k, xd, tf_weighting) {

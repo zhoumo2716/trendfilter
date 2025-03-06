@@ -58,20 +58,20 @@ NumericMatrix compute_A_matrix(NumericVector x_target, NumericVector x_support) 
 }
 
 // [[Rcpp::export]]
-NumericMatrix ns_matrix(NumericVector x, int m) {
+NumericMatrix ns_matrix(NumericVector x, int m1, int m2) {
   int n = x.size();
-  if (m > n / 2) stop("m must be <= half the length of x");
+  if ((m1+m2) > n) stop("m1 + m2 must be <= length of x");
 
   // Define target and support points
-  NumericVector x_target_left = x[Range(0, m - 1)];
-  NumericVector x_support_left = x[Range(m, 2 * m - 1)];
-  NumericVector x_target_right = x[Range(n - m, n - 1)];
-  NumericVector x_support_right = x[Range(n - 2 * m, n - m - 1)];
+  NumericVector x_target_left = x[Range(0, m1 - 1)];
+  NumericVector x_support_left = x[Range(m1, 2*m1 - 1)];
+  NumericVector x_target_right = x[Range(n-m2, n-1)];
+  NumericVector x_support_right = x[Range(n - 2*m2, n-m2-1)];
 
   // Compute A matrices for left and right
   NumericMatrix A_left = compute_A_matrix(x_target_left, x_support_left);
   NumericMatrix A_right = compute_A_matrix(x_target_right, x_support_right);
-  NumericMatrix A_middle(n - 2 * m, n - 2 * m);
+  NumericMatrix A_middle(n - m1 - m2, n - m1 - m2);
 
   // Identity matrix for middle part
   for (int i = 0; i < A_middle.nrow(); i++) {
@@ -79,7 +79,7 @@ NumericMatrix ns_matrix(NumericVector x, int m) {
   }
 
   // Initialize full A matrix
-  NumericMatrix A(n, n-2*m);
+  NumericMatrix A(n, n-m1-m2);
 
   // Fill left, middle, and right portions
   for (int i = 0; i < A_left.nrow(); i++) {
@@ -90,13 +90,13 @@ NumericMatrix ns_matrix(NumericVector x, int m) {
 
   for (int i = 0; i < A_middle.nrow(); i++) {
     for (int j = 0; j < A_middle.ncol(); j++) {
-      A(m + i, j) = A_middle(i, j);
+      A(m1 + i, j) = A_middle(i, j);
     }
   }
 
   for (int i = 0; i < A_right.nrow(); i++) {
     for (int j = 0; j < A_right.ncol(); j++) {
-      A(n - m + i, n - 3*m + j) = A_right(i, j);
+      A(n - m2 + i, n - m1 - 2*m2 + j) = A_right(i, j);
     }
   }
 

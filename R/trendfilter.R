@@ -98,6 +98,9 @@ trendfilter <- function(y,
                         weights = rep(1, n),
                         k = 3L,
                         family = c("gaussian", "logistic", "poisson"),
+                        boundary_condition = FALSE,
+                        left_boundary_m = NULL,
+                        right_boundary_m = NULL,
                         method = c("admm", "pdip", "hybrid"),
                         lambda = NULL,
                         nlambda = 50L,
@@ -105,8 +108,8 @@ trendfilter <- function(y,
                         lambda_min = NULL,
                         lambda_min_ratio = 1e-5,
                         standardize = TRUE,
-                        control = trendfilter_control_list(),
-                        ns = FALSE) { ## add ns option
+                        control = trendfilter_control_list()) {
+
   family <- arg_match(family)
   if (family != "gaussian") {
     cli_abort("Data family {.val {family}} is not yet implemented.")
@@ -155,6 +158,26 @@ trendfilter <- function(y,
     y <- (y - ym) / ys
   }
 
+
+  ####
+  if (boundary_condition) {
+    if (is.null(left_boundary_m)) {
+      left_boundary_m <- -1
+    } else if (!is.numeric(left_boundary_m) || left_boundary_m != as.integer(left_boundary_m) ||
+               left_boundary_m < 1 || left_boundary_m >= k) {
+      stop("Error: left_boundary_m must be an integer between 1 and (k-1), or NULL to use the default.")
+    }
+
+    if (is.null(right_boundary_m)) {
+      right_boundary_m <- -1
+    } else if (!is.numeric(right_boundary_m) || right_boundary_m != as.integer(right_boundary_m) ||
+               right_boundary_m < 1 || right_boundary_m >= k) {
+      stop("Error: right_boundary_m must be an integer between 1 and (k-1), or NULL to use the default.")
+    }
+  }
+  ####
+
+
   out <- admm_lambda_seq(
     xsc, y, wsc, k,
     lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio,
@@ -162,7 +185,7 @@ trendfilter <- function(y,
     control$admm_control$tolerance,
     if (k == 1L) 0L else match(control$admm_control$linear_solver, c("sparse_qr", "kalman_filter")),
     control$admm_control$space_tolerance_ratio,
-    ns = ns
+    boundary_condition = boundary_condition, left_boundary_m = left_boundary_m, right_boundary_m = right_boundary_m
   )
 
   alpha <- NULL
