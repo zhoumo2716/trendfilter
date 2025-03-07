@@ -51,6 +51,16 @@ options passed as strings. So for example, \code{family = "gaussian"} and
 \code{family = gaussian()} will produce the same results, but the first
 will be much faster.character.}
 
+\item{boundary_condition}{Logical. If \code{TRUE}, uses the Newton polynomial
+interpolation with divided difference at the boundary instead of the
+standard trend filtering formulation. Defaults to \code{FALSE}.}
+
+\item{left_boundary_m}{Integer, optional value. Value has to be between
+1 to k-1, If Null, uses value round(k/2). Defaults to \code{FALSE}.}
+
+\item{right_boundary_m}{Integer, optional value. Value has to be between
+1 to k-1, If Null, uses value round(k/2). Defaults to \code{FALSE}.}
+
 \item{method}{Character. Specifies the estimation algorithm to use.}
 
 \item{lambda}{Vector. A user supplied sequence of tuning parameters which
@@ -82,10 +92,6 @@ internally). This can significantly speed convergence of the algorithm.}
 
 \item{control}{A list of control parameters for the estimation algorithm.
 See the constructor \code{\link[=trendfilter_control_list]{trendfilter_control_list()}}.}
-
-\item{ns}{Logical. If \code{TRUE}, uses the natural spline (ns) formulation
-where the design matrix uses natural splines at the boundary instead of the
-standard trend filtering formulation. Defaults to \code{FALSE}.}
 }
 \value{
 An object with S3 class \code{trendfilter}. Among the list components:

@@ -87,16 +87,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// ns_matrix
-NumericMatrix ns_matrix(NumericVector x, int m1, int m2);
-RcppExport SEXP _trendfilter_ns_matrix(SEXP xSEXP, SEXP m1SEXP, SEXP m2SEXP) {
+// pm_matrix
+NumericMatrix pm_matrix(NumericVector x, int m1, int m2);
+RcppExport SEXP _trendfilter_pm_matrix(SEXP xSEXP, SEXP m1SEXP, SEXP m2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type m1(m1SEXP);
     Rcpp::traits::input_parameter< int >::type m2(m2SEXP);
-    rcpp_result_gen = Rcpp::wrap(ns_matrix(x, m1, m2));
+    rcpp_result_gen = Rcpp::wrap(pm_matrix(x, m1, m2));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -228,7 +228,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_compute_P_matrix", (DL_FUNC) &_trendfilter_compute_P_matrix, 2},
     {"_trendfilter_compute_C_withoutTheta", (DL_FUNC) &_trendfilter_compute_C_withoutTheta, 1},
     {"_trendfilter_compute_A_matrix", (DL_FUNC) &_trendfilter_compute_A_matrix, 2},
-    {"_trendfilter_ns_matrix", (DL_FUNC) &_trendfilter_ns_matrix, 3},
+    {"_trendfilter_pm_matrix", (DL_FUNC) &_trendfilter_pm_matrix, 3},
     {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 17},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_penalty_mat", (DL_FUNC) &_trendfilter_get_penalty_mat, 2},

@@ -57,9 +57,14 @@
 #'   internally). This can significantly speed convergence of the algorithm.
 #' @param control A list of control parameters for the estimation algorithm.
 #'   See the constructor [trendfilter_control_list()].
-#' @param ns Logical. If `TRUE`, uses the natural spline (ns) formulation
-#'   where the design matrix uses natural splines at the boundary instead of the
+#' @param boundary_condition Logical. If `TRUE`, uses the Newton polynomial
+#'   interpolation with divided difference at the boundary instead of the
 #'   standard trend filtering formulation. Defaults to `FALSE`.
+#' @param left_boundary_m Integer, optional value. Value has to be between
+#'   1 to k-1, If Null, uses value round(k/2). Defaults to `FALSE`.
+#' @param right_boundary_m Integer, optional value. Value has to be between
+#'   1 to k-1, If Null, uses value round(k/2). Defaults to `FALSE`.
+#'
 
 #'
 #' @return An object with S3 class `trendfilter`. Among the list components:

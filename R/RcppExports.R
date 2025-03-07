@@ -25,8 +25,8 @@ compute_A_matrix <- function(x_target, x_support) {
     .Call(`_trendfilter_compute_A_matrix`, x_target, x_support)
 }
 
-ns_matrix <- function(x, m1, m2) {
-    .Call(`_trendfilter_ns_matrix`, x, m1, m2)
+pm_matrix <- function(x, m1, m2) {
+    .Call(`_trendfilter_pm_matrix`, x, m1, m2)
 }
 
 admm_lambda_seq <- function(x, y, weights, k, boundary_condition, left_boundary_m, right_boundary_m, lambda, nlambda = 50L, lambda_max = -1.0, lambda_min = -1.0, lambda_min_ratio = 1e-5, max_iter = 200L, rho_scale = 1.0, tol = 1e-5, linear_solver = 2L, space_tolerance_ratio = -1.0) {

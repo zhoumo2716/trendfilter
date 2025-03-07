@@ -9,7 +9,7 @@
 #include "utils.h"
 #include "linearsystem.h"
 #include "kf_utils.h"
-#include "ns_matrix.h"
+#include "pm_matrix.h"
 
 
 // [[Rcpp::depends(RcppEigen)]]
@@ -118,7 +118,7 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
   if (boundary_condition) {
     //Rcpp::Rcout << "Computing ns_matrix with m1 = " << left_boundary_m << std::endl; // Print
     //Rcpp::Rcout << "Computing ns_matrix with m2 = " << right_boundary_m << std::endl; // Print
-    Pm = Rcpp::as<Eigen::MatrixXd>(ns_matrix(xd, left_boundary_m, right_boundary_m));
+    Pm = Rcpp::as<Eigen::MatrixXd>(pm_matrix(xd, left_boundary_m, right_boundary_m));
     //Rcpp::Rcout << "Pm matrix size: " << Pm.rows() << " x " << Pm.cols() << std::endl; // Print
   }
   // Set up linear system

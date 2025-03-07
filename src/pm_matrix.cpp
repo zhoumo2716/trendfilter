@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include "ns_matrix.h"
+#include "pm_matrix.h"
 using namespace Rcpp;
 
 // [[Rcpp::export]]
@@ -58,7 +58,7 @@ NumericMatrix compute_A_matrix(NumericVector x_target, NumericVector x_support) 
 }
 
 // [[Rcpp::export]]
-NumericMatrix ns_matrix(NumericVector x, int m1, int m2) {
+NumericMatrix pm_matrix(NumericVector x, int m1, int m2) {
   int n = x.size();
   if ((m1+m2) > n) stop("m1 + m2 must be <= length of x");
 
