@@ -22,6 +22,15 @@
 #' @param k Integer. Degree of the piecewise polynomial curve to be
 #'   estimated. For example, `k = 0` corresponds to a piecewise constant
 #'   curve.
+#'
+#' @param boundary_condition Logical. If `TRUE`, uses the Newton polynomial
+#'   interpolation with divided difference at the boundary instead of the
+#'   standard trend filtering formulation. Defaults to `FALSE`.
+#' @param left_boundary_m Integer, optional value. Value has to be between
+#'   1 to k-1, If Null, uses value round(k/2). Defaults to `FALSE`.
+#' @param right_boundary_m Integer, optional value. Value has to be between
+#'   1 to k-1, If Null, uses value round(k/2). Defaults to `FALSE`.
+#'
 #' @param family Character or function. Specifies the loss function
 #'   to use. Valid options are:
 #'   * `"gaussian"` - least squares loss (the default),
@@ -33,6 +42,7 @@
 #'   options passed as strings. So for example, `family = "gaussian"` and
 #'   `family = gaussian()` will produce the same results, but the first
 #'   will be much faster.character.
+#'
 #' @param method Character. Specifies the estimation algorithm to use.
 #' @param nlambda Integer. Number of lambda values to use in the sequence.
 #' @param lambda Vector. A user supplied sequence of tuning parameters which
@@ -57,14 +67,6 @@
 #'   internally). This can significantly speed convergence of the algorithm.
 #' @param control A list of control parameters for the estimation algorithm.
 #'   See the constructor [trendfilter_control_list()].
-#' @param boundary_condition Logical. If `TRUE`, uses the Newton polynomial
-#'   interpolation with divided difference at the boundary instead of the
-#'   standard trend filtering formulation. Defaults to `FALSE`.
-#' @param left_boundary_m Integer, optional value. Value has to be between
-#'   1 to k-1, If Null, uses value round(k/2). Defaults to `FALSE`.
-#' @param right_boundary_m Integer, optional value. Value has to be between
-#'   1 to k-1, If Null, uses value round(k/2). Defaults to `FALSE`.
-#'
 
 #'
 #' @return An object with S3 class `trendfilter`. Among the list components:
@@ -102,10 +104,10 @@ trendfilter <- function(y,
                         x = seq_along(y),
                         weights = rep(1, n),
                         k = 3L,
-                        family = c("gaussian", "logistic", "poisson"),
                         boundary_condition = FALSE,
                         left_boundary_m = NULL,
                         right_boundary_m = NULL,
+                        family = c("gaussian", "logistic", "poisson"),
                         method = c("admm", "pdip", "hybrid"),
                         lambda = NULL,
                         nlambda = 50L,
