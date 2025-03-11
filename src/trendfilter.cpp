@@ -76,7 +76,7 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
                         double& obj_val, const Eigen::SparseMatrix<double>& dk_mat_sq, const Eigen::SparseMatrix<double>& dk_mat,
                         const Eigen::MatrixXd& denseD, const Eigen::VectorXd& s_seq, double lam,
                         int max_iter, double rho, double tol = 1e-5, int linear_solver = 2,
-                        bool equal_space = false) { ///added ns option and dk_mat
+                        bool equal_space = false) {
 
 
   // Initialize
