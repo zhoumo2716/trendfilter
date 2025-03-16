@@ -221,93 +221,89 @@ Rcpp::List admm_lambda_seq(
 
   int n = x.size();
 
-  try {
-    if (lambda[0] < tol / 100 && lambda_max <= 0) {
-      lambda_max = get_lambda_max(x, y, weights, k);
-    }
-    get_lambda_seq(lambda, lambda_max, lambda_min, lambda_min_ratio, nlambda);
+
+  if (lambda[0] < tol / 100 && lambda_max <= 0) {
+    lambda_max = get_lambda_max(x, y, weights, k);
+  }
+  get_lambda_seq(lambda, lambda_max, lambda_min, lambda_min_ratio, nlambda);
 
 
-    Eigen::MatrixXd theta(n, nlambda);
-    Rcpp::NumericVector objective_val(nlambda);
-    Rcpp::IntegerVector iters(nlambda);
-    Rcpp::IntegerVector dof(nlambda);
+  Eigen::MatrixXd theta(n, nlambda);
+  Rcpp::NumericVector objective_val(nlambda);
+  Rcpp::IntegerVector iters(nlambda);
+  Rcpp::IntegerVector dof(nlambda);
 
-    // Use DP solution for k=0.
-    if (k == 0) {
-      for (int i = 0; i < nlambda; i++) {
-        theta.col(i) = tf_dp_weight(y, lambda[i], weights);
-        objective_val[i] = tf_objective(y, theta.col(i), x, weights, lambda[i], k);
-        dof[i] = calc_degrees_of_freedom(theta.col(i), k);
-      }
-      Rcpp::List out = Rcpp::List::create(
-        Rcpp::Named("theta") = theta,
-        Rcpp::Named("lambda") = lambda,
-        Rcpp::Named("tf_objective") = objective_val,
-        Rcpp::Named("iters") = iters
-      );
-      return out;
-    }
-
-    // Initialize difference matrices and other helper objects
-    SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
-    SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
-    // Kalman filter objects
-    bool equal_space = false;
-    MatrixXd denseD;
-    VectorXd s_seq;
-    // configure `denseD` if using Kalman filter to contain the information in
-    //  the first k nonzero columns in `dk_mat`. If evenly spaced, resize it to 1*k.
-    if (linear_solver == 2) {
-      // check if `x` is equally spaced
-      equal_space = is_equal_space(x, space_tolerance_ratio < 0 ? std::sqrt(
-        Eigen::NumTraits<double>::epsilon()) : space_tolerance_ratio);
-      // initialize with the size of nonzero values in `dk_mat`
-      denseD = MatrixXd::Zero(n - k, k + 1);
-      // if using Kalman filter, save the rightmost nonzero value per row in
-      //  `dk_mat` for unevenly space signals. For equally spaced signals,
-      //  simplify it to one value.
-      s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
-      configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);
-    }
-
-    Eigen::MatrixXd alpha(n-k, nlambda);
-
-    // Initialize ADMM variables
-    // Project onto Legendre polynomials to initialize for largest lambda.
-    theta.col(0) = project_polynomials(x, y, weights, k);
-    alpha.col(0) = Dkv(theta.col(0), k, x);
-    VectorXd u = init_u((theta.col(0) - y)/(lambda[0]*rho_scale), x, k, weights);
-
-
+  // Use DP solution for k=0.
+  if (k == 0) {
     for (int i = 0; i < nlambda; i++) {
-      Rcpp::checkUserInterrupt();
-      admm_single_lambda(n, y, x, weights, k, boundary_condition, left_boundary_m, right_boundary_m,
-        theta.col(i), alpha.col(i), u,
-        iters[i], objective_val[i],
-        dk_mat_sq, dk_mat, denseD, s_seq, lambda[i], max_iter, lambda[i]*rho_scale,
-        tol, linear_solver, equal_space);
-      dof[i] = calc_degrees_of_freedom(alpha.col(i), k);
-      if (i + 1 < nlambda) {
-        theta.col(i + 1) = theta.col(i);
-        alpha.col(i + 1) = alpha.col(i);
-      }
+      theta.col(i) = tf_dp_weight(y, lambda[i], weights);
+      objective_val[i] = tf_objective(y, theta.col(i), x, weights, lambda[i], k);
+      dof[i] = calc_degrees_of_freedom(theta.col(i), k);
     }
     Rcpp::List out = Rcpp::List::create(
       Rcpp::Named("theta") = theta,
-      Rcpp::Named("alpha") = alpha,
       Rcpp::Named("lambda") = lambda,
       Rcpp::Named("tf_objective") = objective_val,
-      Rcpp::Named("iters") = iters,
-      Rcpp::Named("dof") = dof
+      Rcpp::Named("iters") = iters
     );
+    return out;
+  }
+
+  // Initialize difference matrices and other helper objects
+  SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
+  SparseMatrix<double> dk_mat_sq = dk_mat.transpose() * dk_mat;
+  // Kalman filter objects
+  bool equal_space = false;
+  MatrixXd denseD;
+  VectorXd s_seq;
+  // configure `denseD` if using Kalman filter to contain the information in
+  //  the first k nonzero columns in `dk_mat`. If evenly spaced, resize it to 1*k.
+  if (linear_solver == 2) {
+    // check if `x` is equally spaced
+    equal_space = is_equal_space(x, space_tolerance_ratio < 0 ? std::sqrt(
+      Eigen::NumTraits<double>::epsilon()) : space_tolerance_ratio);
+    // initialize with the size of nonzero values in `dk_mat`
+    denseD = MatrixXd::Zero(n - k, k + 1);
+    // if using Kalman filter, save the rightmost nonzero value per row in
+    //  `dk_mat` for unevenly space signals. For equally spaced signals,
+    //  simplify it to one value.
+    s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
+    configure_denseD(x, denseD, s_seq, dk_mat, k, equal_space);
+  }
+
+  Eigen::MatrixXd alpha(n-k, nlambda);
+
+  // Initialize ADMM variables
+  // Project onto Legendre polynomials to initialize for largest lambda.
+  theta.col(0) = project_polynomials(x, y, weights, k);
+  alpha.col(0) = Dkv(theta.col(0), k, x);
+  VectorXd u = init_u((theta.col(0) - y)/(lambda[0]*rho_scale), x, k, weights);
+
+
+  for (int i = 0; i < nlambda; i++) {
+    Rcpp::checkUserInterrupt();
+    admm_single_lambda(n, y, x, weights, k, boundary_condition, left_boundary_m, right_boundary_m,
+                       theta.col(i), alpha.col(i), u,
+                       iters[i], objective_val[i],
+                                              dk_mat_sq, dk_mat, denseD, s_seq, lambda[i], max_iter, lambda[i]*rho_scale,
+                                              tol, linear_solver, equal_space);
+    dof[i] = calc_degrees_of_freedom(alpha.col(i), k);
+    if (i + 1 < nlambda) {
+      theta.col(i + 1) = theta.col(i);
+      alpha.col(i + 1) = alpha.col(i);
+    }
+  }
+  Rcpp::List out = Rcpp::List::create(
+    Rcpp::Named("theta") = theta,
+    Rcpp::Named("alpha") = alpha,
+    Rcpp::Named("lambda") = lambda,
+    Rcpp::Named("tf_objective") = objective_val,
+    Rcpp::Named("iters") = iters,
+    Rcpp::Named("dof") = dof
+  );
   return out;
 
-  }
-  catch (const std::exception &e) {
-    Rcpp::Rcerr << "Exception caught in admm_lambda_seq: " << e.what() << std::endl;
-    Rcpp::stop("Terminating admm_lambda_seq due to error.");
-  }
+
 }
 
 // The below is legacy code, currently unused.
