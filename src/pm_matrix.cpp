@@ -1,12 +1,17 @@
 #include <Rcpp.h>
+#include <RcppEigen.h>
 #include "pm_matrix.h"
-using namespace Rcpp;
+
+// [[Rcpp::depends(RcppEigen)]]
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+
 
 // [[Rcpp::export]]
-NumericMatrix compute_P_matrix(NumericVector x_target, NumericVector x_support) {
+Eigen::MatrixXd compute_P_matrix(const Eigen::VectorXd &x_target, const Eigen::VectorXd &x_support) {
   int m = x_target.size();
   int n = x_support.size();
-  NumericMatrix P(m, n);
+  Eigen::MatrixXd P = Eigen::MatrixXd::Zero(m, n);
 
   for (int i = 0; i < m; i++) {
     P(i, 0) = 1.0;
@@ -18,9 +23,9 @@ NumericMatrix compute_P_matrix(NumericVector x_target, NumericVector x_support) 
 }
 
 // [[Rcpp::export]]
-NumericMatrix compute_C_withoutTheta(NumericVector x_support) {
+Eigen::MatrixXd compute_C_withoutTheta(const Eigen::VectorXd &x_support) {
   int n = x_support.size();
-  NumericMatrix C(n, n);
+  Eigen::MatrixXd C = Eigen::MatrixXd::Zero(n, n);
 
   for (int t = 0; t < n; t++) {
     for (int w = 0; w <= t; w++) {
@@ -37,68 +42,70 @@ NumericMatrix compute_C_withoutTheta(NumericVector x_support) {
 }
 
 // [[Rcpp::export]]
-NumericMatrix compute_A_matrix(NumericVector x_target, NumericVector x_support) {
-  NumericMatrix P = compute_P_matrix(x_target, x_support);
-  NumericMatrix C_withoutTheta = compute_C_withoutTheta(x_support);
+Eigen::MatrixXd compute_A_matrix(const Eigen::VectorXd &x_target, const Eigen::VectorXd &x_support) {
+  Eigen::MatrixXd P = compute_P_matrix(x_target, x_support);
+  Eigen::MatrixXd C_withoutTheta = compute_C_withoutTheta(x_support);
 
-  int m = P.nrow();
-  int n = C_withoutTheta.ncol();
+  int m = P.rows();
+  int n = C_withoutTheta.cols();
 
-  NumericMatrix A(m, n);
+  Eigen::MatrixXd A = Eigen::MatrixXd::Zero(m, n);
 
-  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < n; j++) {
-      A(i, j) = 0;
-      for (int k = 0; k < n; k++) {
-        A(i, j) += P(i, k) * C_withoutTheta(k, j);
-      }
-    }
-  }
+  A = P * C_withoutTheta;
+
+  // for (int i = 0; i < m; i++) {
+  //   for (int j = 0; j < n; j++) {
+  //     A(i, j) = 0;
+  //     for (int k = 0; k < n; k++) {
+  //       A(i, j) += P(i, k) * C_withoutTheta(k, j);
+  //     }
+  //   }
+  // }
   return A;
 }
 
 // [[Rcpp::export]]
-NumericMatrix pm_matrix(NumericVector x, int m1, int m2) {
+Eigen::MatrixXd pm_matrix(const Eigen::VectorXd &x, int m1, int m2) {
   int n = x.size();
-  if ((m1+m2) > n) stop("m1 + m2 must be <= length of x");
+  if ((m1 + m2) > n) Rcpp::stop("Error: m1 + m2 must be <= length of x");
 
   // Define target and support points
-  NumericVector x_target_left = x[Range(0, m1 - 1)];
-  NumericVector x_support_left = x[Range(m1, 2*m1 - 1)];
-  NumericVector x_target_right = x[Range(n-m2, n-1)];
-  NumericVector x_support_right = x[Range(n - 2*m2, n-m2-1)];
+  Eigen::VectorXd x_target_left = x.head(m1);
+  Eigen::VectorXd x_support_left = x.segment(m1, m1);
+  Eigen::VectorXd x_target_right = x.tail(m2);
+  Eigen::VectorXd x_support_right = x.segment(n-2*m2, m2);
 
   // Compute A matrices for left and right
-  NumericMatrix A_left = compute_A_matrix(x_target_left, x_support_left);
-  NumericMatrix A_right = compute_A_matrix(x_target_right, x_support_right);
-  NumericMatrix A_middle(n - m1 - m2, n - m1 - m2);
+  Eigen::MatrixXd A_left = compute_A_matrix(x_target_left, x_support_left);
+  Eigen::MatrixXd A_right = compute_A_matrix(x_target_right, x_support_right);
+  Eigen::MatrixXd A_middle = Eigen::MatrixXd::Identity(n - m1 - m2, n - m1 - m2); // Identity matrix for middle
 
-  // Identity matrix for middle part
-  for (int i = 0; i < A_middle.nrow(); i++) {
-    A_middle(i, i) = 1.0;
-  }
 
   // Initialize full A matrix
-  NumericMatrix A(n, n-m1-m2);
+  Eigen::MatrixXd A = Eigen::MatrixXd::Zero(n, n - m1 - m2);
 
   // Fill left, middle, and right portions
-  for (int i = 0; i < A_left.nrow(); i++) {
-    for (int j = 0; j < A_left.ncol(); j++) {
-      A(i, j) = A_left(i, j);
-    }
-  }
+  A.block(0, 0, A_left.rows(), A_left.cols()) = A_left;
+  A.block(m1, 0, A_middle.rows(), A_middle.cols()) = A_middle;
+  A.block(n - m2, n - m1 - 2*m2, A_right.rows(), A_right.cols()) = A_right;
 
-  for (int i = 0; i < A_middle.nrow(); i++) {
-    for (int j = 0; j < A_middle.ncol(); j++) {
-      A(m1 + i, j) = A_middle(i, j);
-    }
-  }
-
-  for (int i = 0; i < A_right.nrow(); i++) {
-    for (int j = 0; j < A_right.ncol(); j++) {
-      A(n - m2 + i, n - m1 - 2*m2 + j) = A_right(i, j);
-    }
-  }
+  // for (int i = 0; i < A_left.nrow(); i++) {
+  //   for (int j = 0; j < A_left.ncol(); j++) {
+  //     A(i, j) = A_left(i, j);
+  //   }
+  // }
+  //
+  // for (int i = 0; i < A_middle.nrow(); i++) {
+  //   for (int j = 0; j < A_middle.ncol(); j++) {
+  //     A(m1 + i, j) = A_middle(i, j);
+  //   }
+  // }
+  //
+  // for (int i = 0; i < A_right.nrow(); i++) {
+  //   for (int j = 0; j < A_right.ncol(); j++) {
+  //     A(n - m2 + i, n - m1 - 2*m2 + j) = A_right(i, j);
+  //   }
+  // }
 
   return A;
 }

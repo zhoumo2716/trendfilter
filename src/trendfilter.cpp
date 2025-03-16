@@ -113,12 +113,12 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
   ///
 
 
-  // Initialize Pm if using natural splines
   Eigen::MatrixXd Pm;
   if (boundary_condition) {
     //Rcpp::Rcout << "Computing ns_matrix with m1 = " << left_boundary_m << std::endl; // Print
     //Rcpp::Rcout << "Computing ns_matrix with m2 = " << right_boundary_m << std::endl; // Print
-    Pm = Rcpp::as<Eigen::MatrixXd>(pm_matrix(xd, left_boundary_m, right_boundary_m));
+    Eigen::VectorXd xd_eigen = Rcpp::as<Eigen::VectorXd>(xd);
+    Pm = pm_matrix(xd_eigen, left_boundary_m, right_boundary_m);
     //Rcpp::Rcout << "Pm matrix size: " << Pm.rows() << " x " << Pm.cols() << std::endl; // Print
   }
   // Set up linear system

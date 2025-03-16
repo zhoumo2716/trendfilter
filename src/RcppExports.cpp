@@ -53,47 +53,47 @@ BEGIN_RCPP
 END_RCPP
 }
 // compute_P_matrix
-NumericMatrix compute_P_matrix(NumericVector x_target, NumericVector x_support);
+Eigen::MatrixXd compute_P_matrix(const Eigen::VectorXd& x_target, const Eigen::VectorXd& x_support);
 RcppExport SEXP _trendfilter_compute_P_matrix(SEXP x_targetSEXP, SEXP x_supportSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x_target(x_targetSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type x_support(x_supportSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x_target(x_targetSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x_support(x_supportSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_P_matrix(x_target, x_support));
     return rcpp_result_gen;
 END_RCPP
 }
 // compute_C_withoutTheta
-NumericMatrix compute_C_withoutTheta(NumericVector x_support);
+Eigen::MatrixXd compute_C_withoutTheta(const Eigen::VectorXd& x_support);
 RcppExport SEXP _trendfilter_compute_C_withoutTheta(SEXP x_supportSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x_support(x_supportSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x_support(x_supportSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_C_withoutTheta(x_support));
     return rcpp_result_gen;
 END_RCPP
 }
 // compute_A_matrix
-NumericMatrix compute_A_matrix(NumericVector x_target, NumericVector x_support);
+Eigen::MatrixXd compute_A_matrix(const Eigen::VectorXd& x_target, const Eigen::VectorXd& x_support);
 RcppExport SEXP _trendfilter_compute_A_matrix(SEXP x_targetSEXP, SEXP x_supportSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x_target(x_targetSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type x_support(x_supportSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x_target(x_targetSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x_support(x_supportSEXP);
     rcpp_result_gen = Rcpp::wrap(compute_A_matrix(x_target, x_support));
     return rcpp_result_gen;
 END_RCPP
 }
 // pm_matrix
-NumericMatrix pm_matrix(NumericVector x, int m1, int m2);
+Eigen::MatrixXd pm_matrix(const Eigen::VectorXd& x, int m1, int m2);
 RcppExport SEXP _trendfilter_pm_matrix(SEXP xSEXP, SEXP m1SEXP, SEXP m2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type m1(m1SEXP);
     Rcpp::traits::input_parameter< int >::type m2(m2SEXP);
     rcpp_result_gen = Rcpp::wrap(pm_matrix(x, m1, m2));
