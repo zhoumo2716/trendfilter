@@ -88,11 +88,8 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
 
   Eigen::MatrixXd Pm;
   if (boundary_condition) {
-    //Rcpp::Rcout << "Computing ns_matrix with m1 = " << left_boundary_m << std::endl; // Print
-    //Rcpp::Rcout << "Computing ns_matrix with m2 = " << right_boundary_m << std::endl; // Print
     Eigen::VectorXd xd_eigen = Rcpp::as<Eigen::VectorXd>(xd);
     Pm = pm_matrix(xd_eigen, left_boundary_m, right_boundary_m);
-    //Rcpp::Rcout << "Pm matrix size: " << Pm.rows() << " x " << Pm.cols() << std::endl; // Print
   }
   // Set up linear system
   linear_system.construct(y, weights, k, rho, dk_mat_sq, denseD, s_seq, linear_solver);
@@ -110,13 +107,6 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
       std::tie(theta, computation_info) = linear_system.solve(y, weights,
                  alpha + u, k, xd, rho, denseD, s_seq, linear_solver, equal_space);
     } else { // Theta Update (Gamma update if ns=True)
-      //Rcpp::Rcout << "Checking matrix dimensions before RHS and LHS computation..." << std::endl;
-      //Rcpp::Rcout << "y: " << y.size() << std::endl;
-      //Rcpp::Rcout << "dk_mat: " << dk_mat.rows() << " x " << dk_mat.cols() << std::endl;
-      //Rcpp::Rcout << "alpha size: " << alpha.size() << std::endl;
-      //Rcpp::Rcout << "u size: " << u.size() << std::endl;
-      //Rcpp::Rcout << "(alpha + u) size: " << (alpha + u).size() << std::endl;
-
       // Check if dimensions match before multiplying
       if (u.size() != alpha.size()) {
         Rcpp::Rcerr << "ERROR: u.size = " << u.size() << " does not match alpha.size() = " << alpha.size() << std::endl;
@@ -131,11 +121,6 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
       //Rcpp::Rcout << "Calculating LHS and RHS matrix..." << std::endl; // Print
       Eigen::MatrixXd LHS = (Pm.transpose() * Pm) + rho * Pm.transpose() * (dk_mat_sq) * Pm;
       Eigen::VectorXd RHS = Pm.transpose() * y + rho * Pm.transpose() * dk_mat.transpose() * (alpha + u);
-
-      if (LHS.determinant() < 1e-10) {
-        Rcpp::Rcerr << "LHS matrix is nearly singular! Check data." << std::endl;
-        Rcpp::stop("Stopping ADMM due to ill-conditioned LHS matrix.");
-      }
 
       Eigen::ColPivHouseholderQR<Eigen::MatrixXd> solver(LHS);
       Eigen::VectorXd gamma = solver.solve(RHS);

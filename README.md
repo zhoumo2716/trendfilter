@@ -17,20 +17,7 @@ You can install the development version of trendfilter from
 
 ``` r
 # install.packages("remotes")
-remotes::install_github("zhoumo2716/trendfilter")
-#> Downloading GitHub repo zhoumo2716/trendfilter@HEAD
-#> 
-#> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/private/var/folders/74/4fh__5010_l3tp8fpsft2ft00000gn/T/RtmpQIsEHU/remotes100d52ac7815f/zhoumo2716-trendfilter-1cdc5d0/DESCRIPTION’ ... OK
-#> * preparing ‘trendfilter’:
-#> * checking DESCRIPTION meta-information ... OK
-#> * cleaning src
-#> * checking for LF line-endings in source and make files and shell scripts
-#> * checking for empty or unneeded directories
-#> * building ‘trendfilter_0.0.2.9002.tar.gz’
-#> Installing package into '/private/var/folders/74/4fh__5010_l3tp8fpsft2ft00000gn/T/Rtmpymb2M6/temp_libpathfbad592a4767'
-#> (as 'lib' is unspecified)
-#pak::pak("zhoumo2716/trendfilter")
+remotes::install_github("glmgen/trendfilter")
 ```
 
 ## Example
@@ -47,7 +34,7 @@ plot(out) +
   geom_point(data = data.frame(x = x, y = y), aes(x, y), color = "black")
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-example-1.png" width="100%" />
 
 ## Boundary Condition Option
 
@@ -59,34 +46,476 @@ polynomials and divided differences. `left_boundary_m` and
 odd (natural spline at the boundary).
 
 ``` r
+#remotes::install_github("hughjonesd/ggmagnify")
+library(ggplot2)
+library(tidyr)
+library(grid)
+library(ggmagnify)
+
+x <- 1:100 / 101 * 2 * pi
+y <- sin(x) + .2 * rnorm(50)
 
 # Standard trend filtering (without boundary conditions)
-out1 <- trendfilter(y, x, nlambda = 3, lambda_min = 0.1)
-plot(out1) +
-  ggtitle("Standard Trend Filtering") +
-  geom_point(data = data.frame(x = x, y = y), aes(x, y), color = "black")
-```
-
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
-
-``` r
+out1 <- trendfilter(y, x, nlambda = 15)
+df1 <- data.frame(
+  x = 1:100 / 101 * 2 * pi, 
+  y = as.vector(out1$theta), 
+  lambda = rep(out1$lambda, each = length(x))
+)
 
 # Trend filtering with natural spline boundary conditions
-out2 <- trendfilter(y, x, nlambda = 3, lambda_min = 0.1, boundary_condition = TRUE)
-plot(out2) +
-  ggtitle("Natural Spline Boundary") +
-  geom_point(data = data.frame(x = x, y = y), aes(x, y), color = "black")
+out2 <- trendfilter(y, x, nlambda = 15, boundary_condition = TRUE)
+df2 <- data.frame(
+  x = 1:100 / 101 * 2 * pi, 
+  y = as.vector(out2$theta), 
+  lambda = rep(out2$lambda, each = length(x))
+)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-2.png" width="100%" />
+``` r
+# ---- Plots ----
+# Standard Trend Filtering Plot with Magnification on Boundaries
+ggp1 <- ggplot(df1, aes(x, y, group = lambda, color = as.factor(lambda))) +
+  geom_line() +
+  geom_point(data = data.frame(x = x, y = y), aes(x, y), color = "black", inherit.aes = FALSE) +
+  ggtitle("Standard Trend Filtering") + coord_cartesian(xlim = c(-0.5, 6.5), ylim = c(-2, 2)) +
+  theme_minimal()
+
+# Trend filtering with Natural Spline Plot with Magnification on Boundaries
+ggp2 <- ggplot(df2, aes(x, y, group = lambda, color = as.factor(lambda))) +
+  geom_line() +
+  geom_point(data = data.frame(x = x, y = y), aes(x, y), color = "black", inherit.aes = FALSE) +
+  ggtitle("Trend filtering with NS Boundary") + coord_cartesian(xlim = c(-0.5, 6.5), ylim = c(-2, 2)) +
+  theme_minimal()
+
+# Define the zoom-in regions
+from_left <- c(xmin = 0, xmax = 0.5, ymin = -0.2, ymax = 0.4)
+to_left <- c(xmin = -0.5, xmax = 0.5,  ymin = -2, ymax = -1)  
+
+from_right <- c(xmin = 5.8, xmax = 6.5, ymin = -0.6, ymax = 0.2)
+to_right <- c(xmin = 5.5, xmax = 6.5, ymin = 1, ymax = 2)
+
+# Apply magnification
+ggp1 + 
+  geom_magnify(from = from_left, to = to_left) + 
+  geom_magnify(from = from_right, to = to_right)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+```
+
+<img src="man/figures/README-boundary-constraint plot-1.png" width="100%" />
 
 ``` r
 
-# Custom boundary conditions
-out3 <- trendfilter(y, x, nlambda = 3, lambda_min = 0.1, boundary_condition = TRUE, left_boundary_m = 2, right_boundary_m = 1)
-plot(out3) +
-  ggtitle("Custom Boundaries (L=2, R=1)") +
-  geom_point(data = data.frame(x = x, y = y), aes(x, y), color = "black")
+ggp2 + 
+  geom_magnify(from = from_left, to = to_left) + 
+  geom_magnify(from = from_right, to = to_right)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
+#> Warning in .setMask(mask$f, mask$ref): Ignored alpha mask (not supported on
+#> this device)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-3.png" width="100%" />
+<img src="man/figures/README-boundary-constraint plot-2.png" width="100%" />
