@@ -86,33 +86,6 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
   VectorXd wy = (y.array()*weights).matrix();
   double rr, ss;
 
-  ///
-  if (boundary_condition) {
-    // If left_boundary_m is -1, set it to default
-    if (left_boundary_m == -1) {
-      if (k > 1){
-        left_boundary_m = round(k / 2);  // Default value
-      } else {
-        left_boundary_m = 1;
-      }
-    } else if (left_boundary_m < 1 || left_boundary_m >= k) {
-      Rcpp::stop("Error: left_boundary_m must be an integer between 1 and (k-1), or NULL to use the default.");
-    }
-
-    // If right_boundary_m is -1, set it to default
-    if (right_boundary_m == -1) {
-      if (k > 1){
-        right_boundary_m = round(k / 2);  // Default value
-      } else {
-        right_boundary_m = 1;
-      }
-    } else if (right_boundary_m < 1 || right_boundary_m >= k) {
-      Rcpp::stop("Error: right_boundary_m must be an integer between 1 and (k-1), or NULL to use the default.");
-    }
-  }
-  ///
-
-
   Eigen::MatrixXd Pm;
   if (boundary_condition) {
     //Rcpp::Rcout << "Computing ns_matrix with m1 = " << left_boundary_m << std::endl; // Print

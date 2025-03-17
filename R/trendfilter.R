@@ -169,7 +169,7 @@ trendfilter <- function(y,
   ####
   # Ensure left_boundary_m is always set
   if (is.null(left_boundary_m)) {
-    left_boundary_m <- -1
+    left_boundary_m <- ceiling(k/2)
   } else if (boundary_condition) {
     if (!is.numeric(left_boundary_m) || left_boundary_m != as.integer(left_boundary_m) ||
         left_boundary_m < 1 || left_boundary_m >= k) {
@@ -179,7 +179,7 @@ trendfilter <- function(y,
 
   # Ensure right_boundary_m is always set
   if (is.null(right_boundary_m)) {
-    right_boundary_m <- -1
+    right_boundary_m <- ceiling(k/2)
   } else if (boundary_condition) {
     if (!is.numeric(right_boundary_m) || right_boundary_m != as.integer(right_boundary_m) ||
         right_boundary_m < 1 || right_boundary_m >= k) {
