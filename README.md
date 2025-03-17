@@ -101,7 +101,7 @@ ggp1 +
   geom_magnify(from = from_right, to = to_right)
 ```
 
-<img src="man/figures/README-boundary-constraint-plot-1.png" width="100%" />
+<img src="man/figures/README-boundary-constraint-plots-1.png" width="100%" />
 
 ``` r
 
@@ -110,4 +110,4 @@ ggp2 +
   geom_magnify(from = from_right, to = to_right)
 ```
 
-<img src="man/figures/README-boundary-constraint-plot-2.png" width="100%" />
+<img src="man/figures/README-boundary-constraint-plots-2.png" width="100%" />
