@@ -7,7 +7,6 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 
-// [[Rcpp::export]]
 Eigen::MatrixXd compute_P_matrix(const Eigen::VectorXd &x_target, const Eigen::VectorXd &x_support) {
   int m = x_target.size();
   int n = x_support.size();
@@ -22,7 +21,6 @@ Eigen::MatrixXd compute_P_matrix(const Eigen::VectorXd &x_target, const Eigen::V
   return P;
 }
 
-// [[Rcpp::export]]
 Eigen::MatrixXd compute_C_withoutTheta(const Eigen::VectorXd &x_support) {
   int n = x_support.size();
   Eigen::MatrixXd C = Eigen::MatrixXd::Zero(n, n);
@@ -41,7 +39,6 @@ Eigen::MatrixXd compute_C_withoutTheta(const Eigen::VectorXd &x_support) {
   return C;
 }
 
-// [[Rcpp::export]]
 Eigen::MatrixXd compute_A_matrix(const Eigen::VectorXd &x_target, const Eigen::VectorXd &x_support) {
   Eigen::MatrixXd P = compute_P_matrix(x_target, x_support);
   Eigen::MatrixXd C_withoutTheta = compute_C_withoutTheta(x_support);

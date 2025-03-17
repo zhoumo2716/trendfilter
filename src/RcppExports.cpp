@@ -52,41 +52,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_P_matrix
-Eigen::MatrixXd compute_P_matrix(const Eigen::VectorXd& x_target, const Eigen::VectorXd& x_support);
-RcppExport SEXP _trendfilter_compute_P_matrix(SEXP x_targetSEXP, SEXP x_supportSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x_target(x_targetSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x_support(x_supportSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_P_matrix(x_target, x_support));
-    return rcpp_result_gen;
-END_RCPP
-}
-// compute_C_withoutTheta
-Eigen::MatrixXd compute_C_withoutTheta(const Eigen::VectorXd& x_support);
-RcppExport SEXP _trendfilter_compute_C_withoutTheta(SEXP x_supportSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x_support(x_supportSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_C_withoutTheta(x_support));
-    return rcpp_result_gen;
-END_RCPP
-}
-// compute_A_matrix
-Eigen::MatrixXd compute_A_matrix(const Eigen::VectorXd& x_target, const Eigen::VectorXd& x_support);
-RcppExport SEXP _trendfilter_compute_A_matrix(SEXP x_targetSEXP, SEXP x_supportSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x_target(x_targetSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x_support(x_supportSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_A_matrix(x_target, x_support));
-    return rcpp_result_gen;
-END_RCPP
-}
 // pm_matrix
 Eigen::MatrixXd pm_matrix(const Eigen::VectorXd& x, int m1, int m2);
 RcppExport SEXP _trendfilter_pm_matrix(SEXP xSEXP, SEXP m1SEXP, SEXP m2SEXP) {
@@ -225,9 +190,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_smat_to_mat", (DL_FUNC) &_trendfilter_smat_to_mat, 3},
     {"_trendfilter_configure_denseD_test", (DL_FUNC) &_trendfilter_configure_denseD_test, 2},
     {"_trendfilter_linear_single_solve_test", (DL_FUNC) &_trendfilter_linear_single_solve_test, 6},
-    {"_trendfilter_compute_P_matrix", (DL_FUNC) &_trendfilter_compute_P_matrix, 2},
-    {"_trendfilter_compute_C_withoutTheta", (DL_FUNC) &_trendfilter_compute_C_withoutTheta, 1},
-    {"_trendfilter_compute_A_matrix", (DL_FUNC) &_trendfilter_compute_A_matrix, 2},
     {"_trendfilter_pm_matrix", (DL_FUNC) &_trendfilter_pm_matrix, 3},
     {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 17},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
