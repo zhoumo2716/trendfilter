@@ -77,7 +77,7 @@ df2 <- data.frame(
 )
 ```
 
-```{r boundary-constraint plot, dev='png'}
+```{r boundary-constraint-plot, message=FALSE, warning=FALSE, dev='png'}
 # ---- Plots ----
 # Standard Trend Filtering Plot with Magnification on Boundaries
 ggp1 <- ggplot(df1, aes(x, y, group = lambda, color = as.factor(lambda))) +
