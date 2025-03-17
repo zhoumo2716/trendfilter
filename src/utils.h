@@ -2,7 +2,6 @@
 #define UTILS_H
 
 #include <RcppEigen.h>
-using namespace Eigen;
 
 using Rcpp::NumericVector;
 using Eigen::SparseMatrix;
