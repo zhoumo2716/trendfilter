@@ -175,6 +175,7 @@ trendfilter <- function(y,
         left_boundary_m < 1 || left_boundary_m >= k) {
       cli_abort("Error: {.var left_boundary_m} must be an integer between 1 and (k-1), or NULL to use the default.")
     }
+    left_boundary_m <- as.integer(left_boundary_m)
   }
 
   # Ensure right_boundary_m is always set
@@ -185,6 +186,7 @@ trendfilter <- function(y,
         right_boundary_m < 1 || right_boundary_m >= k) {
       cli_abort("Error: {.var right_boundary_m} must be an integer between 1 and (k-1), or NULL to use the default.")
     }
+    right_boundary_m <- as.integer(right_boundary_m)
   }
 
 

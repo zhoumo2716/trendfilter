@@ -53,15 +53,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // pm_matrix
-Eigen::MatrixXd pm_matrix(const Eigen::VectorXd& x, int m1, int m2);
-RcppExport SEXP _trendfilter_pm_matrix(SEXP xSEXP, SEXP m1SEXP, SEXP m2SEXP) {
+Eigen::SparseMatrix<double> pm_matrix(const NumericVector& xd, int m1, int m2);
+RcppExport SEXP _trendfilter_pm_matrix(SEXP xdSEXP, SEXP m1SEXP, SEXP m2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type xd(xdSEXP);
     Rcpp::traits::input_parameter< int >::type m1(m1SEXP);
     Rcpp::traits::input_parameter< int >::type m2(m2SEXP);
-    rcpp_result_gen = Rcpp::wrap(pm_matrix(x, m1, m2));
+    rcpp_result_gen = Rcpp::wrap(pm_matrix(xd, m1, m2));
     return rcpp_result_gen;
 END_RCPP
 }

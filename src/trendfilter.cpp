@@ -86,10 +86,9 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
   VectorXd wy = (y.array()*weights).matrix();
   double rr, ss;
 
-  Eigen::MatrixXd Pm;
+  Eigen::SparseMatrix<double> Pm;
   if (boundary_condition) {
-    Eigen::VectorXd xd_eigen = Rcpp::as<Eigen::VectorXd>(xd);
-    Pm = pm_matrix(xd_eigen, left_boundary_m, right_boundary_m);
+    Pm = pm_matrix(xd, left_boundary_m, right_boundary_m);
   }
   // Set up linear system
   linear_system.construct(y, weights, k, rho, dk_mat_sq, denseD, s_seq, linear_solver);
@@ -102,7 +101,7 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
   for (iter = 1; iter < max_iter; iter++) {
     if (iter % 1000 == 0) Rcpp::checkUserInterrupt();
 
-    // Update if ns=False)
+    // Update if boundary condition=False)
     if (!boundary_condition) {
       std::tie(theta, computation_info) = linear_system.solve(y, weights,
                  alpha + u, k, xd, rho, denseD, s_seq, linear_solver, equal_space);

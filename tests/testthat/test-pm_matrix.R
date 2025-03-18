@@ -13,7 +13,8 @@ test_that("pm_matrix produces correct structure", {
 
   # 2. Check middle section: Identity matrix
   middle_section <- Pm[(m1 + 1):(n - m2), ]
-  expect_equal(middle_section, diag(n - m1 - m2), info = "Middle section should be an identity matrix")
+  middle_dense <- as.matrix(middle_section)   # Convert to dense matrix
+  expect_equal(middle_dense, diag(n - m1 - m2), info = "Middle section should be an identity matrix")
 
   # 3. Check upper-left boundary matrix: (m1 x m1) non-zero
   upper_left <- Pm[1:m1, 1:m1]

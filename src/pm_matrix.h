@@ -1,10 +1,12 @@
 #ifndef PM_MATRIX_H  // Prevents multiple inclusions
 #define PM_MATRIX_H
 
-#include <RcppEigen.h>  // Include Rcpp dependency
+#include <Rcpp.h>
+#include <RcppEigen.h>
+
+using namespace Rcpp;
 
 // Declare the function(s) you implemented in `pm_matrix.cpp`
-Eigen::MatrixXd pm_matrix(const Eigen::VectorXd &x, int m1, int m2);
-
+Eigen::SparseMatrix<double> pm_matrix(const NumericVector& xd, int m1, int m2);
 #endif
 
