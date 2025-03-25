@@ -172,7 +172,7 @@ trendfilter <- function(y,
     left_boundary_m <- ceiling(k/2)
   } else if (boundary_condition) {
     if (!is.numeric(left_boundary_m) || left_boundary_m != as.integer(left_boundary_m) ||
-        left_boundary_m < 1 || left_boundary_m >= k) {
+        left_boundary_m < 1 || left_boundary_m >= k+2) {
       cli_abort("Error: {.var left_boundary_m} must be an integer between 1 and (k-1), or NULL to use the default.")
     }
     left_boundary_m <- as.integer(left_boundary_m)
@@ -183,7 +183,7 @@ trendfilter <- function(y,
     right_boundary_m <- ceiling(k/2)
   } else if (boundary_condition) {
     if (!is.numeric(right_boundary_m) || right_boundary_m != as.integer(right_boundary_m) ||
-        right_boundary_m < 1 || right_boundary_m >= k) {
+        right_boundary_m < 1 || right_boundary_m >= k+2) {
       cli_abort("Error: {.var right_boundary_m} must be an integer between 1 and (k-1), or NULL to use the default.")
     }
     right_boundary_m <- as.integer(right_boundary_m)
