@@ -23,13 +23,10 @@
 #'   estimated. For example, `k = 0` corresponds to a piecewise constant
 #'   curve.
 #'
-#' @param boundary_condition Logical. If `TRUE`, uses the Newton polynomial
-#'   interpolation with divided difference at the boundary instead of the
-#'   standard trend filtering formulation. Defaults to `FALSE`.
-#' @param left_boundary_m Integer, optional value. Value has to be between
-#'   1 to k-1, If Null, uses value round(k/2). Defaults to `FALSE`.
-#' @param right_boundary_m Integer, optional value. Value has to be between
-#'   1 to k-1, If Null, uses value round(k/2). Defaults to `FALSE`.
+#' @param left_boundary_m Integer or 'natural', optional value. Value has to be between
+#'   1 to k-1 or 'natural. If Null, use 0. If 'natural', uses value round(k/2). Defaults to `NULL`.
+#' @param right_boundary_m Integer or 'natural', optional value. Value has to be between
+#'   1 to k-1 or 'natural. If Null, use 0. If 'natural', uses value round(k/2). Defaults to `NULL`.
 #'
 #' @param family Character or function. Specifies the loss function
 #'   to use. Valid options are:
@@ -104,7 +101,6 @@ trendfilter <- function(y,
                         x = seq_along(y),
                         weights = rep(1, n),
                         k = 3L,
-                        boundary_condition = FALSE,
                         left_boundary_m = NULL,
                         right_boundary_m = NULL,
                         family = c("gaussian", "logistic", "poisson"),
@@ -167,29 +163,42 @@ trendfilter <- function(y,
 
 
   ####
-  # Ensure left_boundary_m is always set
+  # Ensure boundary condition is always set
+  if (is.null(left_boundary_m) && is.null(right_boundary_m)) {
+    boundary_condition <- FALSE
+  } else {
+    boundary_condition <- TRUE
+  }
+
   if (is.null(left_boundary_m)) {
-    left_boundary_m <- ceiling(k/2)
-  } else if (boundary_condition) {
-    if (!is.numeric(left_boundary_m) || left_boundary_m != as.integer(left_boundary_m) ||
-        left_boundary_m < 1 || left_boundary_m >= k+2) {
-      cli_abort("Error: {.var left_boundary_m} must be an integer between 1 and (k-1), or NULL to use the default.")
+    left_boundary_m <- 0
+  } else {
+    if (left_boundary_m == "natural") {
+      left_boundary_m <- ceiling(k / 2)
+    } else if (!is.numeric(left_boundary_m) ||
+                 length(left_boundary_m) != 1 ||
+                 left_boundary_m != as.integer(left_boundary_m) ||
+                 left_boundary_m < 1 || left_boundary_m > k) {
+      cli_abort("Error: {.var left_boundary_m} must be an integer between 1 and k, 'natural', or NULL to use the default.")
+      }
     }
-    left_boundary_m <- as.integer(left_boundary_m)
-  }
 
-  # Ensure right_boundary_m is always set
+    # Process right_boundary_m
   if (is.null(right_boundary_m)) {
-    right_boundary_m <- ceiling(k/2)
-  } else if (boundary_condition) {
-    if (!is.numeric(right_boundary_m) || right_boundary_m != as.integer(right_boundary_m) ||
-        right_boundary_m < 1 || right_boundary_m >= k+2) {
-      cli_abort("Error: {.var right_boundary_m} must be an integer between 1 and (k-1), or NULL to use the default.")
-    }
-    right_boundary_m <- as.integer(right_boundary_m)
-  }
+    right_boundary_m <- 0
+    } else {
+      if (right_boundary_m == "natural") {
+        right_boundary_m <- ceiling(k / 2)
+      } else if (!is.numeric(right_boundary_m) ||
+                 length(right_boundary_m) != 1 ||
+                 right_boundary_m != as.integer(right_boundary_m) ||
+                 right_boundary_m < 1 || right_boundary_m > k) {
+        cli_abort("Error: {.var right_boundary_m} must be an integer between 1 and k, 'natural', or NULL to use the default.")
+        }
+      }
 
-
+  left_boundary_m <- as.integer(left_boundary_m)
+  right_boundary_m <- as.integer(right_boundary_m)
 
   out <- admm_lambda_seq(
     xsc, y, wsc, k, boundary_condition, left_boundary_m, right_boundary_m,
@@ -213,8 +222,10 @@ trendfilter <- function(y,
     lambda = out$lambda,
     iters = out$iters,
     objective = out$tf_objective,
+    left_boundary_m <- left_boundary_m,
+    right_boundary_m <- right_boundary_m,
+    boundary_condition <- boundary_condition,
     dof = out$dof,
     call = match.call()
   ), class = "trendfilter")
-
   }
