@@ -30,6 +30,39 @@ library(ggplot2)
 x <- 1:100 / 101 * 2 * pi
 y <- sin(x) + .2 * rnorm(100)
 out <- trendfilter(y, x, nlambda = 15)
+#> Warning: Using `<-` as argument is often a mistake.
+#> Do you need to use `=` to match an argument?
+#> 
+#> If you really want to use `<-`, please wrap in braces:
+#> 
+#>   # Bad:
+#>   fn(a <- 1)
+#> 
+#>   # Good:
+#>   fn(a = 1)       # Match 1 to parameter `a`
+#>   fn({ a <- 1 })  # Assign 1 to variable `a`
+#> Warning: Using `<-` as argument is often a mistake.
+#> Do you need to use `=` to match an argument?
+#> 
+#> If you really want to use `<-`, please wrap in braces:
+#> 
+#>   # Bad:
+#>   fn(a <- 1)
+#> 
+#>   # Good:
+#>   fn(a = 1)       # Match 1 to parameter `a`
+#>   fn({ a <- 1 })  # Assign 1 to variable `a`
+#> Warning: Using `<-` as argument is often a mistake.
+#> Do you need to use `=` to match an argument?
+#> 
+#> If you really want to use `<-`, please wrap in braces:
+#> 
+#>   # Bad:
+#>   fn(a <- 1)
+#> 
+#>   # Good:
+#>   fn(a = 1)       # Match 1 to parameter `a`
+#>   fn({ a <- 1 })  # Assign 1 to variable `a`
 plot(out) +
   geom_point(data = data.frame(x = x, y = y), aes(x, y), color = "black")
 ```
@@ -38,12 +71,13 @@ plot(out) +
 
 ## Boundary Condition Option
 
-`boundary_condition = TRUE` enables boundary correction using Newton
-polynomials and divided differences. `left_boundary_m` and
-`right_boundary_m` determine how the boundary conditions are applied
-(order of polynomial). By default, `left_boundary_m` =
-`right_boundary_m` = `round(k/2)`, which simplifies to (k+1)/2 when k is
-odd (natural spline at the boundary).
+None empty `left_boundary_m` and `right_boundary_m` enables boundary
+correction using Newton polynomials and divided differences.
+`left_boundary_m` and `right_boundary_m` determine how the boundary
+conditions are applied (order of polynomial). By default,
+`left_boundary_m` = `right_boundary_m` = `0`. If set to ‘natural’, we
+use `round_up(k/2)`, which simplifies to (k+1)/2 when k is odd (natural
+spline at the boundary).
 
 ``` r
 #remotes::install_github("hughjonesd/ggmagnify")
@@ -64,7 +98,7 @@ df1 <- data.frame(
 )
 
 # Trend filtering with natural spline boundary conditions
-out2 <- trendfilter(y, x, nlambda = 15, boundary_condition = TRUE)
+out2 <- trendfilter(y, x, nlambda = 15, left_boundary_m = "natural", right_boundary_m = "natural")
 df2 <- data.frame(
   x = 1:100 / 101 * 2 * pi, 
   y = as.vector(out2$theta), 
