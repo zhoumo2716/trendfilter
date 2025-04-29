@@ -45,12 +45,12 @@ print.admm_control <- function(x, prefix = "An", ...) {
 
 #' Trendfilter control list
 #'
-#' These arguments are used to handle the internals of `trendfilter()`
+#' These arguments are used to handle the internals of [trendfilter()]
 #'
 #' @param obj_tol Double. The convergence tolerance for the objective function.
 #' @param x_cond Double. The conditioning of the `x` values
 #' @param admm_control An object of class `admm_control` used to control
-#'   as created by `admm_control_list()`
+#'   as created by [admm_control_list()]
 #' @param ... not used
 #'
 #' @return An object of class `trendfilter_control`

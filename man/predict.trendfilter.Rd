@@ -7,7 +7,7 @@
 \method{predict}{trendfilter}(object, newx = NULL, lambda = NULL, deriv = 0L, ...)
 }
 \arguments{
-\item{object}{the result of \code{trendfilter()}}
+\item{object}{the result of \code{\link[=trendfilter]{trendfilter()}}}
 
 \item{newx}{numeric vector of new design points at which to evaluate the. The
 default, \code{NULL} returns the estimates at the original \code{x} values.}

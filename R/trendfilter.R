@@ -1,5 +1,18 @@
 #' Estimate the trendfilter
 #'
+#' @description
+#' Given observations \eqn{y} at locations \eqn{x} the trendfilter
+#' estimates the regression function \eqn{\theta(x) = E[Y\ |\ X = x]} by
+#' by minimizing the smoothness-penalized negative log-likelihood
+#' of the form:
+#'
+#' \deqn{\hat{\theta} = \arg\min_{\theta} \frac{1}{n} \sum_{i=1}^n (y_i -
+#'   \theta_i)^2 + \lambda\Vert \mathbb{D}_n^{(k+1)}\theta\Vert_1, }
+#'
+#' where \eqn{\lambda} controls the balance between the fit to the data and the
+#' amount of smoothness, and \eqn{\mathbb{D}_n^{(k+1)}} is the \eqn{(k+1)}-th order
+#' discrete derivative matrix (a function of \eqn{x}).
+#'
 #' @param y vector of observations of length `n`
 #' @param x vector of positions at which the `y` have been observed, defaults
 #'   to `1:n`. These should be in increasing order, but will be sorted if
@@ -39,8 +52,11 @@
 #'   A very small value will lead to the solution `theta = y` (for the Gaussian
 #'   loss). This argument has no effect if there is a user-defined `lambda`
 #'   sequence.
+#' @param standardize If `TRUE` (the default), `y` will be centered and scaled
+#'   by its mean and standard deviation (and the operation inverted for `theta`
+#'   internally). This can significantly speed convergence of the algorithm.
 #' @param control A list of control parameters for the estimation algorithm.
-#'   See the constructor `trendfilter_control_list()`.
+#'   See the constructor [trendfilter_control_list()].
 #'
 #' @return An object with S3 class `trendfilter`. Among the list components:
 #' * `y` the input data.
@@ -55,6 +71,18 @@
 #' * `objective` the value of the objective function for each value of `lambda`.
 #' @export
 #'
+#' @seealso [tvdenoising::tvdenoising()]
+#'
+#' @references
+#' Tibshirani (2014). "Adaptive piecewise polynomial estimation via trend
+#'   filtering," _Annals of Statistics_, **42**(1):285–323.
+#'   [Link](https://www.stat.berkeley.edu/~ryantibs/papers/dspline.pdf)
+#'
+#' Tibshirani (2022), "Divided differences, falling factorials, and
+#'   discrete splines: Another look at trend filtering and related problems,"
+#'  _Foundations and Trends® in Machine Learning_, **15**(6):694-846.
+#'  [Link](https://www.stat.berkeley.edu/~ryantibs/papers/trendfilter.pdf)
+#'
 #' @examples
 #' x <- 1:100 / 101 * 2 * pi
 #' y <- sin(x) + .2 * rnorm(100)
@@ -64,7 +92,7 @@
 trendfilter <- function(y,
                         x = seq_along(y),
                         weights = rep(1, n),
-                        k = 2L,
+                        k = 3L,
                         family = c("gaussian", "logistic", "poisson"),
                         method = c("admm", "pdip", "hybrid"),
                         lambda = NULL,
@@ -72,6 +100,7 @@ trendfilter <- function(y,
                         lambda_max = NULL,
                         lambda_min = NULL,
                         lambda_min_ratio = 1e-5,
+                        standardize = TRUE,
                         control = trendfilter_control_list()) {
   family <- arg_match(family)
   if (family != "gaussian") {
@@ -113,19 +142,33 @@ trendfilter <- function(y,
 
   wsc <- weights / sum(weights)
   xsc <- (x - min(x)) / diff(range(x)) * n
+  ym <- 0
+  ys <- 1
+  if (standardize) {
+    ym <- mean(y)
+    ys <- stats::sd(y)
+    y <- (y - ym) / ys
+  }
+
   out <- admm_lambda_seq(
     xsc, y, wsc, k,
     lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio,
     control$admm_control$max_iter, control$admm_control$rho_scale,
-    control$admm_control$tol,
+    control$admm_control$tolerance,
     if (k == 1L) 0L else match(control$admm_control$linear_solver, c("sparse_qr", "kalman_filter")),
     control$admm_control$space_tolerance_ratio
   )
 
+  alpha <- NULL
+  if (!is.null(out$alpha)) alpha <- drop(out$alpha) * ys
+
   structure(enlist(
-    y, x, weights, k,
-    theta = drop(out$theta),
-    alpha = drop(out$alpha),
+    y = y * ys + ym,
+    x,
+    weights,
+    k,
+    theta = drop(out$theta) * ys + ym,
+    alpha = alpha,
     lambda = out$lambda,
     iters = out$iters,
     objective = out$tf_objective,

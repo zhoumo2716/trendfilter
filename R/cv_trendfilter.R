@@ -14,7 +14,7 @@
 #'   }{0 1 2 3 4 1 2 3 4 1 2 3 4 1 0} where 0 indicates no assignment.
 #'   Therefore, the folds are not random and running `cv_trendfilter()` twice
 #'   will give the same result.
-#' @param ... additional parameters passet along to `trendfilter()`.
+#' @param ... additional parameters passed along to [trendfilter()].
 #'
 #' @return An object with S3 class `"cv_trendfilter"`. Among the list components:
 #' * `full_fit` An object with S3 class `"trendfilter"`, estimated with all
@@ -35,9 +35,10 @@ cv_trendfilter <- function(
     y,
     x = seq_along(y),
     weights = rep(1, n),
-    k = 2L,
+    k = 3L,
     error_measure = c("deviance", "mse", "mae"),
     nfolds = 5L,
+    lambda = NULL,
     ...) {
   n <- length(y)
   min_n_train <- (n - 2) %/% nfolds * (nfolds - 1)
@@ -48,10 +49,10 @@ cv_trendfilter <- function(
   assert_integerish(k, lower = 0L, upper = min_n_train - 1L, len = 1L)
   error_measure <- arg_match(error_measure)
   assert_integerish(nfolds, lower = 2L, len = 1L, upper = n - 2L) # 2 for endpoints
-
+  assert_numeric(lambda, finite = TRUE, lower = 0, null.ok = TRUE)
 
   ## Run program one time to create lambda
-  full_fit <- trendfilter(y, x, weights, k, ...)
+  full_fit <- trendfilter(y, x, weights, k, lambda = lambda, ...)
   lambda <- full_fit$lambda
   middle_fold <- rep_len(1:nfolds, n - 2)
   foldid <- c(0, middle_fold, 0)

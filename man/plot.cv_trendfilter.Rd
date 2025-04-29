@@ -7,7 +7,7 @@
 \method{plot}{cv_trendfilter}(x, which_lambda = c("cv_scores", "lambda_min", "lambda_1se"), ...)
 }
 \arguments{
-\item{x}{the result of \code{cv_trendfilter()} of class \code{cv_trendfilter}}
+\item{x}{the result of \code{\link[=cv_trendfilter]{cv_trendfilter()}} of class \code{cv_trendfilter}}
 
 \item{which_lambda}{select which solutions to show.
 If not provided, the cross validation score will be plotted. If provided a

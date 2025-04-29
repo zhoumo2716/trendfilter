@@ -1,6 +1,6 @@
 Package: trendfilter
 Title: Univariate trend filtering
-Version: 0.0.2
+Version: 0.0.2.9002
 Authors@R: c(
     person("Addison", "Hu", , "mail@huisaddison.com", role = c("aut", "cre")),
     person("Ryan J.", "Tibshirani", , "ryantibs@berkeley.edu", role = c("aut", "cph")),
@@ -9,15 +9,14 @@ Authors@R: c(
   )
 Description: Implementation of univariate trend filtering.
 License: MIT + file LICENSE
-Depends:
-    dspline,
-    tvdenoising
 Imports: 
     checkmate,
     cli,
+    dspline (>= 1.0.1),
     ggplot2,
     Rcpp (>= 1.0.10),
-    rlang
+    rlang,
+    tvdenoising
 Suggests: 
     Matrix,
     testthat (>= 3.0.0)
