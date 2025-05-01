@@ -65,6 +65,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// softThreshold
+Eigen::VectorXd softThreshold(const Eigen::VectorXd& x, double gamma);
+RcppExport SEXP _trendfilter_softThreshold(SEXP xSEXP, SEXP gammaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
+    rcpp_result_gen = Rcpp::wrap(softThreshold(x, gamma));
+    return rcpp_result_gen;
+END_RCPP
+}
 // admm_lambda_seq
 Rcpp::List admm_lambda_seq(NumericVector x, Eigen::VectorXd const y, Eigen::ArrayXd const weights, int k, bool boundary_condition, int left_boundary_m, int right_boundary_m, Eigen::VectorXd lambda, int nlambda, double lambda_max, double lambda_min, double lambda_min_ratio, int max_iter, double rho_scale, double tol, int linear_solver, double space_tolerance_ratio);
 RcppExport SEXP _trendfilter_admm_lambda_seq(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP, SEXP boundary_conditionSEXP, SEXP left_boundary_mSEXP, SEXP right_boundary_mSEXP, SEXP lambdaSEXP, SEXP nlambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP max_iterSEXP, SEXP rho_scaleSEXP, SEXP tolSEXP, SEXP linear_solverSEXP, SEXP space_tolerance_ratioSEXP) {
@@ -89,6 +101,23 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type linear_solver(linear_solverSEXP);
     Rcpp::traits::input_parameter< double >::type space_tolerance_ratio(space_tolerance_ratioSEXP);
     rcpp_result_gen = Rcpp::wrap(admm_lambda_seq(x, y, weights, k, boundary_condition, left_boundary_m, right_boundary_m, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio));
+    return rcpp_result_gen;
+END_RCPP
+}
+// trendfilter_D1
+Rcpp::List trendfilter_D1(int n, int k, int lambda1, int lambdak, const Eigen::VectorXd& y, const NumericVector& x, double rho_scale);
+RcppExport SEXP _trendfilter_trendfilter_D1(SEXP nSEXP, SEXP kSEXP, SEXP lambda1SEXP, SEXP lambdakSEXP, SEXP ySEXP, SEXP xSEXP, SEXP rho_scaleSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type lambda1(lambda1SEXP);
+    Rcpp::traits::input_parameter< int >::type lambdak(lambdakSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type rho_scale(rho_scaleSEXP);
+    rcpp_result_gen = Rcpp::wrap(trendfilter_D1(n, k, lambda1, lambdak, y, x, rho_scale));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -191,7 +220,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_configure_denseD_test", (DL_FUNC) &_trendfilter_configure_denseD_test, 2},
     {"_trendfilter_linear_single_solve_test", (DL_FUNC) &_trendfilter_linear_single_solve_test, 6},
     {"_trendfilter_pm_matrix", (DL_FUNC) &_trendfilter_pm_matrix, 3},
+    {"_trendfilter_softThreshold", (DL_FUNC) &_trendfilter_softThreshold, 2},
     {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 17},
+    {"_trendfilter_trendfilter_D1", (DL_FUNC) &_trendfilter_trendfilter_D1, 7},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_penalty_mat", (DL_FUNC) &_trendfilter_get_penalty_mat, 2},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},
