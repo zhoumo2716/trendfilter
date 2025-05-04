@@ -101,8 +101,8 @@ trendfilter <- function(y,
                         x = seq_along(y),
                         weights = rep(1, n),
                         k = 3L,
-                        left_boundary_m = NULL,
-                        right_boundary_m = NULL,
+                        left_boundary_m = 0,
+                        right_boundary_m = 0,
                         family = c("gaussian", "logistic", "poisson"),
                         method = c("admm", "pdip", "hybrid"),
                         lambda = NULL,
@@ -164,41 +164,35 @@ trendfilter <- function(y,
 
   ####
   # Ensure boundary condition is always set
-  if (is.null(left_boundary_m) && is.null(right_boundary_m)) {
+  if (left_boundary_m == 0 && right_boundary_m == 0) {
     boundary_condition <- FALSE
   } else {
     boundary_condition <- TRUE
   }
 
-  if (is.null(left_boundary_m)) {
-    left_boundary_m <- 0
-  } else {
-    if (left_boundary_m == "natural") {
-      left_boundary_m <- ceiling(k / 2)
-    } else if (!is.numeric(left_boundary_m) ||
-                 length(left_boundary_m) != 1 ||
-                 left_boundary_m != as.integer(left_boundary_m) ||
-                 left_boundary_m < 1 || left_boundary_m > k) {
-      cli_abort("Error: {.var left_boundary_m} must be an integer between 1 and k, 'natural', or NULL to use the default.")
+  if (left_boundary_m != 0) {
+    if (identical(left_boundary_m, "natural")) {
+      if (k %% 2 == 1){
+        left_boundary_m <- ceiling(k / 2)
+      } else {
+        cli_abort("Error {.var left_boundary_m}: 'natural' option is allowed when k is odd. Natural splines are defined as piecewise polynomials of odd degree k with additional constraints that force the highest even-order derivatives to be zero at the boundaries. When k is even, there’s no standard natural boundary condition that guarantees the similar behavior as for odd k.")
       }
-    }
-
-    # Process right_boundary_m
-  if (is.null(right_boundary_m)) {
-    right_boundary_m <- 0
     } else {
-      if (right_boundary_m == "natural") {
-        right_boundary_m <- ceiling(k / 2)
-      } else if (!is.numeric(right_boundary_m) ||
-                 length(right_boundary_m) != 1 ||
-                 right_boundary_m != as.integer(right_boundary_m) ||
-                 right_boundary_m < 1 || right_boundary_m > k) {
-        cli_abort("Error: {.var right_boundary_m} must be an integer between 1 and k, 'natural', or NULL to use the default.")
-        }
-      }
+      assert_integerish(left_boundary_m, lower = 1, upper = k, len = 1)
+    }
+  }
 
-  left_boundary_m <- as.integer(left_boundary_m)
-  right_boundary_m <- as.integer(right_boundary_m)
+  if (right_boundary_m != 0) {
+    if (identical(right_boundary_m, "natural")) {
+      if (k %% 2 == 1){
+        right_boundary_m <- ceiling(k / 2)
+      } else {
+        cli_abort("Error {.var right_boundary_m}: 'natural' option is allowed when k is odd. Natural splines are defined as piecewise polynomials of odd degree k with additional constraints that force the highest even-order derivatives to be zero at the boundaries. When k is even, there’s no standard natural boundary condition that guarantees the similar behavior as for odd k.")
+      }
+    } else {
+      assert_integerish(right_boundary_m, lower = 1, upper = k, len = 1)
+    }
+  }
 
   out <- admm_lambda_seq(
     xsc, y, wsc, k, boundary_condition, left_boundary_m, right_boundary_m,
