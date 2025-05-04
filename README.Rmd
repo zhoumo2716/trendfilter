@@ -47,7 +47,7 @@ plot(out) +
 
 ## Boundary Condition Option
 
-None empty `left_boundary_m` and `right_boundary_m` enables boundary correction using Newton polynomials and divided differences.
+The arguments `left_boundary_m` and `right_boundary_m` enable the user to further constrain the solution at the boundary of the domain using Newton polynomials and divided differences.
 `left_boundary_m` and `right_boundary_m` determine how the boundary conditions are applied (order of polynomial). By default, `left_boundary_m` = `right_boundary_m` = `0`. If set to 'natural', we use `round_up(k/2)`, which simplifies to (k+1)/2 when k is odd (natural spline at the boundary).
 
 ```{r boundary-constraint, warning=FALSE}
