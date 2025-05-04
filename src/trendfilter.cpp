@@ -91,6 +91,12 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
   if (boundary_condition) {
     Pm = pm_matrix(xd, left_boundary_m, right_boundary_m);
   }
+
+  // LinearSystem linear_system;
+  // Technically, can form one SparseQR object, analyze the pattern once,
+  // and then re-use it.
+  // So call analyzePattern once, and then factorize repeatedly.
+  // https://eigen.tuxfamily.org/dox/classEigen_1_1SparseQR.html#aba8ae81fd3d4ce9139eccb6b7a0256b2
   // Set up linear system
   linear_system.construct(y, weights, k, rho, dk_mat_sq, denseD, s_seq, linear_solver);
   linear_system.compute(linear_solver);
