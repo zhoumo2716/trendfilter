@@ -1,6 +1,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <tuple>
+#include <cassert>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <Rcpp.h>
@@ -105,19 +106,15 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
     if (!boundary_condition) {
       std::tie(theta, computation_info) = linear_system.solve(y, weights,
                  alpha + u, k, xd, rho, denseD, s_seq, linear_solver, equal_space);
-    } else { // Theta Update (Gamma update if ns=True)
-      // Check if dimensions match before multiplying
-      if (u.size() != alpha.size()) {
-        Rcpp::Rcerr << "ERROR: u.size = " << u.size() << " does not match alpha.size() = " << alpha.size() << std::endl;
-        Rcpp::stop("Matrix size mismatch:  alpha + u");
-      }
+    } else {
+      #ifndef NDEBUG
+      assert(u.size() == alpha.size() &&
+        "u and alpha must have the same length" );
 
-      if (dk_mat.rows() != alpha.size()) {
-        Rcpp::Rcerr << "ERROR: dk_mat.transpose().cols() = " << dk_mat.transpose().cols() << " does not match alpha.size() = " << alpha.size() << std::endl;
-        Rcpp::stop("Matrix size mismatch: dk_mat.transpose() * (alpha + u)");
-      }
+      assert(dk_mat.rows() == alpha.size() &&
+        "Dk rows must match length of alpha" );
+      #endif
 
-      //Rcpp::Rcout << "Calculating LHS and RHS matrix..." << std::endl; // Print
       Eigen::MatrixXd LHS = (Pm.transpose() * Pm) + rho * Pm.transpose() * (dk_mat_sq) * Pm;
       Eigen::VectorXd RHS = Pm.transpose() * y + rho * Pm.transpose() * dk_mat.transpose() * (alpha + u);
 
@@ -131,18 +128,10 @@ void admm_single_lambda(int n, const Eigen::VectorXd& y, const NumericVector& xd
       tmp = Dth_tmp - u;
 
       // Alpha Update
-      if (!boundary_condition) {
-        alpha = tf_dp(tmp, lam / rho);
-      } else {
-        alpha = tf_dp(tmp, lam / rho);
-      }
+      alpha = tf_dp(tmp, lam / rho);
 
       // Dual Variable Update (u)
-      if (!boundary_condition) {
-        u += alpha - Dth_tmp;
-      } else {
-        u += alpha - Dth_tmp;
-      }
+      u += alpha - Dth_tmp;
 
       // Convergence check
       rr = (Dth_tmp - alpha).norm() / alpha.size();
