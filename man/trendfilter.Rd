@@ -125,12 +125,12 @@ plot(out)
 }
 \references{
 Tibshirani (2014). "Adaptive piecewise polynomial estimation via trend
-filtering," \emph{Annals of Statistics}, \strong{42}(1):285–323.
+filtering," Annals of Statistics, 42(1):285–323.
 \href{https://www.stat.berkeley.edu/~ryantibs/papers/dspline.pdf}{Link}
 
 Tibshirani (2022), "Divided differences, falling factorials, and
 discrete splines: Another look at trend filtering and related problems,"
-\emph{Foundations and Trends® in Machine Learning}, \strong{15}(6):694-846.
+Foundations and Trends in Machine Learning, 15(6):694-846.
 \href{https://www.stat.berkeley.edu/~ryantibs/papers/trendfilter.pdf}{Link}
 }
 \seealso{

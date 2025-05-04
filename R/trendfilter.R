@@ -83,12 +83,12 @@
 #'
 #' @references
 #' Tibshirani (2014). "Adaptive piecewise polynomial estimation via trend
-#'   filtering," _Annals of Statistics_, **42**(1):285–323.
+#'   filtering," Annals of Statistics, 42(1):285–323.
 #'   [Link](https://www.stat.berkeley.edu/~ryantibs/papers/dspline.pdf)
 #'
 #' Tibshirani (2022), "Divided differences, falling factorials, and
 #'   discrete splines: Another look at trend filtering and related problems,"
-#'  _Foundations and Trends® in Machine Learning_, **15**(6):694-846.
+#'   Foundations and Trends in Machine Learning, 15(6):694-846.
 #'  [Link](https://www.stat.berkeley.edu/~ryantibs/papers/trendfilter.pdf)
 #'
 #' @examples
@@ -175,7 +175,7 @@ trendfilter <- function(y,
       if (k %% 2 == 1){
         left_boundary_m <- ceiling(k / 2)
       } else {
-        cli_abort("Error {.var left_boundary_m}: 'natural' option is allowed when k is odd. Natural splines are defined as piecewise polynomials of odd degree k with additional constraints that force the highest even-order derivatives to be zero at the boundaries. When k is even, there’s no standard natural boundary condition that guarantees the similar behavior as for odd k.")
+        cli_abort("Error {.var left_boundary_m}: 'natural' option is allowed when k is odd. Natural splines are defined as piecewise polynomials of odd degree k with additional constraints that force the highest even-order derivatives to be zero at the boundaries. When k is even, there's no standard natural boundary condition that guarantees the similar behavior as for odd k.")
       }
     } else {
       assert_integerish(left_boundary_m, lower = 1, upper = k, len = 1)
@@ -187,7 +187,7 @@ trendfilter <- function(y,
       if (k %% 2 == 1){
         right_boundary_m <- ceiling(k / 2)
       } else {
-        cli_abort("Error {.var right_boundary_m}: 'natural' option is allowed when k is odd. Natural splines are defined as piecewise polynomials of odd degree k with additional constraints that force the highest even-order derivatives to be zero at the boundaries. When k is even, there’s no standard natural boundary condition that guarantees the similar behavior as for odd k.")
+        cli_abort("Error {.var right_boundary_m}: 'natural' option is allowed when k is odd. Natural splines are defined as piecewise polynomials of odd degree k with additional constraints that force the highest even-order derivatives to be zero at the boundaries. When k is even, there's no standard natural boundary condition that guarantees the similar behavior as for odd k.")
       }
     } else {
       assert_integerish(right_boundary_m, lower = 1, upper = k, len = 1)
