@@ -31,7 +31,7 @@ predict.trendfilter <- function(object, newx = NULL, lambda = NULL, deriv = 0L, 
 
   # 1. we interpolate at newx for ALL lambda
   interp <- apply(as.matrix(object$theta), 2, function(th) {
-    dspline::dspline_interp(th, object$k, object$x, newx)
+    dspline_interp(th, object$k, object$x, newx)
   })
   # 2. interpolate the solutions to lambdas off the original values
   lam_list <- interpolate_lambda(object$lambda, lambda)
