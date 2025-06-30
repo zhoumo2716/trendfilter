@@ -67,20 +67,20 @@ plot(out) +
   geom_point(data = data.frame(x = x, y = y), aes(x, y), color = "black")
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-example-1.svg" width="100%" />
 
 ## Boundary Condition Option
 
-None empty `left_boundary_m` and `right_boundary_m` enables boundary
-correction using Newton polynomials and divided differences.
-`left_boundary_m` and `right_boundary_m` determine how the boundary
-conditions are applied (order of polynomial). By default,
-`left_boundary_m` = `right_boundary_m` = `0`. If set to ‘natural’, we
-use `round_up(k/2)`, which simplifies to (k+1)/2 when k is odd (natural
-spline at the boundary).
+The arguments `left_boundary_m` and `right_boundary_m` enable the user
+to further constrain the solution at the boundary of the domain using
+Newton polynomials and divided differences. `left_boundary_m` and
+`right_boundary_m` determine how the boundary conditions are applied
+(order of polynomial). By default, `left_boundary_m` =
+`right_boundary_m` = `0`. If set to ‘natural’, we use `round_up(k/2)`,
+which simplifies to (k+1)/2 when k is odd (natural spline at the
+boundary).
 
 ``` r
-#remotes::install_github("hughjonesd/ggmagnify")
 library(ggplot2)
 library(tidyr)
 library(grid)
@@ -135,7 +135,7 @@ ggp1 +
   geom_magnify(from = from_right, to = to_right)
 ```
 
-<img src="man/figures/README-boundary-constraint-plots-1.png" width="100%" />
+<img src="man/figures/README-boundary-constraint-plots-1.svg" width="100%" />
 
 ``` r
 
@@ -144,4 +144,4 @@ ggp2 +
   geom_magnify(from = from_right, to = to_right)
 ```
 
-<img src="man/figures/README-boundary-constraint-plots-2.png" width="100%" />
+<img src="man/figures/README-boundary-constraint-plots-2.svg" width="100%" />
