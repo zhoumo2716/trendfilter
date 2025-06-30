@@ -105,19 +105,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // trendfilter_D1
-Rcpp::List trendfilter_D1(int n, int k, int lambda1, int lambdak, const Eigen::VectorXd& y, const NumericVector& x, double rho_scale);
-RcppExport SEXP _trendfilter_trendfilter_D1(SEXP nSEXP, SEXP kSEXP, SEXP lambda1SEXP, SEXP lambdakSEXP, SEXP ySEXP, SEXP xSEXP, SEXP rho_scaleSEXP) {
+Rcpp::List trendfilter_D1(int k, double lambda1_scalar, double lambdak, const Eigen::VectorXd& y, const NumericVector& x, double rho_scale);
+RcppExport SEXP _trendfilter_trendfilter_D1(SEXP kSEXP, SEXP lambda1_scalarSEXP, SEXP lambdakSEXP, SEXP ySEXP, SEXP xSEXP, SEXP rho_scaleSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    Rcpp::traits::input_parameter< int >::type lambda1(lambda1SEXP);
-    Rcpp::traits::input_parameter< int >::type lambdak(lambdakSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda1_scalar(lambda1_scalarSEXP);
+    Rcpp::traits::input_parameter< double >::type lambdak(lambdakSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
     Rcpp::traits::input_parameter< double >::type rho_scale(rho_scaleSEXP);
-    rcpp_result_gen = Rcpp::wrap(trendfilter_D1(n, k, lambda1, lambdak, y, x, rho_scale));
+    rcpp_result_gen = Rcpp::wrap(trendfilter_D1(k, lambda1_scalar, lambdak, y, x, rho_scale));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -222,7 +221,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_pm_matrix", (DL_FUNC) &_trendfilter_pm_matrix, 3},
     {"_trendfilter_softThreshold", (DL_FUNC) &_trendfilter_softThreshold, 2},
     {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 17},
-    {"_trendfilter_trendfilter_D1", (DL_FUNC) &_trendfilter_trendfilter_D1, 7},
+    {"_trendfilter_trendfilter_D1", (DL_FUNC) &_trendfilter_trendfilter_D1, 6},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_penalty_mat", (DL_FUNC) &_trendfilter_get_penalty_mat, 2},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},

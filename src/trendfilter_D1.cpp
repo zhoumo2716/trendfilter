@@ -82,10 +82,11 @@ void admm_single_lambda_D1(int n, int k,
 }
 
 // [[Rcpp::export]]
-Rcpp::List trendfilter_D1(int n, int k, int lambda1, int lambdak, const Eigen::VectorXd& y, const NumericVector& x, double rho_scale = 1.0) {
+Rcpp::List trendfilter_D1(int k, double lambda1_scalar, double lambdak, const Eigen::VectorXd& y, const NumericVector& x, double rho_scale = 1.0) {
   SparseMatrix<double> dk_mat = get_dk_mat(k, x, false);
   SparseMatrix<double> d1_mat = get_dk_mat(1, x, false);
 
+  int n = y.size();
   Eigen::ArrayXd weights = Eigen::ArrayXd::Ones(n);
 
   // Project onto Legendre polynomials to initialize for largest lambda.
@@ -102,6 +103,7 @@ Rcpp::List trendfilter_D1(int n, int k, int lambda1, int lambdak, const Eigen::V
   Eigen::VectorXd u1 = Eigen::VectorXd::Zero(alpha1.size());
 
 
+  double lambda1 = lambda1_scalar * lambdak;
   double rho = rho_scale*(lambda1+lambdak)/2;
   double tol = 1e-5;
   int max_iter = 1000;
@@ -120,11 +122,31 @@ Rcpp::List trendfilter_D1(int n, int k, int lambda1, int lambdak, const Eigen::V
                         tol,
                         iters);
 
-  Rcpp::List out = Rcpp::List::create(
-    Rcpp::Named("theta") = theta,
-    Rcpp::Named("alpha1") = alpha1,
-    Rcpp::Named("alphak") = alphak,
-    Rcpp::Named("iters") = iters);
+// Rcpp::List out = Rcpp::List::create(
+//     Rcpp::Named("theta") = theta,
+//     Rcpp::Named("alpha1") = alpha1,
+//     Rcpp::Named("alphak") = alphak,
+//     Rcpp::Named("iters") = iters);
+//
+
+Rcpp::NumericMatrix theta_mat(theta.size(), 1);
+std::copy(theta.begin(), theta.end(), theta_mat.begin());
+
+Rcpp::NumericVector lambda_vec(1);
+lambda_vec[0] = lambdak;
+
+  List out = List::create(
+    _["x"]      = x,
+    _["theta"]  = theta_mat,
+    _["lambda"] = lambda_vec,
+    _["lambda1_scalar"] = lambda1_scalar,
+    _["iters"] = iters
+  );
+
+
+
+  out.attr("class") = CharacterVector::create("trendfilter_D1", "trendfilter");
   return out;
+
 }
 

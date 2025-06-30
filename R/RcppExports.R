@@ -25,8 +25,8 @@ admm_lambda_seq <- function(x, y, weights, k, boundary_condition, left_boundary_
     .Call(`_trendfilter_admm_lambda_seq`, x, y, weights, k, boundary_condition, left_boundary_m, right_boundary_m, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio)
 }
 
-trendfilter_D1 <- function(n, k, lambda1, lambdak, y, x, rho_scale = 1.0) {
-    .Call(`_trendfilter_trendfilter_D1`, n, k, lambda1, lambdak, y, x, rho_scale)
+trendfilter_D1 <- function(k, lambda1_scalar, lambdak, y, x, rho_scale = 1.0) {
+    .Call(`_trendfilter_trendfilter_D1`, k, lambda1_scalar, lambdak, y, x, rho_scale)
 }
 
 get_dk_mat <- function(k, xd, tf_weighting) {
