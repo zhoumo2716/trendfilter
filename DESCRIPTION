@@ -1,6 +1,6 @@
 Package: trendfilter
 Title: Univariate trend filtering
-Version: 0.0.2.9002
+Version: 0.0.2.9003
 Authors@R: c(
     person("Addison", "Hu", , "mail@huisaddison.com", role = c("aut", "cre")),
     person("Ryan J.", "Tibshirani", , "ryantibs@berkeley.edu", role = c("aut", "cph")),
@@ -12,11 +12,11 @@ License: MIT + file LICENSE
 Imports: 
     checkmate,
     cli,
-    dspline,
+    dspline (>= 1.0.0),
     ggplot2,
     Rcpp (>= 1.0.10),
     rlang,
-    tvdenoising
+    tvdenoising (>= 1.0.0)
 Suggests: 
     Matrix,
     testthat (>= 3.0.0)
@@ -25,9 +25,6 @@ LinkingTo:
     Rcpp,
     RcppEigen,
     tvdenoising
-Remotes:
-    glmgen/dspline,
-    glmgen/tvdenoising
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
