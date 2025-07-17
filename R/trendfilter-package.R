@@ -4,7 +4,6 @@
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom rlang arg_match %||%
 #' @importFrom dspline dspline_interp
-#' @importFrom tvdenoising tvdenoising
 ## usethis namespace: start
 #' @useDynLib trendfilter, .registration = TRUE
 ## usethis namespace: end

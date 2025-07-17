@@ -1,6 +1,8 @@
 # trendfilter (development version)
 
-## Breaking changes
+* Initial CRAN submission.
+
+# trendfilter 0.0.2
 
 - Add an option to standardize `y` (default `TRUE`). This improves computation
   significantly
