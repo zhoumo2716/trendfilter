@@ -17,7 +17,8 @@ Imports:
     dspline (>= 1.0.0),
     ggplot2,
     Rcpp (>= 1.0.10),
-    rlang
+    rlang,
+    tvdenoising (>= 1.0.0)
 Suggests: 
     Matrix,
     testthat (>= 3.0.0)
@@ -25,7 +26,7 @@ LinkingTo:
     dspline,
     Rcpp,
     RcppEigen,
-    tvdenoising (>= 1.0.0)
+    tvdenoising
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
