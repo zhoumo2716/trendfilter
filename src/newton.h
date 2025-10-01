@@ -30,8 +30,8 @@
 //
 Eigen::VectorXd newton_update(
     const Eigen::VectorXd &z_init,
-    const std::vector<double> &x,
-    const std::vector<double> &W,
+    //const Eigen::VectorXd &x,
+    const Eigen::VectorXd &W,
     int n,
     double A,
     double B,
@@ -40,8 +40,8 @@ Eigen::VectorXd newton_update(
     const Eigen::VectorXd &alpha,
     const Eigen::VectorXd &u,
     double rho,
-    int max_iters = 50,
-    double tol = 1e-4
+    int max_iters = 20,
+    double tol = 1e-3
 );
 
 #endif // NEWTON_H

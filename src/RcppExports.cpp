@@ -12,12 +12,12 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // compute_integral_weights
-std::vector<double> compute_integral_weights(const std::vector<double>& x, double A, double B, int n);
+Eigen::VectorXd compute_integral_weights(const Eigen::VectorXd& x, double A, double B, int n);
 RcppExport SEXP _trendfilter_compute_integral_weights(SEXP xSEXP, SEXP ASEXP, SEXP BSEXP, SEXP nSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const std::vector<double>& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type x(xSEXP);
     Rcpp::traits::input_parameter< double >::type A(ASEXP);
     Rcpp::traits::input_parameter< double >::type B(BSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
@@ -87,6 +87,26 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type linear_solver(linear_solverSEXP);
     Rcpp::traits::input_parameter< double >::type space_tolerance_ratio(space_tolerance_ratioSEXP);
     rcpp_result_gen = Rcpp::wrap(admm_lambda_seq(x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio));
+    return rcpp_result_gen;
+END_RCPP
+}
+// trendfilter_pointProcess
+Rcpp::List trendfilter_pointProcess(NumericVector x, int k, double A, double B, double lambda, double rho_scale, int max_iter, double tol, int newton_max_iters, double newton_tol);
+RcppExport SEXP _trendfilter_trendfilter_pointProcess(SEXP xSEXP, SEXP kSEXP, SEXP ASEXP, SEXP BSEXP, SEXP lambdaSEXP, SEXP rho_scaleSEXP, SEXP max_iterSEXP, SEXP tolSEXP, SEXP newton_max_itersSEXP, SEXP newton_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< double >::type A(ASEXP);
+    Rcpp::traits::input_parameter< double >::type B(BSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type rho_scale(rho_scaleSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type newton_max_iters(newton_max_itersSEXP);
+    Rcpp::traits::input_parameter< double >::type newton_tol(newton_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(trendfilter_pointProcess(x, k, A, B, lambda, rho_scale, max_iter, tol, newton_max_iters, newton_tol));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -190,6 +210,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_configure_denseD_test", (DL_FUNC) &_trendfilter_configure_denseD_test, 2},
     {"_trendfilter_linear_single_solve_test", (DL_FUNC) &_trendfilter_linear_single_solve_test, 6},
     {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 14},
+    {"_trendfilter_trendfilter_pointProcess", (DL_FUNC) &_trendfilter_trendfilter_pointProcess, 10},
     {"_trendfilter_get_dk_mat", (DL_FUNC) &_trendfilter_get_dk_mat, 3},
     {"_trendfilter_get_penalty_mat", (DL_FUNC) &_trendfilter_get_penalty_mat, 2},
     {"_trendfilter_get_lambda_max", (DL_FUNC) &_trendfilter_get_lambda_max, 4},

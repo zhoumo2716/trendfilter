@@ -1,11 +1,12 @@
 #include "integral_weights.h"
+#include <RcppEigen.h>
 #include <stdexcept>
 
-
+// [[Rcpp::depends(RcppEigen)]]
 
 // local 3-point Simpson weights on [x_{j-2},x_j]
 static void add_panel_weights(
-    std::vector<double> &W,
+    Eigen::VectorXd &W,
     double x_left, double x_mid, double x_right,
     int idx_left, int idx_mid, int idx_right
 ) {
@@ -22,21 +23,19 @@ static void add_panel_weights(
 }
 
 // [[Rcpp::export]]
-std::vector<double> compute_integral_weights(
-    const std::vector<double> &x,
+Eigen::VectorXd compute_integral_weights(
+    const Eigen::VectorXd &x,
     double A,
     double B,
     int n
 ) {
   int dim = n + 2; // x0=A, ..., xn, x_{n+1}=B
-  std::vector<double> W(dim, 0.0);
+  Eigen::VectorXd W = Eigen::VectorXd::Zero(dim);
 
   // Build extended node vector including endpoints
-  std::vector<double> nodes(dim);
+  Eigen::VectorXd nodes(dim);
   nodes[0] = A;
-  for (int i = 0; i < n; i++) {
-    nodes[i+1] = x[i];
-  }
+  nodes.segment(1, n) = x;
   nodes[n+1] = B;
 
   // Add Simpson panels
