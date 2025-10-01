@@ -1,9 +1,15 @@
 #ifndef NEWTON_H
 #define NEWTON_H
 
+
 #include <Eigen/Dense>
 #include <vector>
+#include <Eigen/Sparse>
+#include <Rcpp.h>
+#include <RcppEigen.h>
 
+
+// [[Rcpp::depends(RcppEigen)]]
 // Perform Newton update for the z-subproblem inside ADMM
 //
 // Parameters:
@@ -34,7 +40,7 @@ Eigen::VectorXd newton_update(
     const Eigen::VectorXd &alpha,
     const Eigen::VectorXd &u,
     double rho,
-    int max_iters = 10,
+    int max_iters = 50,
     double tol = 1e-4
 );
 

@@ -4,6 +4,9 @@
 #include <cmath>
 #include <iostream>
 
+#include "newton.h"
+
+
 // Perform Newton update for z-subproblem inside ADMM
 Eigen::VectorXd newton_update(
     const Eigen::VectorXd &z_init,             // starting point (warm start)
@@ -16,8 +19,8 @@ Eigen::VectorXd newton_update(
     const Eigen::VectorXd &alpha,              // α^(t)
     const Eigen::VectorXd &u,                  // u^(t)
     double rho,                                // ADMM penalty parameter
-    int max_iters = 10,                        // max Newton iterations
-    double tol = 1e-6                          // stopping tolerance
+    int max_iters,                        // max Newton iterations
+    double tol                          // stopping tolerance
 ) {
     // dimension is n+2: nodes x0=A, ..., xn, x_{n+1}=B
     int dim = n + 2;
