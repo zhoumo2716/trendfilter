@@ -23,7 +23,7 @@ Eigen::VectorXd newton_update(
 ) {
     // dimension is n+2: nodes x0=A, ..., xn, x_{n+1}=B
     int dim = n + 2;
-    Eigen::VectorXd z = z_init;
+    Eigen::VectorXd z = z_init; // size n+2
 
     for (int it = 0; it < max_iters; ++it) {
         // --- Likelihood gradient + Hessian ---
@@ -50,27 +50,33 @@ Eigen::VectorXd newton_update(
         // --- Full gradient and Hessian ---
         Eigen::VectorXd grad = grad_f + grad_q;
 
-        Eigen::SparseMatrix<double> H(dim, dim);
-        H = H_q;  // start with rho D^T D
-        for (int i = 0; i < dim; i++) {
-            H.coeffRef(i,i) += diagH_f[i]; // add diagonal from likelihood
-        }
+        Eigen::SparseMatrix<double> H = H_q;   // dim x dim
+        H.diagonal().array() += diagH_f.array();
+
+        //////////////////////////////////////////////////////////
+        if (z.size()!=dim || W.size()!=dim) Rcpp::stop("Newton: z/W dim mismatch");
+        if (dk_mat.cols()!=dim) Rcpp::stop("Newton: Dk cols != dim");
+        if (dk_mat.rows()!=alpha.size() || alpha.size()!=u.size())
+          Rcpp::stop("Newton: alpha/u/Dk rows mismatch");
+        if (H.rows()!=dim || H.cols()!=dim) Rcpp::stop("Newton: Hessian matrix size mismatch");
+        if (grad.size()!=dim) Rcpp::stop("Newton: Gradient size mismatch");
+
 
         // --- Newton step ---
         Eigen::VectorXd delta_z;
 
-        // Eigen::SimplicialLLT<Eigen::SparseMatrix<double>> solver;
-        // solver.compute(H);
-        // bool ok = (solver.info() == Eigen::Success);
-        // if (ok) {
-        //   delta_z = solver.solve(-grad);
-        //   ok = (solver.info() == Eigen::Success) && delta_z.allFinite();
-        // }
-        //
-        // if (!ok) {
+        Eigen::SimplicialLLT<Eigen::SparseMatrix<double>> solver;
+        solver.compute(H);
+        bool ok = (solver.info() == Eigen::Success);
+        if (ok) {
+           delta_z = solver.solve(-grad);
+           ok = (solver.info() == Eigen::Success) && delta_z.allFinite();
+        }
+
+         if (!ok) {
         //   // -------- Diagonal-only fallback (safe mode) --------
         //   // Use only the diagonal of H for a Jacobi/Newton step
-        //   std::cerr << "Newton solver using full Hessian failed.\n";
+        //std::cerr << "Newton solver using full Hessian failed.\n";
 
           Eigen::VectorXd Hdiag = H.diagonal();              // diag(H)
           const double eps = 1e-8;                          // guard against zeros/NaNs
@@ -78,7 +84,7 @@ Eigen::VectorXd newton_update(
             if (!std::isfinite(Hdiag[i]) || Hdiag[i] < eps) Hdiag[i] = eps;
           }
           delta_z = (-grad).array() / Hdiag.array();         // elementwise divide
-        //}
+        }
 
         // check convergence
         if (delta_z.norm() < tol) {

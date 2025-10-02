@@ -52,6 +52,14 @@ void admm(int n,
   double r_norm = 0.0, s_norm = 0.0;
 
   for (iter = 1; iter < max_iter; iter++) {
+
+    if (theta.size() != n+2) Rcpp::stop("ADMM: theta %d != n+2 %d", (int)theta.size(), n+2);
+    if (W.size()     != n+2) Rcpp::stop("ADMM: W %d != n+2 %d",     (int)W.size(),     n+2);
+    if (alpha.size() != dk_mat.rows()) Rcpp::stop("ADMM: alpha %d != rows(Dk) %d",
+        (int)alpha.size(), (int)dk_mat.rows());
+    if (u.size()     != alpha.size())  Rcpp::stop("ADMM: u %d != alpha %d",
+        (int)u.size(), (int)alpha.size());
+
     // 1. Theta-update: solve through Newton
     theta = newton_update(
       theta,
@@ -76,6 +84,22 @@ void admm(int n,
     // 4. Check convergence (using a simple norm of the primal residuals)
     r_norm = (alpha - dk_mat * theta).norm();
     s_norm = (theta - theta_old).norm();
+
+    // Rcpp::Rcout << "[debug] sizes:"
+    //             << "  Admm iteration= " << iter
+    //              << "  n= " << n
+    //              << "  theta_old size= " << theta_old.size()
+    //              << "  theta size= " << theta.size()
+    //              << "  alpha size= " << alpha.size()
+    //              << "  u size= "     << u.size()
+    //              << "  W size= "     << W.size()
+    //              << "\n";
+    //  Rcpp::Rcout << "[debug] dk_mat dims:    "
+    //              << dk_mat.rows() << " x " << dk_mat.cols() << "\n";
+    //  Rcpp::Rcout << "[debug] dk_mat_sq dims: "
+    //              << dk_mat_sq.rows() << " x " << dk_mat_sq.cols() << "\n";
+    //  R_FlushConsole();
+
     if (r_norm < tol && s_norm < tol) break;
     theta_old = theta;
 
@@ -127,21 +151,22 @@ Rcpp::List trendfilter_pointProcess(NumericVector x,
 
   ////////////////////////////////////////////////////////////////////////
 
-  // Rcpp::Rcout << "[debug] sizes:"
-  //             << "  n=" << n
-  //             << "  dim=" << n+2
-  //             << "  theta=" << theta.size()
-  //             << "  alpha=" << alpha.size()
-  //             << "  u="     << u.size()
-  //             << "  W="     << W.size()
-  //             << "\n";
+   Rcpp::Rcout << "[debug] sizes:"
+               << "  n=" << n
+               << "  dim=" << n+2
+               << "  x_aug="     << x_aug.size()
+               << "  theta=" << theta.size()
+               << "  alpha=" << alpha.size()
+               << "  u="     << u.size()
+               << "  W="     << W.size()
+               << "\n";
   //
-  // Rcpp::Rcout << "[debug] dk_mat dims:    "
-  //             << dk_mat.rows() << " x " << dk_mat.cols() << "\n";
-  // Rcpp::Rcout << "[debug] dk_mat_sq dims: "
-  //             << dk_mat_sq.rows() << " x " << dk_mat_sq.cols() << "\n";
+   Rcpp::Rcout << "[debug] dk_mat dims:    "
+               << dk_mat.rows() << " x " << dk_mat.cols() << "\n";
+   Rcpp::Rcout << "[debug] dk_mat_sq dims: "
+               << dk_mat_sq.rows() << " x " << dk_mat_sq.cols() << "\n";
   //
-  // R_FlushConsole();
+   R_FlushConsole();
   // R_ProcessEvents();
   //Rcpp::stop("Debug abort before ADMM: see printed dimensions above.");
 
