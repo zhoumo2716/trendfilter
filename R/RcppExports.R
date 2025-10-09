@@ -13,6 +13,10 @@ configure_denseD_test <- function(x, k) {
     .Call(`_trendfilter_configure_denseD_test`, x, k)
 }
 
+lbfgs_update <- function(z_init, W, n, dk_mat, alpha, u, rho, max_iters = 200L, tol = 1e-6) {
+    .Call(`_trendfilter_lbfgs_update`, z_init, W, n, dk_mat, alpha, u, rho, max_iters, tol)
+}
+
 linear_single_solve_test <- function(linear_solver, y, weights, x, rho, adj_mean) {
     .Call(`_trendfilter_linear_single_solve_test`, linear_solver, y, weights, x, rho, adj_mean)
 }
@@ -21,7 +25,7 @@ admm_lambda_seq <- function(x, y, weights, k, lambda, nlambda = 50L, lambda_max 
     .Call(`_trendfilter_admm_lambda_seq`, x, y, weights, k, lambda, nlambda, lambda_max, lambda_min, lambda_min_ratio, max_iter, rho_scale, tol, linear_solver, space_tolerance_ratio)
 }
 
-trendfilter_pointProcess <- function(x, k, A, B, lambda = 1, rho_scale = 1, max_iter = 100L, tol = 1e-5, newton_max_iters = 50L, newton_tol = 1e-5) {
+trendfilter_pointProcess <- function(x, k, A, B, lambda = 1, rho_scale = 1e-8, max_iter = 100L, tol = 1e-5, newton_max_iters = 50L, newton_tol = 1e-5) {
     .Call(`_trendfilter_trendfilter_pointProcess`, x, k, A, B, lambda, rho_scale, max_iter, tol, newton_max_iters, newton_tol)
 }
 

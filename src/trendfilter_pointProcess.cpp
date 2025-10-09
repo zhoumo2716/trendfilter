@@ -13,7 +13,7 @@
 #include "kf_utils.h"
 #include "newton.h"
 #include "integral_weights.h"
-#include "gradient_descent.h"
+#include "lbfgs_update.h"
 // [[Rcpp::depends(RcppEigen)]]
 
 typedef Eigen::COLAMDOrdering<int> Ord;
@@ -43,9 +43,9 @@ void admm(int n,
           double rho,
           int& iter,
           int max_iter = 100,
-          double tol = 1e-5,
+          double tol = 1e-10,
           int newton_max_iters = 50,  // default max Newton steps
-          double newton_tol = 1e-4) {
+          double newton_tol = 1e-10) {
 
 
   // Perform ADMM updates
@@ -82,11 +82,13 @@ void admm(int n,
         rho,
         newton_max_iters,
         newton_tol);
+      Rcpp::Rcout << "[z_update] Using Newton update";
+      Rcpp::Rcout.flush();
     } else {
       // Fallback: Hessian-free gradient descent (robust to negative W)
       // Optionally give GD more inner iterations since it’s first-order.
-      const int gd_max_iters = std::max(newton_max_iters * 5, 50);
-      theta = gd_update(
+      const int lbfgs_iters = std::max(newton_max_iters * 5, 50);
+      theta = lbfgs_update(
         theta,
         W,
         n,
@@ -94,7 +96,7 @@ void admm(int n,
         alpha,
         u,
         rho,
-        gd_max_iters,
+        lbfgs_iters,
         newton_tol);
     }
     // 2. Alpha-update: solve through TV-denoising
@@ -107,9 +109,10 @@ void admm(int n,
     r_norm = (alpha - dk_mat * theta).norm();
     s_norm = (theta - theta_old).norm();
 
-    //Rcpp::Rcout << "[debug] Admm:"
-    //             << "  Admm iteration= " << iter
-    //              << "  n= " << n
+    Rcpp::Rcout << "[debug] Admm:"
+                 << "  Admm iteration= " << iter
+                 << "  alpha_norm= " << r_norm
+                 << "  theta_norm= " << s_norm;
     //                << "  theta_old = " << theta_old.transpose()
     //                << "  theta new= " << theta.transpose();
     //              << "  theta_old size= " << theta_old.size()
@@ -122,7 +125,7 @@ void admm(int n,
     //              << dk_mat.rows() << " x " << dk_mat.cols() << "\n";
     //  Rcpp::Rcout << "[debug] dk_mat_sq dims: "
     //              << dk_mat_sq.rows() << " x " << dk_mat_sq.cols() << "\n";
-    //  R_FlushConsole();
+    R_FlushConsole();
 
     if (r_norm < tol && s_norm < tol) break;
     theta_old = theta;
@@ -137,7 +140,7 @@ Rcpp::List trendfilter_pointProcess(NumericVector x,
                      int k,
                      double A, double B,
                      double lambda = 1,
-                     double rho_scale = 1,
+                     double rho_scale = 1e-8,
                      int max_iter = 100,
                      double tol = 1e-5,
                      int newton_max_iters = 50,
@@ -161,6 +164,11 @@ Rcpp::List trendfilter_pointProcess(NumericVector x,
   Eigen::VectorXd y = Eigen::VectorXd::Ones(dim);
   Eigen::VectorXd weights = Eigen::VectorXd::Ones(dim);
   Eigen::VectorXd theta = project_polynomials(x_aug, y, weights, k);
+  for (int i = 0; i < theta.size(); ++i) {
+    if (theta[i] <= 0.0) theta[i] = 1e-6;  // small floor
+  }
+  theta = theta.array().log(); //log(theta)
+
   Eigen::VectorXd alpha = Dkv(theta, k, x_aug);
 
   // For the dual, a common simple choice is to initialize it to zero:
@@ -175,13 +183,13 @@ Rcpp::List trendfilter_pointProcess(NumericVector x,
 
   ////////////////////////////////////////////////////////////////////////
 
-  //  Rcpp::Rcout << "[debug] sizes:"
+    Rcpp::Rcout << "[Initial Debug]:"
   //              << "  n=" << n
   //              << "  dim=" << n+2
   //              << "  x_aug="     << x_aug.size()
-  //              << "  theta=" << theta.size()
-  //              << "  alpha=" << alpha.size()
-  //              << "  u="     << u.size()
+                << "Initial  theta=" << theta;
+  //              << "  alpha=" << alpha
+  //              << "  u="     << u
   //              << "  W="     << W.size()
   //              << "\n";
   // //
@@ -190,7 +198,7 @@ Rcpp::List trendfilter_pointProcess(NumericVector x,
   //  Rcpp::Rcout << "[debug] dk_mat_sq dims: "
   //              << dk_mat_sq.rows() << " x " << dk_mat_sq.cols() << "\n";
   // //
-  //  R_FlushConsole();
+    R_FlushConsole();
   // R_ProcessEvents();
   //Rcpp::stop("Debug abort before ADMM: see printed dimensions above.");
 

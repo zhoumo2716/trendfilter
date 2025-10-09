@@ -50,6 +50,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// lbfgs_update
+Eigen::VectorXd lbfgs_update(const Eigen::VectorXd& z_init, const Eigen::VectorXd& W, int n, const Eigen::SparseMatrix<double>& dk_mat, const Eigen::VectorXd& alpha, const Eigen::VectorXd& u, double rho, int max_iters, double tol);
+RcppExport SEXP _trendfilter_lbfgs_update(SEXP z_initSEXP, SEXP WSEXP, SEXP nSEXP, SEXP dk_matSEXP, SEXP alphaSEXP, SEXP uSEXP, SEXP rhoSEXP, SEXP max_itersSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type z_init(z_initSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type W(WSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type dk_mat(dk_matSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type u(uSEXP);
+    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iters(max_itersSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(lbfgs_update(z_init, W, n, dk_mat, alpha, u, rho, max_iters, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
 // linear_single_solve_test
 Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorXd y, const Eigen::ArrayXd weights, const Rcpp::NumericVector x, double rho, const Eigen::VectorXd adj_mean);
 RcppExport SEXP _trendfilter_linear_single_solve_test(SEXP linear_solverSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP xSEXP, SEXP rhoSEXP, SEXP adj_meanSEXP) {
@@ -208,6 +227,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_trendfilter_compute_integral_weights", (DL_FUNC) &_trendfilter_compute_integral_weights, 4},
     {"_trendfilter_smat_to_mat", (DL_FUNC) &_trendfilter_smat_to_mat, 3},
     {"_trendfilter_configure_denseD_test", (DL_FUNC) &_trendfilter_configure_denseD_test, 2},
+    {"_trendfilter_lbfgs_update", (DL_FUNC) &_trendfilter_lbfgs_update, 9},
     {"_trendfilter_linear_single_solve_test", (DL_FUNC) &_trendfilter_linear_single_solve_test, 6},
     {"_trendfilter_admm_lambda_seq", (DL_FUNC) &_trendfilter_admm_lambda_seq, 14},
     {"_trendfilter_trendfilter_pointProcess", (DL_FUNC) &_trendfilter_trendfilter_pointProcess, 10},

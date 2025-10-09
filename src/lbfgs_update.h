@@ -1,10 +1,10 @@
-#ifndef TRENDFILTER_GRADIENT_DESCENT_H
-#define TRENDFILTER_GRADIENT_DESCENT_H
+#ifndef TRENDFILTER_lbfgs_update_H
+#define TRENDFILTER_lbfgs_update_H
 
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 
-Eigen::VectorXd gd_update(
+Eigen::VectorXd lbfgs_update(
     const Eigen::VectorXd &z_init,
     const Eigen::VectorXd &W,
     int n,
@@ -16,7 +16,7 @@ Eigen::VectorXd gd_update(
     double tol
 );
 
-#endif // TRENDFILTER_GRADIENT_DESCENT_H
+#endif // TRENDFILTER_lbfgs_update_H
 
 
 
