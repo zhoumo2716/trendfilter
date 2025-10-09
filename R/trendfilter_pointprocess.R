@@ -41,6 +41,7 @@ trendfilter_pointprocess <- function(data, A, B, k = 0,
   # Use tvdenosing when k = 0
   if (k==0) {
     ss <- c(data[1] - A, diff(data), B - data[length(data)])
+    ss <- pmax(ss, 1e-12)
     y <- 1/ss
     w <- ss/2
     theta <- tvdenoising::tvdenoising(y=y, w=w,lambda=1)
