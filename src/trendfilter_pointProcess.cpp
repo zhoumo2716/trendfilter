@@ -98,7 +98,10 @@ void admm(int n,
         rho,
         lbfgs_iters,
         newton_tol);
+      Rcpp::Rcout << "[z_update] Using L-BFGS update";
+      Rcpp::Rcout.flush();
     }
+
     // 2. Alpha-update: solve through TV-denoising
     // alpha_k = argmin lambda *||D1*alpha||_1 + (rho/2) * ||alpha - (Dk * theta - u)||_2^2.
     alpha = tf_dp(dk_mat * theta - u, lam / rho);
@@ -183,11 +186,11 @@ Rcpp::List trendfilter_pointProcess(NumericVector x,
 
   ////////////////////////////////////////////////////////////////////////
 
-    Rcpp::Rcout << "[Initial Debug]:"
+  // Rcpp::Rcout << "[Initial Debug]:"
   //              << "  n=" << n
   //              << "  dim=" << n+2
   //              << "  x_aug="     << x_aug.size()
-                << "Initial  theta=" << theta;
+  //              << "Initial  theta=" << theta;
   //              << "  alpha=" << alpha
   //              << "  u="     << u
   //              << "  W="     << W.size()
@@ -198,7 +201,7 @@ Rcpp::List trendfilter_pointProcess(NumericVector x,
   //  Rcpp::Rcout << "[debug] dk_mat_sq dims: "
   //              << dk_mat_sq.rows() << " x " << dk_mat_sq.cols() << "\n";
   // //
-    R_FlushConsole();
+  //  R_FlushConsole();
   // R_ProcessEvents();
   //Rcpp::stop("Debug abort before ADMM: see printed dimensions above.");
 
