@@ -6,109 +6,91 @@
 
 #include "newton.h"
 
-
 // Perform Newton update for z-subproblem inside ADMM
 Eigen::VectorXd newton_update(
-    const Eigen::VectorXd &z_init,             // starting point (warm start) n+2 dimension
-    const Eigen::VectorXd &W,                  // integration weights W_0,...,W_{n+1}
-    int n,                                     // number of interior nodes
-    double A, double B,                        // integration bounds
-    const Eigen::MatrixXd &dk_mat,             // D^(k) matrix
-    const Eigen::SparseMatrix<double>& dk_mat_sq, // (D^(k))^T D^(k)
-    const Eigen::VectorXd &alpha,              // α^(t)
-    const Eigen::VectorXd &u,                  // u^(t)
-    double rho,                                // ADMM penalty parameter
-    int max_iters,                        // max Newton iterations
-    double tol                          // stopping tolerance
+    const Eigen::VectorXd &z_init,
+    const Eigen::VectorXd &W,
+    int n,
+    double A, double B,
+    const Eigen::MatrixXd &dk_mat,
+    const Eigen::SparseMatrix<double>& dk_mat_sq,
+    const Eigen::VectorXd &alpha,
+    const Eigen::VectorXd &u,
+    double rho,
+    int max_iters,
+    double tol
 ) {
-    // dimension is n+2: nodes x0=A, ..., xn, x_{n+1}=B
-    int dim = n + 2;
-    Eigen::VectorXd z = z_init; // size n+2
+  int dim = n + 2;
+  Eigen::VectorXd z = z_init;
 
+  const double ZMAX = 40.0, ZMIN = -40.0;
 
-    // Clamp z before exp to avoid overflow/underflow:
-    Eigen::ArrayXd expz = z.array();
-    const double ZMAX = 40.0;   // exp(40) ~ 2.35e17 (safe)
-    const double ZMIN = -40.0;  // exp(-40) ~ 4.25e-18
-    expz = expz.min(ZMAX).max(ZMIN).exp();
+  for (int it = 0; it < max_iters; ++it) {
+    Eigen::ArrayXd expz = z.array().min(ZMAX).max(ZMIN).exp();
 
-    for (int it = 0; it < max_iters; ++it) {
-        // --- Likelihood gradient + Hessian ---
-        //Eigen::ArrayXd expz = z.array().exp();
-        Eigen::VectorXd s(dim);
-        for (int i = 0; i < dim; i++) {
-            s[i] = W[i] * expz[i];
-        }
+    // --- Likelihood gradient + Hessian ---
+    Eigen::VectorXd s = (W.array() * expz).matrix();
 
-        // gradient of f(z)
-        Eigen::VectorXd grad_f = s;
-        for (int i = 1; i <= n; i++) {
-            grad_f[i] -= 1.0;  // subtract derivative of -sum_{i=1}^n z_i
-        }
+    Eigen::VectorXd grad_f = s;
+    for (int i = 1; i <= n; i++) grad_f[i] -= 1.0;
+    Eigen::VectorXd diagH_f = s;
 
-        // Hessian diagonal (likelihood)
-        Eigen::VectorXd diagH_f = s;
+    // --- ADMM quadratic term ---
+    Eigen::VectorXd residual = dk_mat * z - alpha - u;
+    Eigen::VectorXd grad_q = rho * dk_mat.transpose() * residual;
+    Eigen::SparseMatrix<double> H_q = rho * dk_mat_sq;
 
-        // --- ADMM quadratic term ---
-        Eigen::VectorXd residual = dk_mat * z - alpha - u;
-        Eigen::VectorXd grad_q = rho * dk_mat.transpose() * residual;
-        Eigen::SparseMatrix<double> H_q = rho * dk_mat_sq;
+    // --- Combine ---
+    Eigen::VectorXd grad = grad_f + grad_q;
+    Eigen::SparseMatrix<double> H = H_q;
+    H.diagonal().array() += diagH_f.array();
 
-        // --- Full gradient and Hessian ---
-        Eigen::VectorXd grad = grad_f + grad_q;
-
-        Eigen::SparseMatrix<double> H = H_q;   // dim x dim
-        H.diagonal().array() += diagH_f.array();
-
-        //////////////////////////////////////////////////////////
-        // if (z.size()!=dim || W.size()!=dim) Rcpp::stop("Newton: z/W dim mismatch");
-        // if (dk_mat.cols()!=dim) Rcpp::stop("Newton: Dk cols != dim");
-        // if (dk_mat.rows()!=alpha.size() || alpha.size()!=u.size())
-        //   Rcpp::stop("Newton: alpha/u/Dk rows mismatch");
-        // if (H.rows()!=dim || H.cols()!=dim) Rcpp::stop("Newton: Hessian matrix size mismatch");
-        // if (grad.size()!=dim) Rcpp::stop("Newton: Gradient size mismatch");
-        //
-
-        // --- Newton step ---
-        Eigen::VectorXd delta_z;
-
-        Eigen::SimplicialLLT<Eigen::SparseMatrix<double>> solver;
-        solver.compute(H);
-        bool ok = (solver.info() == Eigen::Success);
-        if (ok) {
-           delta_z = solver.solve(-grad);
-           ok = (solver.info() == Eigen::Success) && delta_z.allFinite();
-        }
-
-         if (!ok) {
-        //   // -------- Diagonal-only fallback (safe mode) --------
-        //   // Use only the diagonal of H for a Jacobi/Newton step
-          std::cerr << "Newton solver using full Hessian failed.\n";
-
-          Eigen::VectorXd Hdiag = H.diagonal();              // diag(H)
-          const double eps = 1e-5;                          // guard against zeros/NaNs
-          for (int i = 0; i < Hdiag.size(); ++i) {
-            if (!std::isfinite(Hdiag[i]) || Hdiag[i] < eps) {
-              // Rcpp::Rcout << "[newton] Hdiag[" << i << "]=" << Hdiag[i]
-              //             << " -> clamped to " << eps << "\n";
-              // R_FlushConsole();
-              Hdiag[i] = eps;
-            }
-
-            }
-
-          delta_z = (-grad).array() / Hdiag.array();         // elementwise divide
-        }
-
-        // check convergence
-        if (delta_z.norm() < tol) {
-          break;
-        }
-
-        // update step (τ = 1, could backtrack if needed)
-        z += delta_z;
-
+    // --- Newton step ---
+    Eigen::VectorXd delta_z;
+    Eigen::SimplicialLLT<Eigen::SparseMatrix<double>> solver;
+    solver.compute(H);
+    bool ok = (solver.info() == Eigen::Success);
+    if (ok) {
+      delta_z = solver.solve(-grad);
+      ok = (solver.info() == Eigen::Success) && delta_z.allFinite();
+    }
+    if (!ok) {
+      std::cerr << "[Newton] Hessian solve failed, fallback to diagonal.\n";
+      Eigen::VectorXd Hdiag = H.diagonal();
+      const double eps = 1e-6;
+      for (int i = 0; i < Hdiag.size(); ++i)
+        if (!std::isfinite(Hdiag[i]) || Hdiag[i] < eps) Hdiag[i] = eps;
+        delta_z = (-grad).array() / Hdiag.array();
     }
 
+    // --- Check convergence ---
+    if (delta_z.norm() < tol) break;
+    z += delta_z;
+  }
+
+  // ============================================================
+  // === Print Final Diagnostic Info (like L-BFGS version) ======
+  // ============================================================
+
+  Eigen::ArrayXd expz_final = z.array().min(ZMAX).max(ZMIN).exp();
+  Eigen::VectorXd s_final = (W.array() * expz_final).matrix();
+
+  Eigen::VectorXd grad_lik = s_final;
+  for (int i = 1; i <= n; i++) grad_lik[i] -= 1.0;
+
+  Eigen::VectorXd residual_final = dk_mat * z - alpha - u;
+  Eigen::VectorXd grad_pen = rho * dk_mat.transpose() * residual_final;
+
+  double fval_final = (W.array() * expz_final).sum()
+    - z.segment(1, n).sum()
+    + 0.5 * rho * residual_final.squaredNorm();
+
+    std::cout << "[Newton final] f=" << fval_final
+              << "  ||grad_lik||=" << grad_lik.norm()
+              << "  ||grad_pen||=" << grad_pen.norm()
+              << "  z_range=[" << z.minCoeff() << ", " << z.maxCoeff() << "]"
+              << std::endl;
+
+    // ============================================================
     return z;
 }

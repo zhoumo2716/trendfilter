@@ -57,7 +57,7 @@ Eigen::VectorXd compute_integral_weights(
       double h2 = nodes[i+1] - nodes[i];
       double ratio = h1 / h2;
 
-      if (ratio >= 0.5 && ratio <= 2.0) {
+      if (ratio > 0.5 && ratio < 2.0) {
         // --- Use 3-point (quadratic) rule ---
         add_panel_weights(W, nodes[i-1], nodes[i], nodes[i+1],
                           i-1, i, i+1);

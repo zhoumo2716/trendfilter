@@ -42,8 +42,8 @@ void admm(int n,
           double lam,
           double rho,
           int& iter,
-          int max_iter = 100,
-          double tol = 1e-10,
+          int max_iter,
+          double tol,
           int newton_max_iters = 50,  // default max Newton steps
           double newton_tol = 1e-10) {
 
@@ -61,32 +61,32 @@ void admm(int n,
     if (u.size()     != alpha.size())  Rcpp::stop("ADMM: u %d != alpha %d",
         (int)u.size(), (int)alpha.size());
 
-    // 1. Theta-update: solve through Newton
+    // 1. Theta-update: solve through L-BFGS
 
-    // Treat any negative (beyond tiny tolerance) or non-finite W as unsafe for Newton
-    const double w_eps = 1e-12;
-    const double wmin  = W.minCoeff();
-    const bool W_bad   = (!W.allFinite()) || (wmin < w_eps);
-
-    if (!W_bad) {
-      // Newton step (safe: W >= 0 so likelihood Hessian is PSD)
-      theta = newton_update(
-        theta,
-        W,
-        n,
-        A, B,
-        dk_mat,
-        dk_mat_sq,
-        alpha,
-        u,
-        rho,
-        newton_max_iters,
-        newton_tol);
-      Rcpp::Rcout << "[z_update] Using Newton update";
-      Rcpp::Rcout.flush();
-    } else {
-      // Fallback: Hessian-free gradient descent (robust to negative W)
-      // Optionally give GD more inner iterations since it’s first-order.
+    // // Treat any negative (beyond tiny tolerance) or non-finite W as unsafe for Newton
+    // const double w_eps = 0; //1e-12;
+    // const double wmin  = W.minCoeff();
+    // const bool W_bad   = (!W.allFinite()) || (wmin < w_eps);
+    //
+    // if (!W_bad) {
+    //   // Newton step (safe: W >= 0 so likelihood Hessian is PSD)
+    //   theta = newton_update(
+    //     theta,
+    //     W,
+    //     n,
+    //     A, B,
+    //     dk_mat,
+    //     dk_mat_sq,
+    //     alpha,
+    //     u,
+    //     rho,
+    //     newton_max_iters,
+    //     newton_tol);
+    //   Rcpp::Rcout << "[z_update] Using Newton update";
+    //   Rcpp::Rcout.flush();
+    // } else {
+    //   // Fallback: Hessian-free gradient descent (robust to negative W)
+    //   // Optionally give GD more inner iterations since it’s first-order.
       const int lbfgs_iters = std::max(newton_max_iters * 5, 50);
       theta = lbfgs_update(
         theta,
@@ -98,9 +98,9 @@ void admm(int n,
         rho,
         lbfgs_iters,
         newton_tol);
-      Rcpp::Rcout << "[z_update] Using L-BFGS update";
-      Rcpp::Rcout.flush();
-    }
+      // Rcpp::Rcout << "[z_update] Using L-BFGS update";
+      // Rcpp::Rcout.flush();
+    //}
 
     // 2. Alpha-update: solve through TV-denoising
     // alpha_k = argmin lambda *||D1*alpha||_1 + (rho/2) * ||alpha - (Dk * theta - u)||_2^2.
@@ -115,7 +115,8 @@ void admm(int n,
     Rcpp::Rcout << "[debug] Admm:"
                  << "  Admm iteration= " << iter
                  << "  alpha_norm= " << r_norm
-                 << "  theta_norm= " << s_norm;
+                 << "  theta_norm= " << s_norm
+                 << "\n";
     //                << "  theta_old = " << theta_old.transpose()
     //                << "  theta new= " << theta.transpose();
     //              << "  theta_old size= " << theta_old.size()
@@ -143,8 +144,8 @@ Rcpp::List trendfilter_pointProcess(NumericVector x,
                      int k,
                      double A, double B,
                      double lambda = 1,
-                     double rho_scale = 1e-8,
-                     int max_iter = 100,
+                     double rho_scale = 1,
+                     int max_iter = 500,
                      double tol = 1e-5,
                      int newton_max_iters = 50,
                      double newton_tol = 1e-5) {
@@ -186,22 +187,22 @@ Rcpp::List trendfilter_pointProcess(NumericVector x,
 
   ////////////////////////////////////////////////////////////////////////
 
-  // Rcpp::Rcout << "[Initial Debug]:"
+  Rcpp::Rcout << "[Initial Debug]:"
   //              << "  n=" << n
   //              << "  dim=" << n+2
   //              << "  x_aug="     << x_aug.size()
   //              << "Initial  theta=" << theta;
   //              << "  alpha=" << alpha
   //              << "  u="     << u
-  //              << "  W="     << W.size()
-  //              << "\n";
+                << "  W="     << W
+                << "\n";
   // //
   //  Rcpp::Rcout << "[debug] dk_mat dims:    "
   //              << dk_mat.rows() << " x " << dk_mat.cols() << "\n";
   //  Rcpp::Rcout << "[debug] dk_mat_sq dims: "
   //              << dk_mat_sq.rows() << " x " << dk_mat_sq.cols() << "\n";
   // //
-  //  R_FlushConsole();
+  R_FlushConsole();
   // R_ProcessEvents();
   //Rcpp::stop("Debug abort before ADMM: see printed dimensions above.");
 

@@ -45,18 +45,18 @@ public:
       Eigen::VectorXd grad_pen = rho * dk_mat.transpose() * r;            // penalty term
       grad = grad_lik + grad_pen;
 
-      // Debug info every 10 evaluations
-      if (eval_count % 10 == 0) {
-        Rcpp::Rcout << "[ZObjective] eval=" << eval_count
-                    << "  f=" << fval
-                    << "  ||grad_lik||=" << grad_lik.norm()
-                    << "  ||grad_pen||=" << grad_pen.norm()
-                    << "  ratio(q/f)=" << grad_pen.norm() / (grad_lik.norm() + 1e-12)
-                    << "  ||res||=" << r.norm()
-                    << "  z_range=[" << zc.minCoeff() << ", " << zc.maxCoeff() << "]"
-                    << std::endl;
-        Rcpp::Rcout.flush();
-      }
+      // // Debug info every 10 evaluations
+      // if (eval_count % 10 == 0) {
+      //   Rcpp::Rcout << "[ZObjective] eval=" << eval_count
+      //               << "  f=" << fval
+      //               << "  ||grad_lik||=" << grad_lik.norm()
+      //               << "  ||grad_pen||=" << grad_pen.norm()
+      //               << "  ratio(q/f)=" << grad_pen.norm() / (grad_lik.norm() + 1e-12)
+      //               << "  ||res||=" << r.norm()
+      //               << "  z_range=[" << zc.minCoeff() << ", " << zc.maxCoeff() << "]"
+      //               << std::endl;
+      //   Rcpp::Rcout.flush();
+      // }
 
       return fval;
   }
@@ -82,11 +82,29 @@ Eigen::VectorXd lbfgs_update(
   // Run optimizer
   int status = optim_lbfgs(f, z, fopt, max_iters, tol, tol);
 
+  // ===== Evaluate one last time to extract final gradient info =====
+  Eigen::VectorXd grad_final(z.size());
+  double fval_final = f.f_grad(z, grad_final);  // recompute objective and grad
+
+  // Separate grad_lik and grad_pen for reporting
+  Eigen::VectorXd zc = z.cwiseMax(-20.0).cwiseMin(20.0);
+  Eigen::VectorXd r = dk_mat * zc - alpha - u;
+  Eigen::VectorXd grad_lik = (W.array() * zc.array().exp()).matrix();
+  grad_lik.segment(1, n).array() -= 1.0;
+  Eigen::VectorXd grad_pen = rho * dk_mat.transpose() * r;
+
+  // ===== Print final diagnostic summary =====
   Rcpp::Rcout << "[lbfgs_update] status=" << status
               << "  fopt=" << fopt
               << "  tol=" << tol
               << "  (0 means success)" << std::endl;
+
+  Rcpp::Rcout << "[ZObjective final] f=" << fval_final
+              << "  ||grad_lik||=" << grad_lik.norm()
+              << "  ||grad_pen||=" << grad_pen.norm()
+              << std::endl;
   Rcpp::Rcout.flush();
 
   return z;
 }
+

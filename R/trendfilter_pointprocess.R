@@ -32,8 +32,8 @@
 #' }
 trendfilter_pointprocess <- function(data, A, B, k = 0,
     lambda = 1,
-    rho_scale = 1e-8,
-    max_iter = 100,
+    rho_scale = 1,
+    max_iter = 500,
     tol = 1e-5,
     newton_max_iters = 50,
     newton_tol = 1e-5
