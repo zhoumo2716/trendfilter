@@ -1,11 +1,11 @@
-segment1 <- rep(3, 10)                    # Flat segment
-segment2 <- 2 + 0.01 * (1:20)^2 - 0.001*(1:20)^3
-segment3 <- rep(8, 10)                     # Flat segment
-y <- c(segment1, segment2, segment3)
-x <- 1:length(y)
-
-cv2d <- cv_trendfilter_D1(y, x, k = 3)
-head(cv2d$scalar_min)
+# segment1 <- rep(3, 10)                    # Flat segment
+# segment2 <- 2 + 0.01 * (1:20)^2 - 0.001*(1:20)^3
+# segment3 <- rep(8, 10)                     # Flat segment
+# y <- c(segment1, segment2, segment3)
+# x <- 1:length(y)
+#
+# cv2d <- cv_trendfilter_D1(y, x, k = 3)
+# head(cv2d$scalar_min)
 
 # segment1 <- rep(3, 10)                    # Flat segment
 # segment2 <- 2 + 0.01 * (1:20)^2 - 0.001*(1:20)^3
